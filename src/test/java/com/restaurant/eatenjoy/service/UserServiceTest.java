@@ -14,12 +14,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
 	@Mock
 	private UserDao userDao;
+
+	@Mock
+	private Encryptable encryptable;
 
 	@InjectMocks
 	private UserService userService;
@@ -28,12 +32,11 @@ class UserServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		userDto = UserDto.builder()
-						 .loginId("test")
-						 .password("1234")
-						 .email("test@test.com")
-						 .regionCd("001")
-						 .build();
+		userDto = new UserDto();
+		userDto.setLoginId("test");
+		userDto.setPassword("1234");
+		userDto.setEmail("test@test.com");
+		userDto.setRegionCd("001");
 	}
 
 	@Test
@@ -57,11 +60,14 @@ class UserServiceTest {
 	void successToRegister() {
 		given(userDao.existsByLoginId("test")).willReturn(false);
 		given(userDao.existsByEmail("test@test.com")).willReturn(false);
+		given(encryptable.encrypt("1234")).willReturn("!@#$%^&*()");
 
 		userService.register(userDto);
+		assertThat(userDto.getPassword()).isEqualTo("!@#$%^&*()");
 
 		then(userDao).should(times(1)).existsByLoginId("test");
 		then(userDao).should(times(1)).existsByEmail("test@test.com");
+		then(encryptable).should(times(1)).encrypt("1234");
 	}
 
 }
