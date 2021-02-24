@@ -3,11 +3,15 @@ package com.restaurant.eatenjoy.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SHA256Util {
+import org.springframework.stereotype.Component;
 
-	private SHA256Util() { }
+import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
-	public static String encrypt(String value) {
+@Component
+public class SHA256Encrypt implements Encryptable {
+
+	@Override
+	public String encrypt(String value) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			byte[] passBytes = value.getBytes();
