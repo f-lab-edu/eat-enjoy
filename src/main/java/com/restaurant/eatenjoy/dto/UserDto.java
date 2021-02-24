@@ -37,7 +37,7 @@ public class UserDto {
 	private String emailToken;
 
 	@JsonIgnore
-	private boolean certYn;
+	private boolean certified;
 
 	public void encryptPassword(Encryptable encryptable) {
 		password = encryptable.encrypt(password);
