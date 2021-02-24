@@ -5,14 +5,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.restaurant.eatenjoy.util.SHA256Util;
+import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-@Builder
-@Getter @Setter
+@Getter
+@Setter
 public class UserDto {
 
 	private Long id;
@@ -38,10 +37,10 @@ public class UserDto {
 	private String emailToken;
 
 	@JsonIgnore
-	private String certYn;
+	private boolean certYn;
 
-	public void encryptPassword() {
-		password = SHA256Util.encrypt(password);
+	public void encryptPassword(Encryptable encryptable) {
+		password = encryptable.encrypt(password);
 	}
 
 }

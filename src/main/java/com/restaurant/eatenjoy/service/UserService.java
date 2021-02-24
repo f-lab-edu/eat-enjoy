@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,10 +16,12 @@ public class UserService {
 
 	private final UserDao userDao;
 
+	private final Encryptable encryptable;
+
 	@Transactional
 	public void register(UserDto userDto) {
 		validateLoginIdAndEmail(userDto);
-		userDto.encryptPassword();
+		userDto.encryptPassword(encryptable);
 		userDao.register(userDto);
 	}
 
