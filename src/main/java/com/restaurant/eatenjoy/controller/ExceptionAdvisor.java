@@ -30,21 +30,17 @@ public class ExceptionAdvisor {
 
 	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {
 		return fieldErrors.stream().map(fieldError -> InvalidField.builder().field(fieldError.getField())
-																			.message(fieldError.getDefaultMessage())
-																			.value(fieldError.getRejectedValue())
-																			.build())
-			                       .collect(Collectors.toList());
+			.message(fieldError.getDefaultMessage())
+			.value(fieldError.getRejectedValue())
+			.build())
+			.collect(Collectors.toList());
 	}
 
 	@Getter @Builder
 	private static class InvalidField {
-
 		private final String field;
-
 		private final String message;
-
 		private final Object value;
-
 	}
 
 }
