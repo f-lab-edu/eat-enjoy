@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restaurant.eatenjoy.dao.UserDao">
+    <insert id="insertUser" parameterType="userDto">
+        INSERT INTO USER
+        (login_id, password, email, email_token, cert_yn, region_cd, insert_at, update_at)
+        VALUES (#{loginId}, #{password}, #{email}, #{emailToken}, #{certYN}, #{regionCD}, #{insertAt}, #{updateAt})
+    </insert>
+
+    <select id="readUserLoginId" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT login_id
+                      FROM USER
+                      WHERE login_id = #{logindId})
+    </select>
+
+    <select id="readUserEmail" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT email
+                      FROM USER
+                      WHERE email = #{email})
+    </select>
+</mapper>

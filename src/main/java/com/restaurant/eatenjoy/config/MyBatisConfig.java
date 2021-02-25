@@ -18,7 +18,8 @@ public class MyBatisConfig {
 		SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
 		sqlSessionFactory.setDataSource(dataSource);
 		sqlSessionFactory.setTypeAliasesPackage("com.restaurant.eatenjoy.dto");
-		sqlSessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml"));
+		sqlSessionFactory.setMapperLocations(
+			new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml"));
 
 		return sqlSessionFactory.getObject();
 	}
