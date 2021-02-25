@@ -21,7 +21,7 @@ public class UserService {
 	@Transactional
 	public void register(UserDto userDto) {
 		validateLoginIdAndEmail(userDto);
-		userDto.encryptPassword(encryptable);
+		userDto.setPassword(encryptable.encrypt(userDto.getPassword()));
 		userDao.register(userDto);
 	}
 

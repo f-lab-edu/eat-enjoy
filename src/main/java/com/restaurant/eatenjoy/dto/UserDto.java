@@ -5,7 +5,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -38,9 +37,5 @@ public class UserDto {
 
 	@JsonIgnore
 	private boolean certified;
-
-	public void encryptPassword(Encryptable encryptable) {
-		password = encryptable.encrypt(password);
-	}
 
 }
