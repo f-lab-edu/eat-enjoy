@@ -49,13 +49,13 @@ public class UserControllerTest {
 	@Test
 	@DisplayName("중복된 아이디가 존재한다면 회원 가입 할 수 없다")
 	public void duplicatedId() throws Exception {
-		assertThat(userService.duplicateLoginIdCheck(userCreate().getLoginId())).isEqualTo(false);
+		assertThat(userService.isDuplicatedId(userCreate().getLoginId())).isEqualTo(false);
 	}
 
 	@Test
 	@DisplayName("중복된 이메일이 존재한다면 회원 가입 할 수 없다")
 	public void duplicatedEmail() throws Exception {
-		assertThat(userService.duplicateEmailCheck(userCreate().getEmail())).isEqualTo(false);
+		assertThat(userService.isDuplicatedEmail(userCreate().getEmail())).isEqualTo(false);
 	}
 
 	@Test

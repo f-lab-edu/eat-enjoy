@@ -8,7 +8,7 @@ import com.restaurant.eatenjoy.dto.UserDto;
 public interface UserService {
 	void register(UserDto userDto);
 
-	boolean duplicateLoginIdCheck(String loginId);
+	boolean isDuplicatedId(String loginId);
 
-	boolean duplicateEmailCheck(String email);
+	boolean isDuplicatedEmail(String email);
 }

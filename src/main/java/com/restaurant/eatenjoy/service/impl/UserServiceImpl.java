@@ -21,11 +21,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void register(UserDto userDto) {
 
-		if (duplicateLoginIdCheck(userDto.getLoginId())) {
+		if (isDuplicatedId(userDto.getLoginId())) {
 			throw new DuplicatedException("중복된 아이디 입니다");
 		}
 
-		if (duplicateEmailCheck(userDto.getEmail())) {
+		if (isDuplicatedEmail(userDto.getEmail())) {
 			throw new DuplicatedException("중복된 이메일 입니다");
 		}
 
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean duplicateLoginIdCheck(String loginId) {
+	public boolean isDuplicatedId(String loginId) {
 		boolean loginIdCheckResult = userDao.readUserLoginId(loginId);
 
 		if (loginIdCheckResult) {
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean duplicateEmailCheck(String email) {
+	public boolean isDuplicatedEmail(String email) {
 		boolean emailCheckResult = userDao.readUserEmail(email);
 
 		if (emailCheckResult) {
