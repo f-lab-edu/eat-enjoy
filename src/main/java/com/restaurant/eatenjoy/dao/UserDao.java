@@ -1,5 +1,6 @@
 package com.restaurant.eatenjoy.dao;
 
+import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 
 public interface UserDao {
@@ -9,5 +10,7 @@ public interface UserDao {
 	boolean existsByLoginId(String loginId);
 
 	boolean existsByEmail(String email);
+
+	boolean existsByLoginIdAndPassword(LoginDto loginDto);
 
 }

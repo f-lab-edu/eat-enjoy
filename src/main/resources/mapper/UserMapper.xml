@@ -18,4 +18,11 @@
         INSERT INTO users(login_id, password, email, region_cd)
         VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
     </insert>
+
+    <select id="existsByLoginIdAndPassword" parameterType="LoginDto" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM users
+                       WHERE login_id = #{loginId}
+                         AND password = #{password})
+    </select>
 </mapper>
