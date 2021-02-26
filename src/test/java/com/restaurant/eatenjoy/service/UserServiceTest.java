@@ -32,11 +32,12 @@ class UserServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		userDto = new UserDto();
-		userDto.setLoginId("test");
-		userDto.setPassword("1234");
-		userDto.setEmail("test@test.com");
-		userDto.setRegionCd("001");
+		userDto = UserDto.builder()
+			.loginId("test")
+			.password("1234")
+			.email("test@test.com")
+			.regionCd("001")
+			.build();
 	}
 
 	@Test
@@ -63,7 +64,6 @@ class UserServiceTest {
 		given(encryptable.encrypt("1234")).willReturn("!@#$%^&*()");
 
 		userService.register(userDto);
-		assertThat(userDto.getPassword()).isEqualTo("!@#$%^&*()");
 
 		then(userDao).should(times(1)).existsByLoginId("test");
 		then(userDao).should(times(1)).existsByEmail("test@test.com");
