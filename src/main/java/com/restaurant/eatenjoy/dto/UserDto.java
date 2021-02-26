@@ -29,7 +29,7 @@ public class UserDto {
 	private String email;
 
 	private String emailToken;
-	private int certYN;
+	private int certified;
 
 	@NotBlank(message = "지역코드를 입력 해주세요")
 	@Length(max = 3)
@@ -39,13 +39,13 @@ public class UserDto {
 	private LocalDateTime updateAt;
 
 	@Builder
-	public UserDto(String loginId, String password, String email, String emailToken, int certYN,
+	public UserDto(String loginId, String password, String email, String emailToken, int certified,
 		String regionCD, LocalDateTime updateAt) {
 		this.loginId = loginId;
 		this.password = password;
 		this.email = email;
 		this.emailToken = emailToken;
-		this.certYN = certYN;
+		this.certified = certified;
 		this.regionCD = regionCD;
 		this.insertAt = LocalDateTime.now();
 		this.updateAt = updateAt;
