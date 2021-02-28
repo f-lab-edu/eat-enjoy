@@ -63,11 +63,11 @@ public class UserControllerTest {
 	public void createUsers() throws Exception {
 		String json = objectMapper.writeValueAsString(userCreate());
 
-		this.mockMvc.perform(post("/api/users/create")
+		this.mockMvc.perform(post("/api/users")
 			.content(json)
 			.contentType(MediaType.APPLICATION_JSON)
 		)
 			.andDo(print())
-			.andExpect(status().isOk());
+			.andExpect(status().isCreated());
 	}
 }

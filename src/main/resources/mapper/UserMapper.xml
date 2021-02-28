@@ -5,8 +5,8 @@
 <mapper namespace="com.restaurant.eatenjoy.dao.UserDao">
     <insert id="insertUser" parameterType="userDto">
         INSERT INTO USER
-        (login_id, password, email, email_token, cert_yn, region_cd, insert_at, update_at)
-        VALUES (#{loginId}, #{password}, #{email}, #{emailToken}, #{certYN}, #{regionCD}, #{insertAt}, #{updateAt})
+        (login_id, password, email, email_token, certified, region_cd, insert_at, update_at)
+        VALUES (#{loginId}, #{password}, #{email}, #{emailToken}, #{certified}, #{regionCD}, #{insertAt}, #{updateAt})
     </insert>
 
     <select id="readUserLoginId" parameterType="String" resultType="boolean">

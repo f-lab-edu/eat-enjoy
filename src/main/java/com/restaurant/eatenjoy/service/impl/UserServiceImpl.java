@@ -2,6 +2,7 @@ package com.restaurant.eatenjoy.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.UserDto;
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 	private EncryptUtil encryptUtil;
 
 	@Override
+	@Transactional
 	public void register(UserDto userDto) {
 
 		if (isDuplicatedId(userDto.getLoginId())) {
