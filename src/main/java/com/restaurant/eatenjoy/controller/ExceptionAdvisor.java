@@ -40,7 +40,7 @@ public class ExceptionAdvisor {
 
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<String> processUserNotFoundError(UserNotFoundException exception) {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exception.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
 	}
 
 	@Getter @Builder
