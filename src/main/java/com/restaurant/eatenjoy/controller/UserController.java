@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.dto.UserDto;
@@ -20,9 +21,8 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping
-	public ResponseEntity<UserDto> createUsers(@Validated @RequestBody UserDto userDto) {
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public void createUsers(@Validated @RequestBody UserDto userDto) {
 		userService.register(userDto);
-
-		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }
