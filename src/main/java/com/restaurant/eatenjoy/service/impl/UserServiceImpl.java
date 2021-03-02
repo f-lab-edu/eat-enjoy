@@ -10,14 +10,17 @@ import com.restaurant.eatenjoy.exception.DuplicatedException;
 import com.restaurant.eatenjoy.service.UserService;
 import com.restaurant.eatenjoy.util.EncryptUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	@Autowired
-	private UserDao userDao;
+	private final UserDao userDao;
 
 	@Autowired
-	private EncryptUtil encryptUtil;
+	private final EncryptUtil encryptUtil;
 
 	@Override
 	@Transactional

@@ -2,7 +2,6 @@ package com.restaurant.eatenjoy.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,12 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
 	@Autowired
-	private UserService userService;
+	private final UserService userService;
 
 	@PostMapping
 	@ResponseStatus(code = HttpStatus.CREATED)
