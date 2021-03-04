@@ -58,6 +58,7 @@ public class UserControllerTest {
 	}
 
 	@Test
+	@DisplayName("중복된 아이디와 이메일이 없다면 회원가입 성공")
 	public void createUsers() throws Exception {
 
 		String json = objectMapper.writeValueAsString(userDto);
