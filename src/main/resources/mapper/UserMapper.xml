@@ -20,4 +20,15 @@
                       FROM USER
                       WHERE email = #{email})
     </select>
+
+    <select id="readUserbyLoginIdAndPassword" parameterType="String" resultType="boolean">
+        SELECT EXISTS(SELECT
+                          login_id
+                           ,password
+                           ,email
+                           ,region_cd
+                      FROM USER
+                      WHERE login_id = #{loginId}
+                        AND password = #{password});
+    </select>
 </mapper>

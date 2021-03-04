@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.UserDao;
+import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.DuplicatedException;
 import com.restaurant.eatenjoy.service.UserService;
@@ -60,5 +61,17 @@ public class UserServiceImpl implements UserService {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean isExistUserbyLoginIdAndPassword(LoginDto loginDto) {
+		String encryptPaswword = encryptUtil.encrypt(loginDto.getPassword());
+		boolean isUserExist = userDao.readUserbyLoginIdAndPassword(loginDto.getLoginId(), encryptPaswword);
+
+		if (!isUserExist) {
+			return false;
+		}
+
+		return true;
 	}
 }

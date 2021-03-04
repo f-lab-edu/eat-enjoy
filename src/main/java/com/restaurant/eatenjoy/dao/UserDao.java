@@ -12,4 +12,6 @@ public interface UserDao {
 	boolean readUserLoginId(String loginId);
 
 	boolean readUserEmail(String email);
+
+	boolean readUserbyLoginIdAndPassword(String loginId, String password);
 }
