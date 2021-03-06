@@ -3,20 +3,20 @@
 
 <mapper namespace="com.restaurant.eatenjoy.dao.UserDao">
     <select id="existsByLoginId" parameterType="string" resultType="boolean">
-        SELECT EXISTS(SELECT login_id
+        SELECT EXISTS(SELECT 1
                         FROM users
                        WHERE login_id = #{loginId})
     </select>
 
     <select id="existsByEmail" parameterType="string" resultType="boolean">
-        SELECT EXISTS(SELECT email
+        SELECT EXISTS(SELECT 1
                         FROM users
                        WHERE email = #{email})
     </select>
 
     <insert id="register" parameterType="UserDto">
-        INSERT INTO users(login_id, password, email, region_cd)
-        VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
+        INSERT INTO users(login_id, password, email, email_token, region_cd)
+        VALUES(#{loginId}, #{password}, #{email}, #{emailToken}, #{regionCd})
     </insert>
 
     <select id="existsByLoginIdAndPassword" parameterType="LoginDto" resultType="boolean">
