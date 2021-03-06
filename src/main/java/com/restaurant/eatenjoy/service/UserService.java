@@ -72,4 +72,13 @@ public class UserService {
 		}
 	}
 
+	@Transactional
+	public void certifyEmailToken(String email, String emailToken) {
+		if (!userDao.existsByEmailAndEmailToken(email, emailToken)) {
+			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
+		}
+
+		userDao.updateEmailCertified(email);
+	}
+
 }

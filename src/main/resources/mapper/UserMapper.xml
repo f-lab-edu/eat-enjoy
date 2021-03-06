@@ -25,4 +25,18 @@
                        WHERE login_id = #{loginId}
                          AND password = #{password})
     </select>
+
+    <select id="existsByEmailAndEmailToken" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM users
+                       WHERE email = #{email}
+                         AND email_token = #{emailToken})
+    </select>
+
+    <update id="updateEmailCertified" parameterType="string">
+        UPDATE users
+           SET certified = 1
+             , update_at = now()
+         WHERE email = #{email}
+    </update>
 </mapper>
