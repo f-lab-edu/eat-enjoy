@@ -1,11 +1,9 @@
-package com.restaurant.eatenjoy.util;
+package com.restaurant.eatenjoy.util.encrypt;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.springframework.stereotype.Component;
-
-import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
 @Component
 public class SHA256Encrypt implements Encryptable {
