@@ -78,7 +78,12 @@ class LoginServiceTest {
 	@Test
 	@DisplayName("아이디 혹은 비밀번호 잘못 입력 - 로그인 실패: 404 NOT_FOUND")
 	public void loginFail() {
-		loginDto.setPassword("test1234");
+
+		loginDto = LoginDto.builder()
+			.loginId(userDto.getLoginId())
+			.password("test1234")
+			.build();
+
 		ResponseEntity<HttpStatus> httpStatusResponseEntity = userController.loginUser(loginDto);
 
 		System.out.println(httpStatusResponseEntity.getStatusCode());
