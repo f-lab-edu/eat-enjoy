@@ -14,6 +14,7 @@ import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.service.LoginService;
 import com.restaurant.eatenjoy.service.UserService;
+import com.restaurant.eatenjoy.util.HttpResponseStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,17 +42,17 @@ public class UserController {
 
 		// 아이디 혹은 비밀번호가 존재하지 않은 경우
 		if (!isUser) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			return HttpResponseStatus.NOT_FOUND;
 		}
 
 		// 이미 로그인을 한 경우
 		if (isLoginUser) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			return HttpResponseStatus.BAD_REQUEST;
 		}
 		
 		// 로그인 성공
 		loginService.login(loginDto);
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return HttpResponseStatus.OK;
 	}
 
 	@PostMapping("/logout")
@@ -59,11 +60,11 @@ public class UserController {
 
 		// 로그인한 사용자가 존재하지 않기 때문에 BAD_REQUEST return
 		if (!loginService.isLoginUser()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			return HttpResponseStatus.BAD_REQUEST;
 		}
 
 		// 로그아웃 성공
 		loginService.logout();
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return HttpResponseStatus.OK;
 	}
 }
