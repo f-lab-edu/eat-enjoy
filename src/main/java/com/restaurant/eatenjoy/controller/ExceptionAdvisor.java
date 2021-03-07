@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.exception.UserNotFoundException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -38,8 +38,8 @@ public class ExceptionAdvisor {
 			.collect(Collectors.toList());
 	}
 
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<String> processUserNotFoundError(UserNotFoundException exception) {
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> processNotFoundError(NotFoundException exception) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
 	}
 
