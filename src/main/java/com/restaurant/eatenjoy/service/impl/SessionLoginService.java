@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class SessionLoginServiceImpl implements LoginService {
+public class SessionLoginService implements LoginService {
 
 	private final String USERSESSION = "USERSSESSION";
 
