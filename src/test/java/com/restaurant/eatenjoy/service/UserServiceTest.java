@@ -12,8 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.restaurant.eatenjoy.dao.UserDao;
+import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.UserNotFoundException;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +70,32 @@ class UserServiceTest {
 		then(userDao).should(times(1)).existsByLoginId("test");
 		then(userDao).should(times(1)).existsByEmail("test@test.com");
 		then(encryptable).should(times(1)).encrypt("1234");
+	}
+
+	@Test
+	@DisplayName("로그인 정보로 사용자를 찾지 못하면 UserNotFoundException 예외가 발생한다.")
+	void failToLoginUserNotFound() {
+		given(userDao.existsByLoginIdAndPassword(any())).willReturn(false);
+
+		assertThatThrownBy(() -> userService.validateLoginIdAndPassword(LoginDto.builder()
+			.loginId("test")
+			.password("1111")
+			.build())).isInstanceOf(UserNotFoundException.class);
+
+		then(userDao).should(times(1)).existsByLoginIdAndPassword(any());
+	}
+
+	@Test
+	@DisplayName("로그인 정보로 사용자가 존재하면 정상이다.")
+	void normalToLoginUserFound() {
+		given(userDao.existsByLoginIdAndPassword(any())).willReturn(true);
+
+		userService.validateLoginIdAndPassword(LoginDto.builder()
+			.loginId("test")
+			.password("1234")
+			.build());
+
+		then(userDao).should(times(1)).existsByLoginIdAndPassword(any());
 	}
 
 }
