@@ -4,9 +4,7 @@ import com.restaurant.eatenjoy.dto.LoginDto;
 
 public interface LoginService {
 
-	boolean login(LoginDto loginDto);
-
-	boolean isLoginUser();
+	void login(LoginDto loginDto);
 
 	void logout();
 }

@@ -8,6 +8,7 @@ import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.DuplicatedException;
+import com.restaurant.eatenjoy.exception.NoUserFoundException;
 import com.restaurant.eatenjoy.service.UserService;
 import com.restaurant.eatenjoy.util.EncryptUtil;
 
@@ -64,14 +65,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean isExistUserbyLoginIdAndPassword(LoginDto loginDto) {
+	public void isExistUserbyLoginIdAndPassword(LoginDto loginDto) {
 		String encryptPaswword = encryptUtil.encrypt(loginDto.getPassword());
 		boolean isUserExist = userDao.readUserbyLoginIdAndPassword(loginDto.getLoginId(), encryptPaswword);
 
 		if (!isUserExist) {
-			return false;
+			throw new NoUserFoundException("아이디 혹은 비밀번호를 잘못 입력 하였습니다");
 		}
-
-		return true;
 	}
 }

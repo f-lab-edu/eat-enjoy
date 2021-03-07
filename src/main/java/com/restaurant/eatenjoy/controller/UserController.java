@@ -37,20 +37,7 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<HttpStatus> loginUser(@Validated @RequestBody LoginDto loginDto) {
-		boolean isUser = userService.isExistUserbyLoginIdAndPassword(loginDto);
-		boolean isLoginUser = loginService.isLoginUser();
 
-		// 아이디 혹은 비밀번호가 존재하지 않은 경우
-		if (!isUser) {
-			return HttpResponseStatus.NOT_FOUND;
-		}
-
-		// 이미 로그인을 한 경우
-		if (isLoginUser) {
-			return HttpResponseStatus.BAD_REQUEST;
-		}
-		
-		// 로그인 성공
 		loginService.login(loginDto);
 		return HttpResponseStatus.OK;
 	}
@@ -58,12 +45,6 @@ public class UserController {
 	@PostMapping("/logout")
 	public ResponseEntity<HttpStatus> logoutUser() {
 
-		// 로그인한 사용자가 존재하지 않기 때문에 BAD_REQUEST return
-		if (!loginService.isLoginUser()) {
-			return HttpResponseStatus.BAD_REQUEST;
-		}
-
-		// 로그아웃 성공
 		loginService.logout();
 		return HttpResponseStatus.OK;
 	}

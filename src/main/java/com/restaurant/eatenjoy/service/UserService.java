@@ -11,5 +11,5 @@ public interface UserService {
 
 	boolean isDuplicatedEmail(String email);
 
-	boolean isExistUserbyLoginIdAndPassword(LoginDto loginDto);
+	void isExistUserbyLoginIdAndPassword(LoginDto loginDto);
 }
