@@ -1,5 +1,6 @@
 package com.restaurant.eatenjoy.service;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+	private static final Duration MAIL_TOKEN_TIMEOUT_SECOND = Duration.ofSeconds(86400);
 
 	private final UserDao userDao;
 
@@ -64,7 +67,7 @@ public class UserService {
 			.token(mailToken)
 			.build());
 
-		mailTokenDao.create(userDto.getEmail(), mailToken);
+		mailTokenDao.create(userDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
 	}
 
 	public void validateLoginIdAndPassword(LoginDto loginDto) {
