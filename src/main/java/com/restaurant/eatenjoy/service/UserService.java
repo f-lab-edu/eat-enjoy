@@ -10,6 +10,7 @@ import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
+import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
@@ -97,4 +98,15 @@ public class UserService {
 		}
 	}
 
+	public void resendCertificationMail(String loginId) {
+		UserDto userDto = userDao.findByLoginId(loginId);
+		if (userDto.isCertified()) {
+			throw new AlreadyCertifiedException("이미 메일 인증이 완료된 사용자 입니다.");
+		}
+
+		sendCertificationMail(UserDto.builder()
+			.loginId(loginId)
+			.email(userDto.getEmail())
+			.build());
+	}
 }

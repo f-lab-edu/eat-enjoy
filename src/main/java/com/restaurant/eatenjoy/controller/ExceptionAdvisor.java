@@ -10,8 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
+import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +21,8 @@ import lombok.Getter;
 @RestControllerAdvice
 public class ExceptionAdvisor {
 
-	@ExceptionHandler(DuplicateValueException.class)
-	public ResponseEntity<String> processDuplicateValueError(DuplicateValueException exception) {
+	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class })
+	public ResponseEntity<String> processBadRequestError(DuplicateValueException exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}
 
@@ -43,7 +45,13 @@ public class ExceptionAdvisor {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
 	}
 
-	@Getter @Builder
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<String> processUnauthorizedError() {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("요청할 권한이 없습니다. 로그인 후 요청하시기 바랍니다.");
+	}
+
+	@Getter
+	@Builder
 	private static class InvalidField {
 		private final String field;
 		private final String message;

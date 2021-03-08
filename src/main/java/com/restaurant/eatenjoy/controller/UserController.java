@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.restaurant.eatenjoy.annotation.CurrentLoginId;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.service.LoginService;
@@ -45,6 +46,11 @@ public class UserController {
 	@GetMapping("/check-mail-token")
 	public void checkMailToken(String email, String token) {
 		userService.certifyEmailToken(email, token);
+	}
+
+	@GetMapping("/resend-mail")
+	public void resendMail(@CurrentLoginId String loginId) {
+		userService.resendCertificationMail(loginId);
 	}
 
 }

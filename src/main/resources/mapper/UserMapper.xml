@@ -32,4 +32,13 @@
              , update_at = now()
          WHERE email = #{email}
     </update>
+
+    <select id="findByLoginId" parameterType="string" resultType="UserDto">
+        SELECT login_id
+             , password
+             , email
+             , certified
+          FROM users
+         WHERE login_id = #{loginId}
+    </select>
 </mapper>

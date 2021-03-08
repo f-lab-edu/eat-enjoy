@@ -15,4 +15,5 @@ public interface UserDao {
 
 	void updateEmailCertified(String email);
 
+	UserDto findByLoginId(String loginId);
 }
