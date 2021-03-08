@@ -34,4 +34,8 @@ public class SessionLoginService implements LoginService {
 		httpSession.invalidate();
 	}
 
+	@Override
+	public String getLoginId() {
+		return (String) httpSession.getAttribute(LOGIN_ID);
+	}
 }
