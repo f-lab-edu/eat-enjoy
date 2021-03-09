@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +37,11 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public String getLoginId() {
-		return (String) httpSession.getAttribute(LOGIN_ID);
+		Object loginId = httpSession.getAttribute(LOGIN_ID);
+		if (loginId == null) {
+			throw new UnauthorizedException();
+		}
+
+		return (String) loginId;
 	}
 }
