@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import javax.print.attribute.standard.Media;
 import javax.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -77,24 +78,29 @@ class LoginServiceTest {
 
 	@Test
 	@DisplayName("아이디 혹은 비밀번호 잘못 입력 - 로그인 실패: 404 NOT_FOUND")
-	public void loginFail() {
+	public void loginFail() throws Exception {
 
 		loginDto = LoginDto.builder()
 			.loginId(userDto.getLoginId())
 			.password("test1234")
 			.build();
 
-		ResponseEntity<HttpStatus> httpStatusResponseEntity = userController.loginUser(loginDto);
+		String json = objectMapper.writeValueAsString(loginDto);
 
-		System.out.println(httpStatusResponseEntity.getStatusCode());
+		this.mockMvc.perform(post("/api/users/login")
+				.content(json)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
-	@DisplayName("로그아웃 실패: 400 bad request")
-	public void logoutFail() {
-		ResponseEntity<HttpStatus> httpStatusResponseEntity = userController.logoutUser();
+	@DisplayName("로그아웃 실패: 404 not found")
+	public void logoutFail() throws Exception {
 
-		System.out.println(httpStatusResponseEntity);
+		this.mockMvc.perform(post("/api/users/logout"))
+			.andDo(print())
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
