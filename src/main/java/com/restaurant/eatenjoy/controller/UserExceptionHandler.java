@@ -12,25 +12,15 @@ import com.restaurant.eatenjoy.exception.UserSessionNotExistException;
 import com.restaurant.eatenjoy.util.HttpResponseStatus;
 
 @RestControllerAdvice(assignableTypes = UserController.class)
-public class CustomExceptionHandler {
+public class UserExceptionHandler {
 
-	@ExceptionHandler(DuplicatedException.class)
-	public ResponseEntity<HttpStatus> duplicatedCreateUsersErrorHandler() {
+	@ExceptionHandler({ DuplicatedException.class, AlreadyLoginException.class })
+	public ResponseEntity<HttpStatus> badRequestError() {
 		return HttpResponseStatus.BAD_REQUEST;
 	}
 
-	@ExceptionHandler(NoUserFoundException.class)
-	public ResponseEntity<HttpStatus> noUserFoundErrorHandler() {
-		return HttpResponseStatus.NOT_FOUND;
-	}
-
-	@ExceptionHandler(AlreadyLoginException.class)
-	public ResponseEntity<HttpStatus> alreadyLoginErrorHandler() {
-		return HttpResponseStatus.BAD_REQUEST;
-	}
-
-	@ExceptionHandler(UserSessionNotExistException.class)
-	public ResponseEntity<HttpStatus> userSessionNotExistsErrorHandler() {
+	@ExceptionHandler({ NoUserFoundException.class, UserSessionNotExistException.class })
+	public ResponseEntity<HttpStatus> notFoundError() {
 		return HttpResponseStatus.NOT_FOUND;
 	}
 }
