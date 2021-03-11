@@ -35,7 +35,7 @@ public class UserController {
 
 	@PostMapping("/login")
 	public void login(@RequestBody @Valid LoginDto loginDto) {
-		loginService.login(loginDto);
+		loginService.loginUser(loginDto);
 	}
 
 	@PostMapping("/logout")

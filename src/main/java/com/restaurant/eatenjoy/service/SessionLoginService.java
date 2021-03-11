@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.function.Consumer;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
@@ -23,12 +25,16 @@ public class SessionLoginService implements LoginService {
 	private final UserService userService;
 
 	@Override
-	public void login(LoginDto loginDto) {
+	public void loginUser(LoginDto loginDto) {
+		login(loginDto, userService::validateLoginIdAndPassword);
+	}
+
+	private void login(LoginDto loginDto, Consumer<LoginDto> validator) {
 		if (httpSession.getAttribute(LOGIN_ID) != null) {
 			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
 		}
 
-		userService.validateLoginIdAndPassword(loginDto);
+		validator.accept(loginDto);
 		httpSession.setAttribute(LOGIN_ID, loginDto.getLoginId());
 	}
 
