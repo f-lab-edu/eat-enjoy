@@ -75,27 +75,27 @@ class UserServiceTest {
 	@Test
 	@DisplayName("로그인 정보로 사용자를 찾지 못하면 UserNotFoundException 예외가 발생한다.")
 	void failToLoginUserNotFound() {
-		given(userDao.existsByLoginIdAndPassword(any())).willReturn(false);
+		given(userDao.existsByLoginIdAndPassword("test", any())).willReturn(false);
 
 		assertThatThrownBy(() -> userService.validateLoginIdAndPassword(LoginDto.builder()
 			.loginId("test")
 			.password("1111")
 			.build())).isInstanceOf(UserNotFoundException.class);
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(any());
+		then(userDao).should(times(1)).existsByLoginIdAndPassword("test", any());
 	}
 
 	@Test
 	@DisplayName("로그인 정보로 사용자가 존재하면 정상이다.")
 	void normalToLoginUserFound() {
-		given(userDao.existsByLoginIdAndPassword(any())).willReturn(true);
+		given(userDao.existsByLoginIdAndPassword("test", any())).willReturn(true);
 
 		userService.validateLoginIdAndPassword(LoginDto.builder()
 			.loginId("test")
 			.password("1234")
 			.build());
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(any());
+		then(userDao).should(times(1)).existsByLoginIdAndPassword("test", any());
 	}
 
 }
