@@ -43,13 +43,13 @@ class SessionLoginServiceTest {
 	@DisplayName("동일한 로그인 아이디 세션이 존재하면 로그인은 실패한다.")
 	void failToLoginSessionDuplicated() {
 		httpSession.setAttribute("loginId", loginDto.getLoginId());
-		assertThatThrownBy(() -> loginService.login(loginDto)).isInstanceOf(DuplicateValueException.class);
+		assertThatThrownBy(() -> loginService.loginUser(loginDto)).isInstanceOf(DuplicateValueException.class);
 	}
 
 	@Test
 	@DisplayName("사용자 정보에 존재하는 로그인 아이디 & 비밀번호 요청이면 로그인에 성공한다.")
 	void successToLogin() {
-		loginService.login(loginDto);
+		loginService.loginUser(loginDto);
 		assertThat(httpSession.getAttribute("loginId")).isEqualTo(loginDto.getLoginId());
 	}
 
