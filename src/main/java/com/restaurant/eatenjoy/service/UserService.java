@@ -109,4 +109,9 @@ public class UserService {
 			.email(userDto.getEmail())
 			.build());
 	}
+
+	public UserDto findByLoginId(String loginId) {
+		return userDao.findByLoginId(loginId);
+	}
+
 }
