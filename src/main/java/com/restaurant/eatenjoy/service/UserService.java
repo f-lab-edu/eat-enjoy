@@ -72,12 +72,7 @@ public class UserService {
 	}
 
 	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		loginDto = LoginDto.builder()
-			.loginId(loginDto.getLoginId())
-			.password(encryptable.encrypt(loginDto.getPassword()))
-			.build();
-
-		if (!userDao.existsByLoginIdAndPassword(loginDto)) {
+		if (!userDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
 		}
 	}

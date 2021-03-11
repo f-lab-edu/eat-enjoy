@@ -19,7 +19,7 @@
         VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
     </insert>
 
-    <select id="existsByLoginIdAndPassword" parameterType="LoginDto" resultType="boolean">
+    <select id="existsByLoginIdAndPassword" resultType="boolean">
         SELECT EXISTS(SELECT 1
                         FROM users
                        WHERE login_id = #{loginId}
