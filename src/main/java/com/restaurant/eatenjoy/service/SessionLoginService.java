@@ -5,6 +5,8 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.UserDto;
+import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
@@ -44,4 +46,17 @@ public class SessionLoginService implements LoginService {
 
 		return (String) loginId;
 	}
+
+	@Override
+	public void validateUserAuthority() {
+		UserDto userDto = userService.findByLoginId(getLoginId());
+		if (userDto == null) {
+			throw new AuthorizationException();
+		}
+
+		if (!userDto.isCertified()) {
+			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
+		}
+	}
+
 }

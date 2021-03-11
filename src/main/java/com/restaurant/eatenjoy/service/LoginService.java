@@ -10,4 +10,6 @@ public interface LoginService {
 
 	String getLoginId();
 
+	void validateUserAuthority();
+
 }
