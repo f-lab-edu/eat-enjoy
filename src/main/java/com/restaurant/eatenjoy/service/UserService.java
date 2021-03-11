@@ -13,6 +13,7 @@ import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
+import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailMessage;
@@ -107,6 +108,15 @@ public class UserService {
 
 	public UserDto findByLoginId(String loginId) {
 		return userDao.findByLoginId(loginId);
+	}
+
+	@Transactional
+	public void delete(String loginId, String password) {
+		if (!userDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
+		}
+
+		userDao.deleteByLoginId(loginId);
 	}
 
 }

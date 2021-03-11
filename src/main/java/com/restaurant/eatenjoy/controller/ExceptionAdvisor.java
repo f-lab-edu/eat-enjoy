@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
@@ -23,8 +24,8 @@ import lombok.Getter;
 @RestControllerAdvice
 public class ExceptionAdvisor {
 
-	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class })
-	public ResponseEntity<String> processBadRequestError(DuplicateValueException exception) {
+	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class, NoMatchedPasswordException.class })
+	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}
 
