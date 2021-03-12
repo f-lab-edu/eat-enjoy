@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
+import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
@@ -117,6 +119,22 @@ public class UserService {
 		}
 
 		userDao.deleteByLoginId(loginId);
+	}
+
+	@Transactional
+	public void updatePassword(String loginId, UpdatePasswordDto passwordDto) {
+		validatePasswords(loginId, passwordDto);
+		userDao.updatePassword(loginId, encryptable.encrypt(passwordDto.getNewPassword()));
+	}
+
+	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
+		if (!userDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
+		}
+
+		if (passwordDto.getNewPassword().equals(passwordDto.getOldPassword())) {
+			throw new ConflictPasswordException("신규 비밀번호가 기존 비밀번호와 일치합니다.");
+		}
 	}
 
 }

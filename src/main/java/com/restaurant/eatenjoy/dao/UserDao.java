@@ -20,4 +20,6 @@ public interface UserDao {
 
 	void deleteByLoginId(String loginId);
 
+	void updatePassword(@Param("loginId") String loginId, @Param("password") String password);
+
 }

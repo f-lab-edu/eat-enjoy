@@ -47,4 +47,11 @@
           FROM users
          WHERE login_id = #{login_id}
     </delete>
+
+    <update id="updatePassword">
+        UPDATE users
+           SET password = #{password}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
 </mapper>
