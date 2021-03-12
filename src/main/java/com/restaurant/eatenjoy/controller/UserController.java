@@ -58,7 +58,7 @@ public class UserController {
 	}
 
 	@Authority(Role.USER)
-	@DeleteMapping
+	@DeleteMapping("/my-info")
 	public void delete(@CurrentLoginId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
 		userService.delete(loginId, passwordDto.getPassword());
 		loginService.logout();
