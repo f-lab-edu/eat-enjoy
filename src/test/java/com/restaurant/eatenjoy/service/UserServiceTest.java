@@ -16,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
+import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
@@ -198,6 +200,48 @@ class UserServiceTest {
 		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
 		userService.delete("test", "1234");
 		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+	}
+
+	@Test
+	@DisplayName("기존 비밀번호로 유효하지 않으면 비밀번호 업데이트에 실패한다.")
+	void failToUpdatePasswordIfOldPasswordInvalid() {
+		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
+
+		assertThatThrownBy(() -> userService.updatePassword("test", UpdatePasswordDto.builder()
+			.oldPassword("1234")
+			.newPassword("5678")
+			.build()))
+			.isInstanceOf(NoMatchedPasswordException.class);
+
+		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+	}
+
+	@Test
+	@DisplayName("신규 비밀번호가 기존 비밀번호와 일치할 경우 비밀번호 업데이트에 실패한다.")
+	void failToUpdatePasswordIfNewPasswordEqualsOldPassword() {
+		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+
+		assertThatThrownBy(() -> userService.updatePassword("test", UpdatePasswordDto.builder()
+			.oldPassword("1234")
+			.newPassword("1234")
+			.build()))
+			.isInstanceOf(ConflictPasswordException.class);
+
+		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+	}
+
+	@Test
+	@DisplayName("비밀번호 업데이트에 성공한다.")
+	void successToUpdatePassword() {
+		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+
+		userService.updatePassword("test", UpdatePasswordDto.builder()
+			.oldPassword("1234")
+			.newPassword("5678")
+			.build());
+
+		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(userDao).should(times(1)).updatePassword(eq("test"), any());
 	}
 
 }
