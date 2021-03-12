@@ -22,4 +22,6 @@ public interface UserDao {
 
 	void updatePassword(@Param("loginId") String loginId, @Param("password") String password);
 
+	void updateByLoginId(UserDto userDto);
+
 }

@@ -17,4 +17,6 @@ public class MailMessage {
 
 	private final String token;
 
+	private final boolean isRegister;
+
 }

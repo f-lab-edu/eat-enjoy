@@ -10,7 +10,9 @@ import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.UserDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
+import com.restaurant.eatenjoy.dto.UpdateUserDto;
 import com.restaurant.eatenjoy.dto.UserDto;
+import com.restaurant.eatenjoy.dto.UserInfoDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -49,7 +51,7 @@ public class UserService {
 			.build();
 		userDao.register(userDto);
 
-		sendCertificationMail(userDto);
+		sendCertificationMail(userDto, true);
 	}
 
 	private void validateLoginIdAndEmail(UserDto userDto) {
@@ -62,13 +64,14 @@ public class UserService {
 		}
 	}
 
-	private void sendCertificationMail(UserDto userDto) {
+	private void sendCertificationMail(UserDto userDto, boolean isRegister) {
 		String mailToken = UUID.randomUUID().toString();
 		mailService.send(MailMessage.builder()
 			.loginId(userDto.getLoginId())
 			.to(userDto.getEmail())
-			.subject("eat-enjoy, 회원가입 인증 안내")
+			.subject(isRegister ? "eat-enjoy, 회원가입 인증 안내" : "eat-enjoy, 메일 인증 안내")
 			.token(mailToken)
+			.isRegister(isRegister)
 			.build());
 
 		mailTokenDao.create(userDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
@@ -105,7 +108,7 @@ public class UserService {
 		sendCertificationMail(UserDto.builder()
 			.loginId(loginId)
 			.email(userDto.getEmail())
-			.build());
+			.build(), false);
 	}
 
 	public UserDto findByLoginId(String loginId) {
@@ -134,6 +137,30 @@ public class UserService {
 
 		if (passwordDto.getNewPassword().equals(passwordDto.getOldPassword())) {
 			throw new ConflictPasswordException("신규 비밀번호가 기존 비밀번호와 일치합니다.");
+		}
+	}
+
+	public UserInfoDto getUserInfo(String loginId) {
+		UserDto userDto = findByLoginId(loginId);
+		return UserInfoDto.builder()
+			.id(userDto.getId())
+			.loginId(userDto.getLoginId())
+			.email(userDto.getEmail())
+			.regionCd(userDto.getRegionCd())
+			.build();
+	}
+
+	@Transactional
+	public void update(String loginId, UpdateUserDto userDto) {
+		userDao.updateByLoginId(UserDto.builder()
+			.loginId(loginId)
+			.email(userDto.getEmail())
+			.regionCd(userDto.getRegionCd())
+			.build());
+
+		UserDto findUser = findByLoginId(loginId);
+		if (!findUser.isCertified()) {
+			sendCertificationMail(findUser, false);
 		}
 	}
 
