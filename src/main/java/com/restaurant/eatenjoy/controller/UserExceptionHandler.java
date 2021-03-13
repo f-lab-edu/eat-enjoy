@@ -14,7 +14,12 @@ import com.restaurant.eatenjoy.util.HttpResponseStatus;
 @RestControllerAdvice(assignableTypes = UserController.class)
 public class UserExceptionHandler {
 
-	@ExceptionHandler({ DuplicatedException.class, AlreadyLoginException.class })
+	@ExceptionHandler(DuplicatedException.class)
+	public ResponseEntity<HttpStatus> conflictError() {
+		return HttpResponseStatus.CONFLICT;
+	}
+
+	@ExceptionHandler(AlreadyLoginException.class)
 	public ResponseEntity<HttpStatus> badRequestError() {
 		return HttpResponseStatus.BAD_REQUEST;
 	}

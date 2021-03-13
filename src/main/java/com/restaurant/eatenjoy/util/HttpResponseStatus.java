@@ -8,5 +8,6 @@ public class HttpResponseStatus {
 	public static final ResponseEntity<HttpStatus> BAD_REQUEST = ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	public static final ResponseEntity<HttpStatus> NOT_FOUND = ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	public static final ResponseEntity<HttpStatus> OK = ResponseEntity.status(HttpStatus.OK).build();
+	public static final ResponseEntity<HttpStatus> CONFLICT = ResponseEntity.status(HttpStatus.CONFLICT).build();
 
 }
