@@ -19,7 +19,7 @@
         VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
     </insert>
 
-    <select id="existsByLoginIdAndPassword" parameterType="LoginDto" resultType="boolean">
+    <select id="existsByLoginIdAndPassword" resultType="boolean">
         SELECT EXISTS(SELECT 1
                         FROM users
                        WHERE login_id = #{loginId}
@@ -34,11 +34,34 @@
     </update>
 
     <select id="findByLoginId" parameterType="string" resultType="UserDto">
-        SELECT login_id
-             , password
+        SELECT id
+             , login_id AS loginId
              , email
              , certified
+             , region_cd AS regionCd
           FROM users
          WHERE login_id = #{loginId}
     </select>
+
+    <delete id="deleteByLoginId" parameterType="string">
+        DELETE
+          FROM users
+         WHERE login_id = #{login_id}
+    </delete>
+
+    <update id="updatePassword">
+        UPDATE users
+           SET password = #{password}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+
+    <update id="updateByLoginId" parameterType="UserDto">
+        UPDATE users
+           SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
+             , email = #{email}
+             , region_cd = #{regionCd}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
 </mapper>

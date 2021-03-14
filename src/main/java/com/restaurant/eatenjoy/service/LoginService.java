@@ -4,10 +4,12 @@ import com.restaurant.eatenjoy.dto.LoginDto;
 
 public interface LoginService {
 
-	void login(LoginDto loginDto);
+	void loginUser(LoginDto loginDto);
 
 	void logout();
 
 	String getLoginId();
+
+	void validateUserAuthority();
 
 }

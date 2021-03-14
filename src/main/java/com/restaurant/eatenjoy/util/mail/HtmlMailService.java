@@ -27,7 +27,9 @@ public class HtmlMailService implements MailService {
 			mimeMessageHelper.setTo(mailMessage.getTo());
 			mimeMessageHelper.setSubject(mailMessage.getSubject());
 			mimeMessageHelper.setText(HTML_CONTENT.replace("LOGIN_ID", mailMessage.getLoginId())
-				.replace("EMAIL", mailMessage.getTo()).replace("TOKEN", mailMessage.getToken()), true);
+				.replace("EMAIL", mailMessage.getTo()).replace("TOKEN", mailMessage.getToken())
+				.replace("CONTENT",
+					mailMessage.isRegister() ? "<b>eat-enjoy</b>에 가입해 주셔서 진심으로 감사드립니다.<br />" : ""), true);
 
 			javaMailSender.send(mimeMessage);
 		} catch (MessagingException e) {
@@ -42,8 +44,8 @@ public class HtmlMailService implements MailService {
 			+ "		<span style=\"color: #02b875\">메일인증</span> 안내입니다.</h1>\n"
 			+ "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"
 			+ "		<b>LOGIN_ID</b>님 안녕하세요.<br />"
-			+ "		<b>eat-enjoy</b>에 가입해 주셔서 진심으로 감사드립니다.<br />"
-			+ "		아래 <b style=\"color: #02b875\">'메일 인증'</b> 버튼을 클릭하여 회원가입을 완료해 주세요.<br />"
+			+ "		CONTENT"
+			+ "		아래 <b style=\"color: #02b875\">'메일 인증'</b> 버튼을 클릭하여 인증을 완료해 주세요.<br />"
 			+ "		감사합니다.</p>"
 			+ "	<a style=\"color: #FFF; text-decoration: none; text-align: center;\""
 			+ "	href=\"http://localhost:8080/api/users/check-mail-token?email=EMAIL&token=TOKEN\" target=\"_blank\">"

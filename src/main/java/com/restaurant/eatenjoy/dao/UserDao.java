@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.dao;
 
-import com.restaurant.eatenjoy.dto.LoginDto;
+import org.apache.ibatis.annotations.Param;
+
 import com.restaurant.eatenjoy.dto.UserDto;
 
 public interface UserDao {
@@ -11,9 +12,16 @@ public interface UserDao {
 
 	boolean existsByEmail(String email);
 
-	boolean existsByLoginIdAndPassword(LoginDto loginDto);
+	boolean existsByLoginIdAndPassword(@Param("loginId") String loginId, @Param("password") String password);
 
 	void updateEmailCertified(String email);
 
 	UserDto findByLoginId(String loginId);
+
+	void deleteByLoginId(String loginId);
+
+	void updatePassword(@Param("loginId") String loginId, @Param("password") String password);
+
+	void updateByLoginId(UserDto userDto);
+
 }
