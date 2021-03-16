@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
+import com.restaurant.eatenjoy.service.LoginService;
 import com.restaurant.eatenjoy.service.OwnerService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,10 +23,22 @@ public class OwnerController {
 
 	private final OwnerService ownerService;
 
+	private final LoginService loginService;
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(@RequestBody @Valid OwnerDto ownerDto) {
 		ownerService.register(ownerDto);
+	}
+
+	@PostMapping("/login")
+	public void login(@RequestBody @Valid LoginDto loginDto) {
+		loginService.loginUser(loginDto);
+	}
+
+	@PostMapping("/logout")
+	public void logout() {
+		loginService.logout();
 	}
 
 }

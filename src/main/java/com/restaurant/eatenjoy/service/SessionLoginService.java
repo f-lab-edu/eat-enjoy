@@ -24,9 +24,16 @@ public class SessionLoginService implements LoginService {
 
 	private final UserService userService;
 
+	private final OwnerService ownerService;
+
 	@Override
 	public void loginUser(LoginDto loginDto) {
 		login(loginDto, userService::validateLoginIdAndPassword);
+	}
+
+	@Override
+	public void loginOwner(LoginDto loginDto) {
+		login(loginDto, ownerService::validateLoginIdAndPassword);
 	}
 
 	private void login(LoginDto loginDto, Consumer<LoginDto> validator) {

@@ -18,4 +18,11 @@
         INSERT INTO owner(login_id, password, email)
         VALUES(#{loginId}, #{password}, #{email})
     </insert>
+
+    <select id="existsByLoginIdAndPassword" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM owner
+                       WHERE login_id = #{loginId}
+                         AND password = #{password})
+    </select>
 </mapper>

@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.OwnerDao;
+import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.UserNotFoundException;
 import com.restaurant.eatenjoy.util.Role;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailMessage;
@@ -64,6 +66,12 @@ public class OwnerService {
 			.build());
 
 		mailTokenDao.create(Role.OWNER, ownerDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
+	}
+
+	public void validateLoginIdAndPassword(LoginDto loginDto) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
+		}
 	}
 
 }
