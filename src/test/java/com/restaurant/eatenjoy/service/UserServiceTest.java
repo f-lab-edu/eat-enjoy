@@ -25,6 +25,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
+import com.restaurant.eatenjoy.util.Role;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailService;
 
@@ -89,7 +90,7 @@ class UserServiceTest {
 		then(userDao).should(times(1)).existsByEmail(TEST_MAIL);
 		then(encryptable).should(times(1)).encrypt("1234");
 		then(mailService).should(times(1)).send(any());
-		then(mailTokenDao).should(times(1)).create(eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
+		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
 	}
 
 	@Test
@@ -131,25 +132,25 @@ class UserServiceTest {
 	@DisplayName("인증 토큰이 일치하지 않으면 메일 인증에 실패한다.")
 	void failToCertifyEmailTokenNotMatch() {
 		given(userDao.existsByEmail(TEST_MAIL)).willReturn(true);
-		given(mailTokenDao.findByMail(TEST_MAIL)).willReturn("1111");
+		given(mailTokenDao.findByRoleAndMail(eq(Role.USER), eq(TEST_MAIL))).willReturn("1111");
 
 		assertThatThrownBy(() -> userService.certifyEmailToken(TEST_MAIL, "1234"))
 			.isInstanceOf(MailTokenNotFoundException.class);
 
 		then(userDao).should(times(1)).existsByEmail(TEST_MAIL);
-		then(mailTokenDao).should(times(1)).findByMail(TEST_MAIL);
+		then(mailTokenDao).should(times(1)).findByRoleAndMail(eq(Role.USER), eq(TEST_MAIL));
 	}
 
 	@Test
 	@DisplayName("메일 인증에 성공한다.")
 	void successToCertifyEmailToken() {
 		given(userDao.existsByEmail(TEST_MAIL)).willReturn(true);
-		given(mailTokenDao.findByMail(TEST_MAIL)).willReturn("1234");
+		given(mailTokenDao.findByRoleAndMail(eq(Role.USER), eq(TEST_MAIL))).willReturn("1234");
 
 		userService.certifyEmailToken(TEST_MAIL, "1234");
 
 		then(userDao).should(times(1)).existsByEmail(TEST_MAIL);
-		then(mailTokenDao).should(times(1)).findByMail(TEST_MAIL);
+		then(mailTokenDao).should(times(1)).findByRoleAndMail(eq(Role.USER), eq(TEST_MAIL));
 		then(userDao).should(times(1)).updateEmailCertified(TEST_MAIL);
 	}
 
@@ -183,7 +184,7 @@ class UserServiceTest {
 		userService.resendCertificationMail("test");
 
 		then(mailService).should(times(1)).send(any());
-		then(mailTokenDao).should(times(1)).create(eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
+		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
 	}
 
 	@Test
@@ -262,7 +263,7 @@ class UserServiceTest {
 
 		then(userDao).should(times(1)).findByLoginId("test");
 		then(mailService).should(times(1)).send(any());
-		then(mailTokenDao).should(times(1)).create(eq(changeMail), any(), eq(Duration.ofSeconds(86400)));
+		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(changeMail), any(), eq(Duration.ofSeconds(86400)));
 	}
 
 	@Test
@@ -281,7 +282,7 @@ class UserServiceTest {
 
 		then(userDao).should(times(1)).findByLoginId("test");
 		then(mailService).should(times(0)).send(any());
-		then(mailTokenDao).should(times(0)).create(eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
+		then(mailTokenDao).should(times(0)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
 	}
 
 }
