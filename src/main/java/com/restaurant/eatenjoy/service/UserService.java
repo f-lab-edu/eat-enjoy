@@ -19,6 +19,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
+import com.restaurant.eatenjoy.util.Role;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailMessage;
 import com.restaurant.eatenjoy.util.mail.MailService;
@@ -74,7 +75,7 @@ public class UserService {
 			.register(isRegister)
 			.build());
 
-		mailTokenDao.create(userDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
+		mailTokenDao.create(Role.USER, userDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
 	}
 
 	public void validateLoginIdAndPassword(LoginDto loginDto) {
@@ -94,7 +95,7 @@ public class UserService {
 			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
 		}
 
-		if (!emailToken.equals(mailTokenDao.findByMail(email))) {
+		if (!emailToken.equals(mailTokenDao.findByRoleAndMail(Role.USER, email))) {
 			throw new MailTokenNotFoundException("인증 토큰을 찾을 수 없습니다.");
 		}
 	}
