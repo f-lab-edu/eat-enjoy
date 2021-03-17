@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.OwnerDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -18,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SessionLoginService implements LoginService {
 
-	private static final String LOGIN_ID = "loginId";
+	private static final String LOGIN_USER_ID = "LOGIN_USER_ID";
+
+	private static final String LOGIN_OWNER_ID = "LOGIN_OWNER_ID";
 
 	private final HttpSession httpSession;
 
@@ -28,21 +31,21 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public void loginUser(LoginDto loginDto) {
-		login(loginDto, userService::validateLoginIdAndPassword);
+		login(LOGIN_USER_ID, loginDto, userService::validateLoginIdAndPassword);
 	}
 
 	@Override
 	public void loginOwner(LoginDto loginDto) {
-		login(loginDto, ownerService::validateLoginIdAndPassword);
+		login(LOGIN_OWNER_ID, loginDto, ownerService::validateLoginIdAndPassword);
 	}
 
-	private void login(LoginDto loginDto, Consumer<LoginDto> validator) {
-		if (httpSession.getAttribute(LOGIN_ID) != null) {
+	private void login(String sessionKey, LoginDto loginDto, Consumer<LoginDto> validator) {
+		if (httpSession.getAttribute(sessionKey) != null) {
 			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
 		}
 
 		validator.accept(loginDto);
-		httpSession.setAttribute(LOGIN_ID, loginDto.getLoginId());
+		httpSession.setAttribute(sessionKey, loginDto.getLoginId());
 	}
 
 	@Override
@@ -51,8 +54,17 @@ public class SessionLoginService implements LoginService {
 	}
 
 	@Override
-	public String getLoginId() {
-		Object loginId = httpSession.getAttribute(LOGIN_ID);
+	public String getLoginUserId() {
+		return getLoginId(LOGIN_USER_ID);
+	}
+
+	@Override
+	public String getLoginOwnerId() {
+		return getLoginId(LOGIN_OWNER_ID);
+	}
+
+	private String getLoginId(String sessionKey) {
+		Object loginId = httpSession.getAttribute(sessionKey);
 		if (loginId == null) {
 			throw new UnauthorizedException();
 		}
@@ -62,12 +74,24 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public void validateUserAuthority() {
-		UserDto userDto = userService.findByLoginId(getLoginId());
+		UserDto userDto = userService.findByLoginId(getLoginUserId());
 		if (userDto == null) {
 			throw new AuthorizationException();
 		}
 
 		if (!userDto.isCertified()) {
+			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
+		}
+	}
+
+	@Override
+	public void validateOwnerAuthority() {
+		OwnerDto ownerDto = ownerService.findByLoginId(getLoginOwnerId());
+		if (ownerDto == null) {
+			throw new AuthorizationException();
+		}
+
+		if (!ownerDto.isCertified()) {
 			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
 		}
 	}

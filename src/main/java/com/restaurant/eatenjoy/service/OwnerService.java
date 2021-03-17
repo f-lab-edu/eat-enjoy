@@ -106,4 +106,8 @@ public class OwnerService {
 			.build(), false);
 	}
 
+	public OwnerDto findByLoginId(String loginId) {
+		return ownerDao.findByLoginId(loginId);
+	}
+
 }

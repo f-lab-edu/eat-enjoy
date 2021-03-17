@@ -33,6 +33,9 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 			case USER:
 				loginService.validateUserAuthority();
 				break;
+			case OWNER:
+				loginService.validateOwnerAuthority();
+				break;
 		}
 
 		return true;
