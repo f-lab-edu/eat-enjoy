@@ -9,8 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.OwnerDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.MailDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
+import com.restaurant.eatenjoy.dto.OwnerInfoDto;
+import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
+import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
@@ -74,7 +78,7 @@ public class OwnerService {
 	}
 
 	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+		if (ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
 		}
 	}
@@ -113,11 +117,49 @@ public class OwnerService {
 
 	@Transactional
 	public void delete(String loginId, String password) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+		if (ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
 			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 
 		ownerDao.deleteByLoginId(loginId);
+	}
+
+	@Transactional
+	public void updatePassword(String loginId, UpdatePasswordDto passwordDto) {
+		validatePasswords(loginId, passwordDto);
+		ownerDao.updatePassword(loginId, encryptable.encrypt(passwordDto.getNewPassword()));
+	}
+
+	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
+		if (ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
+		}
+
+		if (passwordDto.getNewPassword().equals(passwordDto.getOldPassword())) {
+			throw new ConflictPasswordException("신규 비밀번호가 기존 비밀번호와 일치합니다.");
+		}
+	}
+
+	public OwnerInfoDto getOwnerInfo(String loginId) {
+		OwnerDto ownerDto = findByLoginId(loginId);
+		return OwnerInfoDto.builder()
+			.id(ownerDto.getId())
+			.loginId(ownerDto.getLoginId())
+			.email(ownerDto.getEmail())
+			.build();
+	}
+
+	@Transactional
+	public void changeMail(String loginId, MailDto mailDto) {
+		ownerDao.updateMailByLoginId(OwnerDto.builder()
+			.loginId(loginId)
+			.email(mailDto.getEmail())
+			.build());
+
+		OwnerDto findOwner = findByLoginId(loginId);
+		if (!findOwner.isCertified()) {
+			sendCertificationMail(findOwner, false);
+		}
 	}
 
 }

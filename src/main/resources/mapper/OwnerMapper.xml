@@ -47,4 +47,19 @@
           FROM owner
          WHERE login_id = #{login_id}
     </delete>
+
+    <update id="updatePassword">
+        UPDATE owner
+           SET password = #{password}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+
+    <update id="updateMailByLoginId" parameterType="OwnerDto">
+        UPDATE owner
+           SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
+             , email = #{email}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
 </mapper>

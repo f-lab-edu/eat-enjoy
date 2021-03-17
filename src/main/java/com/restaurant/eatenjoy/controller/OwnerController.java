@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +16,11 @@ import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginOwnerId;
 import com.restaurant.eatenjoy.annotation.LoginUserId;
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.MailDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
+import com.restaurant.eatenjoy.dto.OwnerInfoDto;
 import com.restaurant.eatenjoy.dto.PasswordDto;
+import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.service.LoginService;
 import com.restaurant.eatenjoy.service.OwnerService;
 import com.restaurant.eatenjoy.util.Role;
@@ -63,6 +67,24 @@ public class OwnerController {
 	public void delete(@LoginOwnerId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
 		ownerService.delete(loginId, passwordDto.getPassword());
 		loginService.logout();
+	}
+
+	@Authority(Role.OWNER)
+	@PatchMapping("/my-info/password")
+	public void changePassword(@LoginOwnerId String loginId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
+		ownerService.updatePassword(loginId, passwordDto);
+	}
+
+	@Authority(Role.OWNER)
+	@GetMapping("/my-info")
+	public OwnerInfoDto userInfo(@LoginOwnerId String loginId) {
+		return ownerService.getOwnerInfo(loginId);
+	}
+
+	@Authority(Role.OWNER)
+	@PatchMapping("/my-info/change-mail")
+	public void changeMail(@LoginOwnerId String loginId, @RequestBody @Valid MailDto mailDto) {
+		ownerService.changeMail(loginId, mailDto);
 	}
 
 }
