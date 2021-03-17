@@ -78,7 +78,7 @@ public class OwnerService {
 	}
 
 	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		if (ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
 		}
 	}
@@ -117,7 +117,7 @@ public class OwnerService {
 
 	@Transactional
 	public void delete(String loginId, String password) {
-		if (ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
 			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 
@@ -131,7 +131,7 @@ public class OwnerService {
 	}
 
 	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
-		if (ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
 			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
 		}
 
