@@ -18,4 +18,6 @@ public interface OwnerDao {
 
 	OwnerDto findByLoginId(String loginId);
 
+	void deleteByLoginId(String loginId);
+
 }

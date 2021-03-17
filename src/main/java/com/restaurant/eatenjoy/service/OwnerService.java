@@ -13,6 +13,7 @@ import com.restaurant.eatenjoy.dto.OwnerDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
+import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
 import com.restaurant.eatenjoy.util.Role;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
@@ -108,6 +109,15 @@ public class OwnerService {
 
 	public OwnerDto findByLoginId(String loginId) {
 		return ownerDao.findByLoginId(loginId);
+	}
+
+	@Transactional
+	public void delete(String loginId, String password) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
+		}
+
+		ownerDao.deleteByLoginId(loginId);
 	}
 
 }

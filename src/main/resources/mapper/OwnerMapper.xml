@@ -41,4 +41,10 @@
           FROM owner
          WHERE login_id = #{loginId}
     </select>
+
+    <delete id="deleteByLoginId" parameterType="string">
+        DELETE
+          FROM owner
+         WHERE login_id = #{login_id}
+    </delete>
 </mapper>
