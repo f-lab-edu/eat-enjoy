@@ -28,6 +28,6 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(authorityInterceptor)
-			.excludePathPatterns("/api/*/login", "/api/*/logout", "/api/users/check-mail-token");
+			.excludePathPatterns("/api/*/login", "/api/*/logout", "/api/*/check-mail-token");
 	}
 }

@@ -73,6 +73,7 @@ public class UserService {
 			.subject(isRegister ? "eat-enjoy, 회원가입 인증 안내" : "eat-enjoy, 메일 인증 안내")
 			.token(mailToken)
 			.register(isRegister)
+			.role(Role.USER)
 			.build());
 
 		mailTokenDao.create(Role.USER, userDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);

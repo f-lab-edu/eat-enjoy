@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.util.mail;
 
+import com.restaurant.eatenjoy.util.Role;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,5 +20,7 @@ public class MailMessage {
 	private final String token;
 
 	private final boolean register;
+
+	private final Role role;
 
 }

@@ -25,4 +25,20 @@
                        WHERE login_id = #{loginId}
                          AND password = #{password})
     </select>
+
+    <update id="updateEmailCertified" parameterType="string">
+        UPDATE owner
+           SET certified = 1
+             , update_at = now()
+         WHERE email = #{email}
+    </update>
+
+    <select id="findByLoginId" parameterType="string" resultType="OwnerDto">
+        SELECT id
+             , login_id AS loginId
+             , email
+             , certified
+          FROM owner
+         WHERE login_id = #{loginId}
+    </select>
 </mapper>

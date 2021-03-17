@@ -13,4 +13,9 @@ public interface OwnerDao {
 	boolean existsByEmail(String email);
 
 	boolean existsByLoginIdAndPassword(@Param("loginId") String loginId, @Param("password") String password);
+
+	void updateEmailCertified(String email);
+
+	OwnerDto findByLoginId(String loginId);
+
 }
