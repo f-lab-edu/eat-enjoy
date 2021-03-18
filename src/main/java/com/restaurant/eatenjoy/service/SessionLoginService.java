@@ -39,15 +39,6 @@ public class SessionLoginService implements LoginService {
 		login(LOGIN_OWNER_ID, loginDto, ownerService::validateLoginIdAndPassword);
 	}
 
-	private void login(String sessionKey, LoginDto loginDto, Consumer<LoginDto> validator) {
-		if (httpSession.getAttribute(sessionKey) != null) {
-			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
-		}
-
-		validator.accept(loginDto);
-		httpSession.setAttribute(sessionKey, loginDto.getLoginId());
-	}
-
 	@Override
 	public void logout() {
 		httpSession.invalidate();
@@ -61,15 +52,6 @@ public class SessionLoginService implements LoginService {
 	@Override
 	public String getLoginOwnerId() {
 		return getLoginId(LOGIN_OWNER_ID);
-	}
-
-	private String getLoginId(String sessionKey) {
-		Object loginId = httpSession.getAttribute(sessionKey);
-		if (loginId == null) {
-			throw new UnauthorizedException();
-		}
-
-		return (String) loginId;
 	}
 
 	@Override
@@ -94,6 +76,24 @@ public class SessionLoginService implements LoginService {
 		if (!ownerDto.isCertified()) {
 			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
 		}
+	}
+
+	private void login(String sessionKey, LoginDto loginDto, Consumer<LoginDto> validator) {
+		if (httpSession.getAttribute(sessionKey) != null) {
+			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
+		}
+
+		validator.accept(loginDto);
+		httpSession.setAttribute(sessionKey, loginDto.getLoginId());
+	}
+
+	private String getLoginId(String sessionKey) {
+		Object loginId = httpSession.getAttribute(sessionKey);
+		if (loginId == null) {
+			throw new UnauthorizedException();
+		}
+
+		return (String) loginId;
 	}
 
 }
