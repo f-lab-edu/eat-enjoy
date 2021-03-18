@@ -62,26 +62,26 @@ public class UserController {
 	}
 
 	@Authority(Role.USER)
-	@DeleteMapping("/my-info")
+	@DeleteMapping("/my-infos")
 	public void delete(@LoginUserId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
 		userService.delete(loginId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.USER)
-	@PatchMapping("/my-info/password")
+	@PatchMapping("/my-infos/password")
 	public void changePassword(@LoginUserId String loginId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
 		userService.updatePassword(loginId, passwordDto);
 	}
 
 	@Authority(Role.USER)
-	@GetMapping("/my-info")
+	@GetMapping("/my-infos")
 	public UserInfoDto userInfo(@LoginUserId String loginId) {
 		return userService.getUserInfo(loginId);
 	}
 
 	@Authority(Role.USER)
-	@PatchMapping("/my-info")
+	@PatchMapping("/my-infos")
 	public void update(@LoginUserId String loginId, @RequestBody @Valid UpdateUserDto userDto) {
 		userService.update(loginId, userDto);
 	}

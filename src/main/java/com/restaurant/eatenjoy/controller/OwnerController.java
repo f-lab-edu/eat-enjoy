@@ -63,26 +63,26 @@ public class OwnerController {
 	}
 
 	@Authority(Role.OWNER)
-	@DeleteMapping("/my-info")
+	@DeleteMapping("/my-infos")
 	public void delete(@LoginOwnerId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
 		ownerService.delete(loginId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.OWNER)
-	@PatchMapping("/my-info/password")
+	@PatchMapping("/my-infos/password")
 	public void changePassword(@LoginOwnerId String loginId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
 		ownerService.updatePassword(loginId, passwordDto);
 	}
 
 	@Authority(Role.OWNER)
-	@GetMapping("/my-info")
+	@GetMapping("/my-infos")
 	public OwnerInfoDto userInfo(@LoginOwnerId String loginId) {
 		return ownerService.getOwnerInfo(loginId);
 	}
 
 	@Authority(Role.OWNER)
-	@PatchMapping("/my-info/change-mail")
+	@PatchMapping("/my-infos/mail")
 	public void changeMail(@LoginOwnerId String loginId, @RequestBody @Valid MailDto mailDto) {
 		ownerService.changeMail(loginId, mailDto);
 	}
