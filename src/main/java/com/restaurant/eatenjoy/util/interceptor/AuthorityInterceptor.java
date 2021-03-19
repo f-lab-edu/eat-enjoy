@@ -29,11 +29,7 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 			return true;
 		}
 
-		switch (authority.value()) {
-			case USER:
-				loginService.validateUserAuthority();
-				break;
-		}
+		authority.value().validate(loginService);
 
 		return true;
 	}

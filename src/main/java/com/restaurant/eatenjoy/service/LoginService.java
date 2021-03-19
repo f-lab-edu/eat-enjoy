@@ -10,8 +10,12 @@ public interface LoginService {
 
 	void logout();
 
-	String getLoginId();
+	String getLoginUserId();
+
+	String getLoginOwnerId();
 
 	void validateUserAuthority();
+
+	void validateOwnerAuthority();
 
 }

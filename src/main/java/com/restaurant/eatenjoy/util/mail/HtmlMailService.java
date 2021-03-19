@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import com.restaurant.eatenjoy.exception.MailSendFailedException;
+import com.restaurant.eatenjoy.util.Role;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class HtmlMailService implements MailService {
 			mimeMessageHelper.setTo(mailMessage.getTo());
 			mimeMessageHelper.setSubject(mailMessage.getSubject());
 			mimeMessageHelper.setText(HTML_CONTENT.replace("LOGIN_ID", mailMessage.getLoginId())
+				.replace("ROLE", mailMessage.getRole() == Role.USER ? "users" : "owners")
 				.replace("EMAIL", mailMessage.getTo()).replace("TOKEN", mailMessage.getToken())
 				.replace("CONTENT",
 					mailMessage.isRegister() ? "<b>eat-enjoy</b>에 가입해 주셔서 진심으로 감사드립니다.<br />" : ""), true);
@@ -48,7 +50,7 @@ public class HtmlMailService implements MailService {
 			+ "		아래 <b style=\"color: #02b875\">'메일 인증'</b> 버튼을 클릭하여 인증을 완료해 주세요.<br />"
 			+ "		감사합니다.</p>"
 			+ "	<a style=\"color: #FFF; text-decoration: none; text-align: center;\""
-			+ "	href=\"http://localhost:8080/api/users/check-mail-token?email=EMAIL&token=TOKEN\" target=\"_blank\">"
+			+ "	href=\"http://localhost:8080/api/ROLE/check-mail-token?email=EMAIL&token=TOKEN\" target=\"_blank\">"
 			+ "		<p style=\"display: inline-block; width: 210px; height: 45px; margin: 30px 5px 40px; background: #02b875; line-height: 45px; vertical-align: middle; font-size: 16px;\">메일 인증</p></a>"
 			+ "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>\n</div>\n</body>\n</html>";
 	}

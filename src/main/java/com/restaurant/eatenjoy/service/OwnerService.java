@@ -4,12 +4,20 @@ import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.OwnerDao;
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.MailDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
+import com.restaurant.eatenjoy.dto.OwnerInfoDto;
+import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
+import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
+import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
+import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
 import com.restaurant.eatenjoy.util.Role;
 import com.restaurant.eatenjoy.util.encrypt.Encryptable;
@@ -32,6 +40,7 @@ public class OwnerService {
 
 	private final MailTokenDao mailTokenDao;
 
+	@Transactional
 	public void register(OwnerDto ownerDto) {
 		validateLoginIdAndEmail(ownerDto);
 
@@ -43,6 +52,71 @@ public class OwnerService {
 		ownerDao.register(ownerDto);
 
 		sendCertificationMail(ownerDto, true);
+	}
+
+	public void validateLoginIdAndPassword(LoginDto loginDto) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
+		}
+	}
+
+	@Transactional
+	public void certifyEmailToken(String email, String emailToken) {
+		validateEmailAndToken(email, emailToken);
+		ownerDao.updateEmailCertified(email);
+	}
+
+	public void resendCertificationMail(String loginId) {
+		OwnerDto ownerDto = ownerDao.findByLoginId(loginId);
+		if (ownerDto.isCertified()) {
+			throw new AlreadyCertifiedException("이미 메일 인증이 완료된 사용자 입니다.");
+		}
+
+		sendCertificationMail(OwnerDto.builder()
+			.loginId(loginId)
+			.email(ownerDto.getEmail())
+			.build(), false);
+	}
+
+	public OwnerDto findByLoginId(String loginId) {
+		return ownerDao.findByLoginId(loginId);
+	}
+
+	@Transactional
+	public void delete(String loginId, String password) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
+		}
+
+		ownerDao.deleteByLoginId(loginId);
+	}
+
+	@Transactional
+	public void updatePassword(String loginId, UpdatePasswordDto passwordDto) {
+		validatePasswords(loginId, passwordDto);
+		ownerDao.updatePassword(loginId, encryptable.encrypt(passwordDto.getNewPassword()));
+	}
+
+	public OwnerInfoDto getOwnerInfo(String loginId) {
+		OwnerDto ownerDto = findByLoginId(loginId);
+		return OwnerInfoDto.builder()
+			.id(ownerDto.getId())
+			.loginId(ownerDto.getLoginId())
+			.email(ownerDto.getEmail())
+			.build();
+	}
+
+	@Transactional
+	public void changeMail(String loginId, MailDto mailDto) {
+		ownerDao.updateMailByLoginId(OwnerDto.builder()
+			.loginId(loginId)
+			.email(mailDto.getEmail())
+			.build());
+
+		OwnerDto findOwner = findByLoginId(loginId);
+		if (!findOwner.isCertified()) {
+			sendCertificationMail(findOwner, false);
+		}
 	}
 
 	private void validateLoginIdAndEmail(OwnerDto ownerDto) {
@@ -63,14 +137,29 @@ public class OwnerService {
 			.subject(isRegister ? "eat-enjoy, 회원가입 인증 안내" : "eat-enjoy, 메일 인증 안내")
 			.token(mailToken)
 			.register(isRegister)
+			.role(Role.OWNER)
 			.build());
 
 		mailTokenDao.create(Role.OWNER, ownerDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
 	}
 
-	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
-			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
+	private void validateEmailAndToken(String email, String emailToken) {
+		if (!ownerDao.existsByEmail(email)) {
+			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
+		}
+
+		if (!emailToken.equals(mailTokenDao.findByRoleAndMail(Role.OWNER, email))) {
+			throw new MailTokenNotFoundException("인증 토큰을 찾을 수 없습니다.");
+		}
+	}
+
+	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
+		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
+		}
+
+		if (passwordDto.getNewPassword().equals(passwordDto.getOldPassword())) {
+			throw new ConflictPasswordException("신규 비밀번호가 기존 비밀번호와 일치합니다.");
 		}
 	}
 

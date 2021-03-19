@@ -25,4 +25,41 @@
                        WHERE login_id = #{loginId}
                          AND password = #{password})
     </select>
+
+    <update id="updateEmailCertified" parameterType="string">
+        UPDATE owner
+           SET certified = 1
+             , update_at = now()
+         WHERE email = #{email}
+    </update>
+
+    <select id="findByLoginId" parameterType="string" resultType="OwnerDto">
+        SELECT id
+             , login_id AS loginId
+             , email
+             , certified
+          FROM owner
+         WHERE login_id = #{loginId}
+    </select>
+
+    <delete id="deleteByLoginId" parameterType="string">
+        DELETE
+          FROM owner
+         WHERE login_id = #{login_id}
+    </delete>
+
+    <update id="updatePassword">
+        UPDATE owner
+           SET password = #{password}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+
+    <update id="updateMailByLoginId" parameterType="OwnerDto">
+        UPDATE owner
+           SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
+             , email = #{email}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
 </mapper>
