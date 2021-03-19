@@ -6,10 +6,16 @@ public interface LoginService {
 
 	void loginUser(LoginDto loginDto);
 
+	void loginOwner(LoginDto loginDto);
+
 	void logout();
 
-	String getLoginId();
+	String getLoginUserId();
+
+	String getLoginOwnerId();
 
 	void validateUserAuthority();
+
+	void validateOwnerAuthority();
 
 }
