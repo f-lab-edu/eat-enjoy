@@ -20,7 +20,6 @@ public class RestaurantDto {
 	private Long id;
 
 	@NotBlank(message = "가게 이름을 입력해주세요")
-	@NotNull
 	@Size(max = 100, message = "가게 이름은 100자를 넘길 수 없습니다")
 	private String name;
 
