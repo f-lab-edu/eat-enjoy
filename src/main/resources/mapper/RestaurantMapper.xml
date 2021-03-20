@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.restaurant.eatenjoy.dao.RestaurantDao">
+    <insert id="register" parameterType="RestaurantDto">
+        INSERT INTO restaurant(name, bizr_no, address, region_cd, tel_no, intr_dc, min_order_price, payment_type, owner_id, category_id, open_time, close_time)
+        VALUES (#{name}, #{bizrNo}, #{address}, #{regionCd}, #{telNo}, #{intrDc}, #{minOrderPrice}, #{paymentType}, #{ownerId}, #{categoryId}, #{openTime}, #{closeTime})
+    </insert>
+</mapper>
