@@ -5,4 +5,6 @@ import com.restaurant.eatenjoy.dto.RestaurantDto;
 public interface RestaurantDao {
 
 	void register(RestaurantDto restaurantDto);
+
+	boolean findByBizrNo(String bizrNo);
 }

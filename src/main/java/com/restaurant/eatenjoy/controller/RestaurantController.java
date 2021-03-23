@@ -15,7 +15,7 @@ import com.restaurant.eatenjoy.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/restaurant")
+@RequestMapping("/api/restaurants")
 @RequiredArgsConstructor
 public class RestaurantController {
 

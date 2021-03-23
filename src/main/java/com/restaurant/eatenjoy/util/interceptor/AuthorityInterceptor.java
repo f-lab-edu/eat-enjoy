@@ -24,7 +24,7 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 			return true;
 		}
 
-		Authority authority = findAuthorityAnnotation((HandlerMethod) handler);
+		Authority authority = findAuthorityAnnotation((HandlerMethod)handler);
 		if (authority == null) {
 			return true;
 		}

@@ -6,4 +6,10 @@
         INSERT INTO restaurant(name, bizr_no, address, region_cd, tel_no, intr_dc, min_order_price, payment_type, owner_id, category_id, open_time, close_time)
         VALUES (#{name}, #{bizrNo}, #{address}, #{regionCd}, #{telNo}, #{intrDc}, #{minOrderPrice}, #{paymentType}, #{ownerId}, #{categoryId}, #{openTime}, #{closeTime})
     </insert>
+
+    <select id="findByBizrNo" parameterType="string" resultType="boolean">
+        SELECT EXISTS(SELECT bizr_no
+                          FROM restaurant
+                      WHERE bizr_no = #{bizrNo})
+    </select>
 </mapper>
