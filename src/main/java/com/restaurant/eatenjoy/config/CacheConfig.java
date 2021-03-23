@@ -9,7 +9,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 @Configuration
 public class CacheConfig {
 
-	@Value("${spring.redis.host}")
+	@Value("${spring.redis.cache.host}")
 	private String redisHost;
 
 	@Value("${spring.redis.cache.port}")
