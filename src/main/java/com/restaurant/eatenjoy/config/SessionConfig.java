@@ -10,7 +10,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 
 @Configuration
 @EnableRedisHttpSession
-public class RedisConfig {
+public class SessionConfig {
 
 	@Value("${spring.redis.host}")
 	private String redisHost;
