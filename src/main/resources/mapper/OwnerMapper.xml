@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.restaurant.eatenjoy.dao.OwnerDao">
+    <select id="existsByLoginId" parameterType="string" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM owner
+                       WHERE login_id = #{loginId})
+    </select>
+
+    <select id="existsByEmail" parameterType="string" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM owner
+                       WHERE email = #{email})
+    </select>
+
+    <insert id="register" parameterType="OwnerDto">
+        INSERT INTO owner(login_id, password, email)
+        VALUES(#{loginId}, #{password}, #{email})
+    </insert>
+
+    <select id="existsByLoginIdAndPassword" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM owner
+                       WHERE login_id = #{loginId}
+                         AND password = #{password})
+    </select>
+
+    <update id="updateEmailCertified" parameterType="string">
+        UPDATE owner
+           SET certified = 1
+             , update_at = now()
+         WHERE email = #{email}
+    </update>
+
+    <select id="findByLoginId" parameterType="string" resultType="OwnerDto">
+        SELECT id
+             , login_id AS loginId
+             , email
+             , certified
+          FROM owner
+         WHERE login_id = #{loginId}
+    </select>
+
+    <delete id="deleteByLoginId" parameterType="string">
+        DELETE
+          FROM owner
+         WHERE login_id = #{login_id}
+    </delete>
+
+    <update id="updatePassword">
+        UPDATE owner
+           SET password = #{password}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+
+    <update id="updateMailByLoginId" parameterType="OwnerDto">
+        UPDATE owner
+           SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
+             , email = #{email}
+             , update_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+</mapper>

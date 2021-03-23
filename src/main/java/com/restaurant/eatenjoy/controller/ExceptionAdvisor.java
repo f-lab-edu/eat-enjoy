@@ -38,14 +38,6 @@ public class ExceptionAdvisor {
 		return ResponseEntity.badRequest().body(createInvalidFields(fieldErrors));
 	}
 
-	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {
-		return fieldErrors.stream().map(fieldError -> InvalidField.builder().field(fieldError.getField())
-			.message(fieldError.getDefaultMessage())
-			.value(fieldError.getRejectedValue())
-			.build())
-			.collect(Collectors.toList());
-	}
-
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<String> processNotFoundError(NotFoundException exception) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
@@ -60,6 +52,14 @@ public class ExceptionAdvisor {
 	public ResponseEntity<String> processAuthorizationError(AuthorizationException exception) {
 		String message = StringUtils.hasLength(exception.getMessage()) ? exception.getMessage() : "해당 리소스에 접근할 수 없습니다.";
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
+	}
+
+	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {
+		return fieldErrors.stream().map(fieldError -> InvalidField.builder().field(fieldError.getField())
+			.message(fieldError.getDefaultMessage())
+			.value(fieldError.getRejectedValue())
+			.build())
+			.collect(Collectors.toList());
 	}
 
 	@Getter

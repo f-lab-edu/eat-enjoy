@@ -5,6 +5,8 @@ import java.time.Duration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.restaurant.eatenjoy.util.Role;
+
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -15,12 +17,16 @@ public class MailTokenDao {
 
 	private final StringRedisTemplate redisTemplate;
 
-	public void create(String mail, String mailToken, Duration timeoutSecond) {
-		redisTemplate.opsForValue().set(MAIL_TOKEN_PREFIX_KEY + mail, mailToken, timeoutSecond);
+	public void create(Role role, String mail, String mailToken, Duration timeoutSecond) {
+		redisTemplate.opsForValue().set(getMailTokenKey(role, mail), mailToken, timeoutSecond);
 	}
 
-	public String findByMail(String mail) {
-		return redisTemplate.opsForValue().get(MAIL_TOKEN_PREFIX_KEY + mail);
+	public String findByRoleAndMail(Role role, String mail) {
+		return redisTemplate.opsForValue().get(getMailTokenKey(role, mail));
+	}
+
+	private String getMailTokenKey(Role role, String mail) {
+		return MAIL_TOKEN_PREFIX_KEY + role + ":" + mail;
 	}
 
 }
