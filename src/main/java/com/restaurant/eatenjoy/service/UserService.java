@@ -55,10 +55,13 @@ public class UserService {
 		sendCertificationMail(userDto, true);
 	}
 
-	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		if (!userDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+	public Long findIdByLoginIdAndPassword(LoginDto loginDto) {
+		Long id = userDao.findIdByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()));
+		if (id == null) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
 		}
+
+		return id;
 	}
 
 	@Transactional
@@ -67,39 +70,39 @@ public class UserService {
 		userDao.updateEmailCertified(email);
 	}
 
-	public void resendCertificationMail(String loginId) {
-		UserDto userDto = userDao.findByLoginId(loginId);
+	public void resendCertificationMail(Long userId) {
+		UserDto userDto = userDao.findById(userId);
 		if (userDto.isCertified()) {
 			throw new AlreadyCertifiedException("이미 메일 인증이 완료된 사용자 입니다.");
 		}
 
 		sendCertificationMail(UserDto.builder()
-			.loginId(loginId)
+			.loginId(userDto.getLoginId())
 			.email(userDto.getEmail())
 			.build(), false);
 	}
 
-	public UserDto findByLoginId(String loginId) {
-		return userDao.findByLoginId(loginId);
+	public UserDto findById(Long userId) {
+		return userDao.findById(userId);
 	}
 
 	@Transactional
-	public void delete(String loginId, String password) {
-		if (!userDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+	public void delete(Long userId, String password) {
+		if (!userDao.existsByIdAndPassword(userId, encryptable.encrypt(password))) {
 			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 
-		userDao.deleteByLoginId(loginId);
+		userDao.deleteById(userId);
 	}
 
 	@Transactional
-	public void updatePassword(String loginId, UpdatePasswordDto passwordDto) {
-		validatePasswords(loginId, passwordDto);
-		userDao.updatePassword(loginId, encryptable.encrypt(passwordDto.getNewPassword()));
+	public void updatePassword(Long userId, UpdatePasswordDto passwordDto) {
+		validatePasswords(userId, passwordDto);
+		userDao.updatePassword(userId, encryptable.encrypt(passwordDto.getNewPassword()));
 	}
 
-	public UserInfoDto getUserInfo(String loginId) {
-		UserDto userDto = findByLoginId(loginId);
+	public UserInfoDto getUserInfo(Long userId) {
+		UserDto userDto = findById(userId);
 		return UserInfoDto.builder()
 			.id(userDto.getId())
 			.loginId(userDto.getLoginId())
@@ -109,14 +112,14 @@ public class UserService {
 	}
 
 	@Transactional
-	public void update(String loginId, UpdateUserDto userDto) {
-		userDao.updateByLoginId(UserDto.builder()
-			.loginId(loginId)
+	public void update(Long userId, UpdateUserDto userDto) {
+		userDao.updateById(UserDto.builder()
+			.id(userId)
 			.email(userDto.getEmail())
 			.regionCd(userDto.getRegionCd())
 			.build());
 
-		UserDto findUser = findByLoginId(loginId);
+		UserDto findUser = findById(userId);
 		if (!findUser.isCertified()) {
 			sendCertificationMail(findUser, false);
 		}
@@ -156,8 +159,8 @@ public class UserService {
 		}
 	}
 
-	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
-		if (!userDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+	private void validatePasswords(Long userId, UpdatePasswordDto passwordDto) {
+		if (!userDao.existsByIdAndPassword(userId, encryptable.encrypt(passwordDto.getOldPassword()))) {
 			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
 		}
 

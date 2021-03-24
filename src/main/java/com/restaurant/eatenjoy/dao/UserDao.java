@@ -12,16 +12,18 @@ public interface UserDao {
 
 	boolean existsByEmail(String email);
 
-	boolean existsByLoginIdAndPassword(@Param("loginId") String loginId, @Param("password") String password);
+	Long findIdByLoginIdAndPassword(@Param("loginId") String loginId, @Param("password") String password);
+
+	boolean existsByIdAndPassword(@Param("id") Long id, @Param("password") String password);
 
 	void updateEmailCertified(String email);
 
-	UserDto findByLoginId(String loginId);
+	UserDto findById(Long id);
 
-	void deleteByLoginId(String loginId);
+	void deleteById(Long id);
 
-	void updatePassword(@Param("loginId") String loginId, @Param("password") String password);
+	void updatePassword(@Param("id") Long id, @Param("password") String password);
 
-	void updateByLoginId(UserDto userDto);
+	void updateById(UserDto userDto);
 
 }

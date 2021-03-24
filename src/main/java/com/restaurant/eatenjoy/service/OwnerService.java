@@ -54,10 +54,13 @@ public class OwnerService {
 		sendCertificationMail(ownerDto, true);
 	}
 
-	public void validateLoginIdAndPassword(LoginDto loginDto) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()))) {
+	public Long findIdByLoginIdAndPassword(LoginDto loginDto) {
+		Long id = ownerDao.findIdByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()));
+		if (id == null) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
 		}
+
+		return id;
 	}
 
 	@Transactional
@@ -66,39 +69,39 @@ public class OwnerService {
 		ownerDao.updateEmailCertified(email);
 	}
 
-	public void resendCertificationMail(String loginId) {
-		OwnerDto ownerDto = ownerDao.findByLoginId(loginId);
+	public void resendCertificationMail(Long ownerId) {
+		OwnerDto ownerDto = ownerDao.findById(ownerId);
 		if (ownerDto.isCertified()) {
 			throw new AlreadyCertifiedException("이미 메일 인증이 완료된 사용자 입니다.");
 		}
 
 		sendCertificationMail(OwnerDto.builder()
-			.loginId(loginId)
+			.loginId(ownerDto.getLoginId())
 			.email(ownerDto.getEmail())
 			.build(), false);
 	}
 
-	public OwnerDto findByLoginId(String loginId) {
-		return ownerDao.findByLoginId(loginId);
+	public OwnerDto findById(Long ownerId) {
+		return ownerDao.findById(ownerId);
 	}
 
 	@Transactional
-	public void delete(String loginId, String password) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(password))) {
+	public void delete(Long ownerId, String password) {
+		if (!ownerDao.existsByIdAndPassword(ownerId, encryptable.encrypt(password))) {
 			throw new NoMatchedPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 
-		ownerDao.deleteByLoginId(loginId);
+		ownerDao.deleteById(ownerId);
 	}
 
 	@Transactional
-	public void updatePassword(String loginId, UpdatePasswordDto passwordDto) {
-		validatePasswords(loginId, passwordDto);
-		ownerDao.updatePassword(loginId, encryptable.encrypt(passwordDto.getNewPassword()));
+	public void updatePassword(Long ownerId, UpdatePasswordDto passwordDto) {
+		validatePasswords(ownerId, passwordDto);
+		ownerDao.updatePassword(ownerId, encryptable.encrypt(passwordDto.getNewPassword()));
 	}
 
-	public OwnerInfoDto getOwnerInfo(String loginId) {
-		OwnerDto ownerDto = findByLoginId(loginId);
+	public OwnerInfoDto getOwnerInfo(Long ownerId) {
+		OwnerDto ownerDto = findById(ownerId);
 		return OwnerInfoDto.builder()
 			.id(ownerDto.getId())
 			.loginId(ownerDto.getLoginId())
@@ -107,13 +110,13 @@ public class OwnerService {
 	}
 
 	@Transactional
-	public void changeMail(String loginId, MailDto mailDto) {
-		ownerDao.updateMailByLoginId(OwnerDto.builder()
-			.loginId(loginId)
+	public void changeMail(Long ownerId, MailDto mailDto) {
+		ownerDao.updateMailById(OwnerDto.builder()
+			.id(ownerId)
 			.email(mailDto.getEmail())
 			.build());
 
-		OwnerDto findOwner = findByLoginId(loginId);
+		OwnerDto findOwner = findById(ownerId);
 		if (!findOwner.isCertified()) {
 			sendCertificationMail(findOwner, false);
 		}
@@ -153,8 +156,8 @@ public class OwnerService {
 		}
 	}
 
-	private void validatePasswords(String loginId, UpdatePasswordDto passwordDto) {
-		if (!ownerDao.existsByLoginIdAndPassword(loginId, encryptable.encrypt(passwordDto.getOldPassword()))) {
+	private void validatePasswords(Long ownerId, UpdatePasswordDto passwordDto) {
+		if (!ownerDao.existsByIdAndPassword(ownerId, encryptable.encrypt(passwordDto.getOldPassword()))) {
 			throw new NoMatchedPasswordException("기존 비밀번호가 유효하지 않습니다.");
 		}
 

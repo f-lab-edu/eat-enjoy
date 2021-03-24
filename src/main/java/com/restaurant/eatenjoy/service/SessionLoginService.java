@@ -1,6 +1,6 @@
 package com.restaurant.eatenjoy.service;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.servlet.http.HttpSession;
 
@@ -31,12 +31,12 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public void loginUser(LoginDto loginDto) {
-		login(LOGIN_USER_ID, loginDto, userService::validateLoginIdAndPassword);
+		login(LOGIN_USER_ID, loginDto, userService::findIdByLoginIdAndPassword);
 	}
 
 	@Override
 	public void loginOwner(LoginDto loginDto) {
-		login(LOGIN_OWNER_ID, loginDto, ownerService::validateLoginIdAndPassword);
+		login(LOGIN_OWNER_ID, loginDto, ownerService::findIdByLoginIdAndPassword);
 	}
 
 	@Override
@@ -45,18 +45,18 @@ public class SessionLoginService implements LoginService {
 	}
 
 	@Override
-	public String getLoginUserId() {
+	public Long getLoginUserId() {
 		return getLoginId(LOGIN_USER_ID);
 	}
 
 	@Override
-	public String getLoginOwnerId() {
+	public Long getLoginOwnerId() {
 		return getLoginId(LOGIN_OWNER_ID);
 	}
 
 	@Override
 	public void validateUserAuthority() {
-		UserDto userDto = userService.findByLoginId(getLoginUserId());
+		UserDto userDto = userService.findById(getLoginUserId());
 		if (userDto == null) {
 			throw new AuthorizationException();
 		}
@@ -68,7 +68,7 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public void validateOwnerAuthority() {
-		OwnerDto ownerDto = ownerService.findByLoginId(getLoginOwnerId());
+		OwnerDto ownerDto = ownerService.findById(getLoginOwnerId());
 		if (ownerDto == null) {
 			throw new AuthorizationException();
 		}
@@ -78,22 +78,21 @@ public class SessionLoginService implements LoginService {
 		}
 	}
 
-	private void login(String sessionKey, LoginDto loginDto, Consumer<LoginDto> validator) {
+	private void login(String sessionKey, LoginDto loginDto, Function<LoginDto, Long> validator) {
 		if (httpSession.getAttribute(sessionKey) != null) {
 			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
 		}
 
-		validator.accept(loginDto);
-		httpSession.setAttribute(sessionKey, loginDto.getLoginId());
+		httpSession.setAttribute(sessionKey, validator.apply(loginDto));
 	}
 
-	private String getLoginId(String sessionKey) {
+	private Long getLoginId(String sessionKey) {
 		Object loginId = httpSession.getAttribute(sessionKey);
 		if (loginId == null) {
 			throw new UnauthorizedException();
 		}
 
-		return (String) loginId;
+		return (Long) loginId;
 	}
 
 }

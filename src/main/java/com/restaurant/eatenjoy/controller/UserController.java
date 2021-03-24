@@ -57,33 +57,33 @@ public class UserController {
 	}
 
 	@GetMapping("/resend-mail")
-	public void resendMail(@LoginUserId String loginId) {
-		userService.resendCertificationMail(loginId);
+	public void resendMail(@LoginUserId Long userId) {
+		userService.resendCertificationMail(userId);
 	}
 
 	@Authority(Role.USER)
 	@DeleteMapping("/my-infos")
-	public void delete(@LoginUserId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
-		userService.delete(loginId, passwordDto.getPassword());
+	public void delete(@LoginUserId Long userId, @RequestBody @Valid PasswordDto passwordDto) {
+		userService.delete(userId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.USER)
 	@PatchMapping("/my-infos/password")
-	public void changePassword(@LoginUserId String loginId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
-		userService.updatePassword(loginId, passwordDto);
+	public void changePassword(@LoginUserId Long userId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
+		userService.updatePassword(userId, passwordDto);
 	}
 
 	@Authority(Role.USER)
 	@GetMapping("/my-infos")
-	public UserInfoDto userInfo(@LoginUserId String loginId) {
-		return userService.getUserInfo(loginId);
+	public UserInfoDto userInfo(@LoginUserId Long userId) {
+		return userService.getUserInfo(userId);
 	}
 
 	@Authority(Role.USER)
 	@PatchMapping("/my-infos")
-	public void update(@LoginUserId String loginId, @RequestBody @Valid UpdateUserDto userDto) {
-		userService.update(loginId, userDto);
+	public void update(@LoginUserId Long userId, @RequestBody @Valid UpdateUserDto userDto) {
+		userService.update(userId, userDto);
 	}
 
 }

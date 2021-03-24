@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginOwnerId;
-import com.restaurant.eatenjoy.annotation.LoginUserId;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.MailDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
@@ -58,33 +57,33 @@ public class OwnerController {
 	}
 
 	@GetMapping("/resend-mail")
-	public void resendMail(@LoginUserId String loginId) {
-		ownerService.resendCertificationMail(loginId);
+	public void resendMail(@LoginOwnerId Long ownerId) {
+		ownerService.resendCertificationMail(ownerId);
 	}
 
 	@Authority(Role.OWNER)
 	@DeleteMapping("/my-infos")
-	public void delete(@LoginOwnerId String loginId, @RequestBody @Valid PasswordDto passwordDto) {
-		ownerService.delete(loginId, passwordDto.getPassword());
+	public void delete(@LoginOwnerId Long ownerId, @RequestBody @Valid PasswordDto passwordDto) {
+		ownerService.delete(ownerId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.OWNER)
 	@PatchMapping("/my-infos/password")
-	public void changePassword(@LoginOwnerId String loginId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
-		ownerService.updatePassword(loginId, passwordDto);
+	public void changePassword(@LoginOwnerId Long ownerId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
+		ownerService.updatePassword(ownerId, passwordDto);
 	}
 
 	@Authority(Role.OWNER)
 	@GetMapping("/my-infos")
-	public OwnerInfoDto userInfo(@LoginOwnerId String loginId) {
-		return ownerService.getOwnerInfo(loginId);
+	public OwnerInfoDto ownerInfo(@LoginOwnerId Long ownerId) {
+		return ownerService.getOwnerInfo(ownerId);
 	}
 
 	@Authority(Role.OWNER)
 	@PatchMapping("/my-infos/mail")
-	public void changeMail(@LoginOwnerId String loginId, @RequestBody @Valid MailDto mailDto) {
-		ownerService.changeMail(loginId, mailDto);
+	public void changeMail(@LoginOwnerId Long ownerId, @RequestBody @Valid MailDto mailDto) {
+		ownerService.changeMail(ownerId, mailDto);
 	}
 
 }

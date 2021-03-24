@@ -55,6 +55,7 @@ class OwnerServiceTest {
 	@BeforeEach
 	void setUp() {
 		ownerDto = OwnerDto.builder()
+			.id(1L)
 			.loginId("test")
 			.password("1234")
 			.email(TEST_MAIL)
@@ -96,27 +97,27 @@ class OwnerServiceTest {
 	@Test
 	@DisplayName("로그인 정보로 사용자를 찾지 못하면 UserNotFoundException 예외가 발생한다.")
 	void failToLoginUserNotFound() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
+		given(ownerDao.findIdByLoginIdAndPassword(eq("test"), any())).willReturn(null);
 
-		assertThatThrownBy(() -> ownerService.validateLoginIdAndPassword(LoginDto.builder()
+		assertThatThrownBy(() -> ownerService.findIdByLoginIdAndPassword(LoginDto.builder()
 			.loginId("test")
 			.password("1111")
 			.build())).isInstanceOf(UserNotFoundException.class);
 
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(ownerDao).should(times(1)).findIdByLoginIdAndPassword(eq("test"), any());
 	}
 
 	@Test
 	@DisplayName("로그인 정보로 사용자가 존재하면 정상이다.")
 	void normalToLoginUserFound() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(ownerDao.findIdByLoginIdAndPassword(eq("test"), any())).willReturn(1L);
 
-		ownerService.validateLoginIdAndPassword(LoginDto.builder()
+		ownerService.findIdByLoginIdAndPassword(LoginDto.builder()
 			.loginId("test")
 			.password("1234")
 			.build());
 
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(ownerDao).should(times(1)).findIdByLoginIdAndPassword(eq("test"), any());
 	}
 
 	@Test
@@ -158,30 +159,30 @@ class OwnerServiceTest {
 	@DisplayName("인증을 완료하면 인증 메일을 재전송할 수 없다.")
 	void failToResendMailCertified() {
 		ownerDto = OwnerDto.builder()
-			.loginId("test")
+			.id(1L)
 			.certified(true)
 			.build();
 
-		given(ownerDao.findByLoginId("test")).willReturn(ownerDto);
+		given(ownerDao.findById(1L)).willReturn(ownerDto);
 
-		assertThatThrownBy(() -> ownerService.resendCertificationMail("test"))
+		assertThatThrownBy(() -> ownerService.resendCertificationMail(1L))
 			.isInstanceOf(AlreadyCertifiedException.class);
 
-		then(ownerDao).should(times(1)).findByLoginId("test");
+		then(ownerDao).should(times(1)).findById(1L);
 	}
 
 	@Test
 	@DisplayName("인증 메일을 재전송한다.")
 	void resendCertificationMail() {
 		ownerDto = OwnerDto.builder()
-			.loginId("test")
+			.id(1L)
 			.email(TEST_MAIL)
 			.certified(false)
 			.build();
 
-		given(ownerDao.findByLoginId("test")).willReturn(ownerDto);
+		given(ownerDao.findById(1L)).willReturn(ownerDto);
 
-		ownerService.resendCertificationMail("test");
+		ownerService.resendCertificationMail(1L);
 
 		then(mailService).should(times(1)).send(any());
 		then(mailTokenDao).should(times(1)).create(eq(Role.OWNER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
@@ -190,77 +191,77 @@ class OwnerServiceTest {
 	@Test
 	@DisplayName("비밀번호가 일치하지 않으면 회원탈퇴에 실패한다.")
 	void failToMemberWithdrawalIfPasswordNotMatch() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
-		assertThatThrownBy(() -> ownerService.delete("test", "1234"))
+		given(ownerDao.existsByIdAndPassword(eq(1L), any())).willReturn(false);
+		assertThatThrownBy(() -> ownerService.delete(1L, "1234"))
 			.isInstanceOf(NoMatchedPasswordException.class);
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(ownerDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("비밀번호가 일치하면 회원탈퇴에 성공한다.")
 	void successToMemberWithdrawal() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
-		ownerService.delete("test", "1234");
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		given(ownerDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
+		ownerService.delete(1L, "1234");
+		then(ownerDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("기존 비밀번호로 유효하지 않으면 비밀번호 업데이트에 실패한다.")
 	void failToUpdatePasswordIfOldPasswordInvalid() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
+		given(ownerDao.existsByIdAndPassword(eq(1L), any())).willReturn(false);
 
-		assertThatThrownBy(() -> ownerService.updatePassword("test", UpdatePasswordDto.builder()
+		assertThatThrownBy(() -> ownerService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("5678")
 			.build()))
 			.isInstanceOf(NoMatchedPasswordException.class);
 
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(ownerDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("신규 비밀번호가 기존 비밀번호와 일치할 경우 비밀번호 업데이트에 실패한다.")
 	void failToUpdatePasswordIfNewPasswordEqualsOldPassword() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(ownerDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
 
-		assertThatThrownBy(() -> ownerService.updatePassword("test", UpdatePasswordDto.builder()
+		assertThatThrownBy(() -> ownerService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("1234")
 			.build()))
 			.isInstanceOf(ConflictPasswordException.class);
 
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(ownerDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("비밀번호 업데이트에 성공한다.")
 	void successToUpdatePassword() {
-		given(ownerDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(ownerDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
 
-		ownerService.updatePassword("test", UpdatePasswordDto.builder()
+		ownerService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("5678")
 			.build());
 
-		then(ownerDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
-		then(ownerDao).should(times(1)).updatePassword(eq("test"), any());
+		then(ownerDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
+		then(ownerDao).should(times(1)).updatePassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("메일을 변경하면 인증 메일을 전송한다.")
 	void sendCertificationMailIfMailChange() {
 		String changeMail = "change@test.com";
-		given(ownerDao.findByLoginId("test")).willReturn(OwnerDto.builder()
+		given(ownerDao.findById(1L)).willReturn(OwnerDto.builder()
 			.loginId("test")
 			.email(changeMail)
 			.certified(false)
 			.build());
 
-		ownerService.changeMail("test", MailDto.builder()
+		ownerService.changeMail(1L, MailDto.builder()
 			.email(changeMail)
 			.build());
 
-		then(ownerDao).should(times(1)).findByLoginId("test");
+		then(ownerDao).should(times(1)).findById(1L);
 		then(mailService).should(times(1)).send(any());
 		then(mailTokenDao).should(times(1)).create(eq(Role.OWNER), eq(changeMail), any(), eq(Duration.ofSeconds(86400)));
 	}
@@ -268,17 +269,17 @@ class OwnerServiceTest {
 	@Test
 	@DisplayName("메일이 변경되지 않았으면 메일을 전송하지 않는다.")
 	void notSendCertificationMailIfMailNotChange() {
-		given(ownerDao.findByLoginId("test")).willReturn(OwnerDto.builder()
+		given(ownerDao.findById(1L)).willReturn(OwnerDto.builder()
 			.loginId("test")
 			.email(TEST_MAIL)
 			.certified(true)
 			.build());
 
-		ownerService.changeMail("test", MailDto.builder()
+		ownerService.changeMail(1L, MailDto.builder()
 			.email(TEST_MAIL)
 			.build());
 
-		then(ownerDao).should(times(1)).findByLoginId("test");
+		then(ownerDao).should(times(1)).findById(1L);
 		then(mailService).should(times(0)).send(any());
 		then(mailTokenDao).should(times(0)).create(eq(Role.OWNER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
 	}

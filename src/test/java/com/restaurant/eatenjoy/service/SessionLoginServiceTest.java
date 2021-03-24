@@ -54,8 +54,12 @@ class SessionLoginServiceTest {
 	@Test
 	@DisplayName("사용자 정보에 존재하는 로그인 아이디 & 비밀번호 요청이면 로그인에 성공한다.")
 	void successToLogin() {
+		given(userService.findIdByLoginIdAndPassword(loginDto)).willReturn(1L);
+
 		loginService.loginUser(loginDto);
-		assertThat(httpSession.getAttribute(LOGIN_USER_ID)).isEqualTo(loginDto.getLoginId());
+
+		assertThat(httpSession.getAttribute(LOGIN_USER_ID)).isEqualTo(1L);
+		then(userService).should(times(1)).findIdByLoginIdAndPassword(loginDto);
 	}
 
 	@Test
@@ -67,51 +71,51 @@ class SessionLoginServiceTest {
 	@Test
 	@DisplayName("사용자를 찾을 수 없으면 사용자 권한 검증에 실패한다.")
 	void failToUserAuthorityIfUserNotFound() {
-		httpSession.setAttribute(LOGIN_USER_ID, loginDto.getLoginId());
+		httpSession.setAttribute(LOGIN_USER_ID, 1L);
 
-		given(userService.findByLoginId(loginService.getLoginUserId())).willReturn(null);
+		given(userService.findById(loginService.getLoginUserId())).willReturn(null);
 
 		assertThatThrownBy(() -> loginService.validateUserAuthority())
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage(null);
 
-		then(userService).should(times(1)).findByLoginId(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginUserId());
 	}
 
 	@Test
 	@DisplayName("메일 인증을 하지 않으면 사용자 권한 검증에 실패한다.")
 	void failToUserAuthorityIfUncertified() {
-		httpSession.setAttribute(LOGIN_USER_ID, loginDto.getLoginId());
+		httpSession.setAttribute(LOGIN_USER_ID, 1L);
 
 		UserDto userDto = UserDto.builder()
 			.loginId(loginDto.getLoginId())
 			.certified(false)
 			.build();
 
-		given(userService.findByLoginId(loginService.getLoginUserId())).willReturn(userDto);
+		given(userService.findById(loginService.getLoginUserId())).willReturn(userDto);
 
 		assertThatThrownBy(() -> loginService.validateUserAuthority())
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage("메일 인증이 되지 않았습니다.");
 
-		then(userService).should(times(1)).findByLoginId(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginUserId());
 	}
 
 	@Test
 	@DisplayName("메일을 인증하면 사용자 권한 검증에 성공한다.")
 	void successToUserAuthority() {
-		httpSession.setAttribute(LOGIN_USER_ID, loginDto.getLoginId());
+		httpSession.setAttribute(LOGIN_USER_ID, 1L);
 
 		UserDto userDto = UserDto.builder()
-			.loginId(loginDto.getLoginId())
+			.id(1L)
 			.certified(true)
 			.build();
 
-		given(userService.findByLoginId(loginService.getLoginUserId())).willReturn(userDto);
+		given(userService.findById(loginService.getLoginUserId())).willReturn(userDto);
 
 		loginService.validateUserAuthority();
 
-		then(userService).should(times(1)).findByLoginId(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginUserId());
 	}
 
 }
