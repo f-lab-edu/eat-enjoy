@@ -1,25 +1,32 @@
 package com.restaurant.eatenjoy.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.DateTimeException;
 import java.time.LocalTime;
+import java.util.Objects;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 
 @AutoConfigureMockMvc
@@ -38,6 +45,9 @@ class RestaurantControllerTest {
 	@Autowired
 	RestaurantService restaurantService;
 
+	@Autowired
+	RestaurantController restaurantController;
+
 	RestaurantDto restaurantDto;
 
 	@BeforeEach
@@ -45,6 +55,10 @@ class RestaurantControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(ctx)
 			.addFilter(new CharacterEncodingFilter("UTF-8", true))
 			.alwaysDo(print())
+			.build();
+
+		this.mockMvc = MockMvcBuilders.standaloneSetup(restaurantController)
+			.setControllerAdvice(new ExceptionAdvisor())
 			.build();
 	}
 
@@ -97,7 +111,8 @@ class RestaurantControllerTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(json))
 			.andDo(print())
-			.andExpect(status().isCreated());
+			.andExpect(status().isBadRequest())
+			.andExpect(result -> assertThat(result.getResolvedException().getClass()).isEqualTo(DateTimeException.class));
 	}
 
 	@Test
