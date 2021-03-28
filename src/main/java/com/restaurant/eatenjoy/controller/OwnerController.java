@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.annotation.LoginOwnerId;
+import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.MailDto;
 import com.restaurant.eatenjoy.dto.OwnerDto;
@@ -57,32 +57,32 @@ public class OwnerController {
 	}
 
 	@GetMapping("/resend-mail")
-	public void resendMail(@LoginOwnerId Long ownerId) {
+	public void resendMail(@LoginAuthId Long ownerId) {
 		ownerService.resendCertificationMail(ownerId);
 	}
 
 	@Authority(Role.OWNER)
 	@DeleteMapping("/my-infos")
-	public void delete(@LoginOwnerId Long ownerId, @RequestBody @Valid PasswordDto passwordDto) {
+	public void delete(@LoginAuthId Long ownerId, @RequestBody @Valid PasswordDto passwordDto) {
 		ownerService.delete(ownerId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.OWNER)
 	@PatchMapping("/my-infos/password")
-	public void changePassword(@LoginOwnerId Long ownerId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
+	public void changePassword(@LoginAuthId Long ownerId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
 		ownerService.updatePassword(ownerId, passwordDto);
 	}
 
 	@Authority(Role.OWNER)
 	@GetMapping("/my-infos")
-	public OwnerInfoDto ownerInfo(@LoginOwnerId Long ownerId) {
+	public OwnerInfoDto ownerInfo(@LoginAuthId Long ownerId) {
 		return ownerService.getOwnerInfo(ownerId);
 	}
 
 	@Authority(Role.OWNER)
 	@PatchMapping("/my-infos/mail")
-	public void changeMail(@LoginOwnerId Long ownerId, @RequestBody @Valid MailDto mailDto) {
+	public void changeMail(@LoginAuthId Long ownerId, @RequestBody @Valid MailDto mailDto) {
 		ownerService.changeMail(ownerId, mailDto);
 	}
 

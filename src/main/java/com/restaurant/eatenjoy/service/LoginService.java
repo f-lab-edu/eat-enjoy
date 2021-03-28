@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
 import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.util.Role;
 
 public interface LoginService {
 
@@ -10,9 +11,9 @@ public interface LoginService {
 
 	void logout();
 
-	Long getLoginUserId();
+	Long getLoginAuthId();
 
-	Long getLoginOwnerId();
+	Role getAuthRole();
 
 	void validateUserAuthority();
 

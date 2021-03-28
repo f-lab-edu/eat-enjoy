@@ -19,11 +19,14 @@ import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.util.Role;
 
 @ExtendWith(MockitoExtension.class)
 class SessionLoginServiceTest {
 
-	private static final String LOGIN_USER_ID = "LOGIN_USER_ID";
+	private static final String LOGIN_AUTH_ID = "LOGIN_AUTH_ID";
+
+	private static final String AUTH_ROLE = "AUTH_ROLE";
 
 	@Mock
 	private UserService userService;
@@ -47,7 +50,7 @@ class SessionLoginServiceTest {
 	@Test
 	@DisplayName("동일한 로그인 아이디 세션이 존재하면 로그인은 실패한다.")
 	void failToLoginSessionDuplicated() {
-		httpSession.setAttribute(LOGIN_USER_ID, loginDto.getLoginId());
+		httpSession.setAttribute(LOGIN_AUTH_ID, loginDto.getLoginId());
 		assertThatThrownBy(() -> loginService.loginUser(loginDto)).isInstanceOf(DuplicateValueException.class);
 	}
 
@@ -58,7 +61,7 @@ class SessionLoginServiceTest {
 
 		loginService.loginUser(loginDto);
 
-		assertThat(httpSession.getAttribute(LOGIN_USER_ID)).isEqualTo(1L);
+		assertThat(httpSession.getAttribute(LOGIN_AUTH_ID)).isEqualTo(1L);
 		then(userService).should(times(1)).findIdByLoginIdAndPassword(loginDto);
 	}
 
@@ -71,51 +74,54 @@ class SessionLoginServiceTest {
 	@Test
 	@DisplayName("사용자를 찾을 수 없으면 사용자 권한 검증에 실패한다.")
 	void failToUserAuthorityIfUserNotFound() {
-		httpSession.setAttribute(LOGIN_USER_ID, 1L);
+		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
+		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
-		given(userService.findById(loginService.getLoginUserId())).willReturn(null);
+		given(userService.findById(loginService.getLoginAuthId())).willReturn(null);
 
 		assertThatThrownBy(() -> loginService.validateUserAuthority())
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage(null);
 
-		then(userService).should(times(1)).findById(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
 	}
 
 	@Test
 	@DisplayName("메일 인증을 하지 않으면 사용자 권한 검증에 실패한다.")
 	void failToUserAuthorityIfUncertified() {
-		httpSession.setAttribute(LOGIN_USER_ID, 1L);
+		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
+		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
 		UserDto userDto = UserDto.builder()
 			.loginId(loginDto.getLoginId())
 			.certified(false)
 			.build();
 
-		given(userService.findById(loginService.getLoginUserId())).willReturn(userDto);
+		given(userService.findById(loginService.getLoginAuthId())).willReturn(userDto);
 
 		assertThatThrownBy(() -> loginService.validateUserAuthority())
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage("메일 인증이 되지 않았습니다.");
 
-		then(userService).should(times(1)).findById(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
 	}
 
 	@Test
 	@DisplayName("메일을 인증하면 사용자 권한 검증에 성공한다.")
 	void successToUserAuthority() {
-		httpSession.setAttribute(LOGIN_USER_ID, 1L);
+		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
+		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
 		UserDto userDto = UserDto.builder()
 			.id(1L)
 			.certified(true)
 			.build();
 
-		given(userService.findById(loginService.getLoginUserId())).willReturn(userDto);
+		given(userService.findById(loginService.getLoginAuthId())).willReturn(userDto);
 
 		loginService.validateUserAuthority();
 
-		then(userService).should(times(1)).findById(loginService.getLoginUserId());
+		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
 	}
 
 }

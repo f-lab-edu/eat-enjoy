@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.annotation.LoginUserId;
+import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.LoginDto;
 import com.restaurant.eatenjoy.dto.PasswordDto;
 import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
@@ -57,32 +57,32 @@ public class UserController {
 	}
 
 	@GetMapping("/resend-mail")
-	public void resendMail(@LoginUserId Long userId) {
+	public void resendMail(@LoginAuthId Long userId) {
 		userService.resendCertificationMail(userId);
 	}
 
 	@Authority(Role.USER)
 	@DeleteMapping("/my-infos")
-	public void delete(@LoginUserId Long userId, @RequestBody @Valid PasswordDto passwordDto) {
+	public void delete(@LoginAuthId Long userId, @RequestBody @Valid PasswordDto passwordDto) {
 		userService.delete(userId, passwordDto.getPassword());
 		loginService.logout();
 	}
 
 	@Authority(Role.USER)
 	@PatchMapping("/my-infos/password")
-	public void changePassword(@LoginUserId Long userId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
+	public void changePassword(@LoginAuthId Long userId, @RequestBody @Valid UpdatePasswordDto passwordDto) {
 		userService.updatePassword(userId, passwordDto);
 	}
 
 	@Authority(Role.USER)
 	@GetMapping("/my-infos")
-	public UserInfoDto userInfo(@LoginUserId Long userId) {
+	public UserInfoDto userInfo(@LoginAuthId Long userId) {
 		return userService.getUserInfo(userId);
 	}
 
 	@Authority(Role.USER)
 	@PatchMapping("/my-infos")
-	public void update(@LoginUserId Long userId, @RequestBody @Valid UpdateUserDto userDto) {
+	public void update(@LoginAuthId Long userId, @RequestBody @Valid UpdateUserDto userDto) {
 		userService.update(userId, userDto);
 	}
 

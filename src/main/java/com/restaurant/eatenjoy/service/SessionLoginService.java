@@ -12,6 +12,7 @@ import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
+import com.restaurant.eatenjoy.util.Role;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SessionLoginService implements LoginService {
 
-	private static final String LOGIN_USER_ID = "LOGIN_USER_ID";
+	private static final String LOGIN_AUTH_ID = "LOGIN_AUTH_ID";
 
-	private static final String LOGIN_OWNER_ID = "LOGIN_OWNER_ID";
+	private static final String AUTH_ROLE = "AUTH_ROLE";
 
 	private final HttpSession httpSession;
 
@@ -31,12 +32,12 @@ public class SessionLoginService implements LoginService {
 
 	@Override
 	public void loginUser(LoginDto loginDto) {
-		login(LOGIN_USER_ID, loginDto, userService::findIdByLoginIdAndPassword);
+		login(loginDto, userService::findIdByLoginIdAndPassword, Role.USER);
 	}
 
 	@Override
 	public void loginOwner(LoginDto loginDto) {
-		login(LOGIN_OWNER_ID, loginDto, ownerService::findIdByLoginIdAndPassword);
+		login(loginDto, ownerService::findIdByLoginIdAndPassword, Role.OWNER);
 	}
 
 	@Override
@@ -45,54 +46,66 @@ public class SessionLoginService implements LoginService {
 	}
 
 	@Override
-	public Long getLoginUserId() {
-		return getLoginId(LOGIN_USER_ID);
-	}
-
-	@Override
-	public Long getLoginOwnerId() {
-		return getLoginId(LOGIN_OWNER_ID);
-	}
-
-	@Override
-	public void validateUserAuthority() {
-		UserDto userDto = userService.findById(getLoginUserId());
-		if (userDto == null) {
-			throw new AuthorizationException();
-		}
-
-		if (!userDto.isCertified()) {
-			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
-		}
-	}
-
-	@Override
-	public void validateOwnerAuthority() {
-		OwnerDto ownerDto = ownerService.findById(getLoginOwnerId());
-		if (ownerDto == null) {
-			throw new AuthorizationException();
-		}
-
-		if (!ownerDto.isCertified()) {
-			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
-		}
-	}
-
-	private void login(String sessionKey, LoginDto loginDto, Function<LoginDto, Long> validator) {
-		if (httpSession.getAttribute(sessionKey) != null) {
-			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
-		}
-
-		httpSession.setAttribute(sessionKey, validator.apply(loginDto));
-	}
-
-	private Long getLoginId(String sessionKey) {
-		Object loginId = httpSession.getAttribute(sessionKey);
+	public Long getLoginAuthId() {
+		Object loginId = httpSession.getAttribute(LOGIN_AUTH_ID);
 		if (loginId == null) {
 			throw new UnauthorizedException();
 		}
 
 		return (Long) loginId;
+	}
+
+	@Override
+	public Role getAuthRole() {
+		Object role = httpSession.getAttribute(AUTH_ROLE);
+		if (role == null) {
+			throw new UnauthorizedException();
+		}
+
+		return (Role) role;
+	}
+
+	@Override
+	public void validateUserAuthority() {
+		validateAuthority(Role.USER, loginAuthId -> {
+			UserDto userDto = userService.findById(loginAuthId);
+			if (userDto == null) {
+				throw new AuthorizationException();
+			}
+
+			return userDto.isCertified();
+		});
+	}
+
+	@Override
+	public void validateOwnerAuthority() {
+		validateAuthority(Role.OWNER, loginAuthId -> {
+			OwnerDto ownerDto = ownerService.findById(loginAuthId);
+			if (ownerDto == null) {
+				throw new AuthorizationException();
+			}
+
+			return ownerDto.isCertified();
+		});
+	}
+
+	private void login(LoginDto loginDto, Function<LoginDto, Long> validator, Role role) {
+		if (httpSession.getAttribute(LOGIN_AUTH_ID) != null) {
+			throw new DuplicateValueException("이미 로그인이 되어 있습니다.");
+		}
+
+		httpSession.setAttribute(LOGIN_AUTH_ID, validator.apply(loginDto));
+		httpSession.setAttribute(AUTH_ROLE, role);
+	}
+
+	private void validateAuthority(Role role, Function<Long, Boolean> mailValidator) {
+		if (role != getAuthRole()) {
+			throw new AuthorizationException();
+		}
+
+		if (!mailValidator.apply(getLoginAuthId())) {
+			throw new AuthorizationException("메일 인증이 되지 않았습니다.");
+		}
 	}
 
 }
