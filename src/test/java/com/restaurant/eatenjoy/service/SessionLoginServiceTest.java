@@ -16,10 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 
 import com.restaurant.eatenjoy.dto.LoginDto;
-import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.util.Role;
+import com.restaurant.eatenjoy.util.security.Role;
+import com.restaurant.eatenjoy.util.security.UserDetailsService;
 
 @ExtendWith(MockitoExtension.class)
 class SessionLoginServiceTest {
@@ -29,10 +29,10 @@ class SessionLoginServiceTest {
 	private static final String AUTH_ROLE = "AUTH_ROLE";
 
 	@Mock
-	private UserService userService;
+	private UserDetailsService userDetailsService;
 
 	@Spy
-	private HttpSession httpSession = new MockHttpSession();
+	private final HttpSession httpSession = new MockHttpSession();
 
 	@InjectMocks
 	private SessionLoginService loginService;
@@ -51,18 +51,18 @@ class SessionLoginServiceTest {
 	@DisplayName("동일한 로그인 아이디 세션이 존재하면 로그인은 실패한다.")
 	void failToLoginSessionDuplicated() {
 		httpSession.setAttribute(LOGIN_AUTH_ID, loginDto.getLoginId());
-		assertThatThrownBy(() -> loginService.loginUser(loginDto)).isInstanceOf(DuplicateValueException.class);
+		assertThatThrownBy(() -> loginService.login(loginDto, userDetailsService)).isInstanceOf(DuplicateValueException.class);
 	}
 
 	@Test
 	@DisplayName("사용자 정보에 존재하는 로그인 아이디 & 비밀번호 요청이면 로그인에 성공한다.")
 	void successToLogin() {
-		given(userService.findIdByLoginIdAndPassword(loginDto)).willReturn(1L);
+		given(userDetailsService.findIdByLoginIdAndPassword(loginDto)).willReturn(1L);
 
-		loginService.loginUser(loginDto);
+		loginService.login(loginDto, userDetailsService);
 
 		assertThat(httpSession.getAttribute(LOGIN_AUTH_ID)).isEqualTo(1L);
-		then(userService).should(times(1)).findIdByLoginIdAndPassword(loginDto);
+		then(userDetailsService).should(times(1)).findIdByLoginIdAndPassword(loginDto);
 	}
 
 	@Test
@@ -77,13 +77,15 @@ class SessionLoginServiceTest {
 		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
 		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
-		given(userService.findById(loginService.getLoginAuthId())).willReturn(null);
+		given(userDetailsService.getRole()).willReturn(Role.USER);
+		given(userDetailsService.isMailCertified(loginService.getLoginAuthId())).willThrow(AuthorizationException.class);
 
-		assertThatThrownBy(() -> loginService.validateUserAuthority())
+		assertThatThrownBy(() -> loginService.validateAuthority(userDetailsService))
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage(null);
 
-		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
+		then(userDetailsService).should(times(1)).getRole();
+		then(userDetailsService).should(times(1)).isMailCertified(loginService.getLoginAuthId());
 	}
 
 	@Test
@@ -92,18 +94,15 @@ class SessionLoginServiceTest {
 		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
 		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
-		UserDto userDto = UserDto.builder()
-			.loginId(loginDto.getLoginId())
-			.certified(false)
-			.build();
+		given(userDetailsService.getRole()).willReturn(Role.USER);
+		given(userDetailsService.isMailCertified(loginService.getLoginAuthId())).willReturn(false);
 
-		given(userService.findById(loginService.getLoginAuthId())).willReturn(userDto);
-
-		assertThatThrownBy(() -> loginService.validateUserAuthority())
+		assertThatThrownBy(() -> loginService.validateAuthority(userDetailsService))
 			.isInstanceOf(AuthorizationException.class)
 			.hasMessage("메일 인증이 되지 않았습니다.");
 
-		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
+		then(userDetailsService).should(times(1)).getRole();
+		then(userDetailsService).should(times(1)).isMailCertified(loginService.getLoginAuthId());
 	}
 
 	@Test
@@ -112,16 +111,13 @@ class SessionLoginServiceTest {
 		httpSession.setAttribute(LOGIN_AUTH_ID, 1L);
 		httpSession.setAttribute(AUTH_ROLE, Role.USER);
 
-		UserDto userDto = UserDto.builder()
-			.id(1L)
-			.certified(true)
-			.build();
+		given(userDetailsService.getRole()).willReturn(Role.USER);
+		given(userDetailsService.isMailCertified(loginService.getLoginAuthId())).willReturn(true);
 
-		given(userService.findById(loginService.getLoginAuthId())).willReturn(userDto);
+		loginService.validateAuthority(userDetailsService);
 
-		loginService.validateUserAuthority();
-
-		then(userService).should(times(1)).findById(loginService.getLoginAuthId());
+		then(userDetailsService).should(times(1)).getRole();
+		then(userDetailsService).should(times(1)).isMailCertified(loginService.getLoginAuthId());
 	}
 
 }

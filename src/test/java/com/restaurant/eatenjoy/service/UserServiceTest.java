@@ -25,8 +25,8 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
-import com.restaurant.eatenjoy.util.Role;
-import com.restaurant.eatenjoy.util.encrypt.Encryptable;
+import com.restaurant.eatenjoy.util.security.Role;
+import com.restaurant.eatenjoy.util.security.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailService;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,19 +92,6 @@ class UserServiceTest {
 		then(encryptable).should(times(1)).encrypt("1234");
 		then(mailService).should(times(1)).send(any());
 		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
-	}
-
-	@Test
-	@DisplayName("로그인 정보로 사용자를 찾지 못하면 UserNotFoundException 예외가 발생한다.")
-	void failToLoginUserNotFound() {
-		given(userDao.findIdByLoginIdAndPassword(eq("test"), any())).willReturn(null);
-
-		assertThatThrownBy(() -> userService.findIdByLoginIdAndPassword(LoginDto.builder()
-			.loginId("test")
-			.password("1111")
-			.build())).isInstanceOf(UserNotFoundException.class);
-
-		then(userDao).should(times(1)).findIdByLoginIdAndPassword(eq("test"), any());
 	}
 
 	@Test
