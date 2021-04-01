@@ -20,9 +20,9 @@ import com.restaurant.eatenjoy.dto.OwnerDto;
 import com.restaurant.eatenjoy.dto.OwnerInfoDto;
 import com.restaurant.eatenjoy.dto.PasswordDto;
 import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
-import com.restaurant.eatenjoy.service.LoginService;
+import com.restaurant.eatenjoy.util.security.LoginService;
 import com.restaurant.eatenjoy.service.OwnerService;
-import com.restaurant.eatenjoy.util.Role;
+import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +43,7 @@ public class OwnerController {
 
 	@PostMapping("/login")
 	public void login(@RequestBody @Valid LoginDto loginDto) {
-		loginService.loginOwner(loginDto);
+		loginService.login(loginDto, ownerService);
 	}
 
 	@PostMapping("/logout")

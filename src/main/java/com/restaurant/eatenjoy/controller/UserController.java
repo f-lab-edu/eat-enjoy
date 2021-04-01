@@ -20,9 +20,9 @@ import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.dto.UpdateUserDto;
 import com.restaurant.eatenjoy.dto.UserDto;
 import com.restaurant.eatenjoy.dto.UserInfoDto;
-import com.restaurant.eatenjoy.service.LoginService;
+import com.restaurant.eatenjoy.util.security.LoginService;
 import com.restaurant.eatenjoy.service.UserService;
-import com.restaurant.eatenjoy.util.Role;
+import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +43,7 @@ public class UserController {
 
 	@PostMapping("/login")
 	public void login(@RequestBody @Valid LoginDto loginDto) {
-		loginService.loginUser(loginDto);
+		loginService.login(loginDto, userService);
 	}
 
 	@PostMapping("/logout")

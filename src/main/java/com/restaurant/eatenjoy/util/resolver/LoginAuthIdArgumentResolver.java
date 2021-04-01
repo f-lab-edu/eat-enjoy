@@ -8,7 +8,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
-import com.restaurant.eatenjoy.service.LoginService;
+import com.restaurant.eatenjoy.util.security.LoginService;
 
 import lombok.RequiredArgsConstructor;
 

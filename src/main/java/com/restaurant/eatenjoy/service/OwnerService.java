@@ -14,13 +14,15 @@ import com.restaurant.eatenjoy.dto.OwnerDto;
 import com.restaurant.eatenjoy.dto.OwnerInfoDto;
 import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
+import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
-import com.restaurant.eatenjoy.util.Role;
-import com.restaurant.eatenjoy.util.encrypt.Encryptable;
+import com.restaurant.eatenjoy.util.security.Role;
+import com.restaurant.eatenjoy.util.security.UserDetailsService;
+import com.restaurant.eatenjoy.util.security.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailMessage;
 import com.restaurant.eatenjoy.util.mail.MailService;
 
@@ -28,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class OwnerService {
+public class OwnerService implements UserDetailsService {
 
 	private static final Duration MAIL_TOKEN_TIMEOUT_SECOND = Duration.ofSeconds(86400);
 
@@ -54,13 +56,24 @@ public class OwnerService {
 		sendCertificationMail(ownerDto, true);
 	}
 
+	@Override
 	public Long findIdByLoginIdAndPassword(LoginDto loginDto) {
-		Long id = ownerDao.findIdByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()));
-		if (id == null) {
-			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
+		return ownerDao.findIdByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()));
+	}
+
+	@Override
+	public boolean isMailCertified(Long id) {
+		OwnerDto ownerDto = ownerDao.findById(id);
+		if (ownerDto == null) {
+			throw new AuthorizationException();
 		}
 
-		return id;
+		return ownerDto.isCertified();
+	}
+
+	@Override
+	public Role getRole() {
+		return Role.OWNER;
 	}
 
 	@Transactional
@@ -140,10 +153,10 @@ public class OwnerService {
 			.subject(isRegister ? "eat-enjoy, 회원가입 인증 안내" : "eat-enjoy, 메일 인증 안내")
 			.token(mailToken)
 			.register(isRegister)
-			.role(Role.OWNER)
+			.role(getRole())
 			.build());
 
-		mailTokenDao.create(Role.OWNER, ownerDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
+		mailTokenDao.create(getRole(), ownerDto.getEmail(), mailToken, MAIL_TOKEN_TIMEOUT_SECOND);
 	}
 
 	private void validateEmailAndToken(String email, String emailToken) {
@@ -151,7 +164,7 @@ public class OwnerService {
 			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
 		}
 
-		if (!emailToken.equals(mailTokenDao.findByRoleAndMail(Role.OWNER, email))) {
+		if (!emailToken.equals(mailTokenDao.findByRoleAndMail(getRole(), email))) {
 			throw new MailTokenNotFoundException("인증 토큰을 찾을 수 없습니다.");
 		}
 	}

@@ -1,4 +1,4 @@
-package com.restaurant.eatenjoy.util.encrypt;
+package com.restaurant.eatenjoy.util.security.encrypt;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
