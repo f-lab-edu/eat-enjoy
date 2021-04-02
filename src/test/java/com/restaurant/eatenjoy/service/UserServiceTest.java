@@ -25,8 +25,8 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
-import com.restaurant.eatenjoy.util.Role;
-import com.restaurant.eatenjoy.util.encrypt.Encryptable;
+import com.restaurant.eatenjoy.util.security.Role;
+import com.restaurant.eatenjoy.util.security.encrypt.Encryptable;
 import com.restaurant.eatenjoy.util.mail.MailService;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +54,7 @@ class UserServiceTest {
 	@BeforeEach
 	void setUp() {
 		userDto = UserDto.builder()
+			.id(1L)
 			.loginId("test")
 			.password("1234")
 			.email(TEST_MAIL)
@@ -94,29 +95,16 @@ class UserServiceTest {
 	}
 
 	@Test
-	@DisplayName("로그인 정보로 사용자를 찾지 못하면 UserNotFoundException 예외가 발생한다.")
-	void failToLoginUserNotFound() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
-
-		assertThatThrownBy(() -> userService.validateLoginIdAndPassword(LoginDto.builder()
-			.loginId("test")
-			.password("1111")
-			.build())).isInstanceOf(UserNotFoundException.class);
-
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
-	}
-
-	@Test
 	@DisplayName("로그인 정보로 사용자가 존재하면 정상이다.")
 	void normalToLoginUserFound() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(userDao.findIdByLoginIdAndPassword(eq("test"), any())).willReturn(1L);
 
-		userService.validateLoginIdAndPassword(LoginDto.builder()
+		userService.findIdByLoginIdAndPassword(LoginDto.builder()
 			.loginId("test")
 			.password("1234")
 			.build());
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(userDao).should(times(1)).findIdByLoginIdAndPassword(eq("test"), any());
 	}
 
 	@Test
@@ -158,30 +146,32 @@ class UserServiceTest {
 	@DisplayName("인증을 완료하면 인증 메일을 재전송할 수 없다.")
 	void failToResendMailCertified() {
 		userDto = UserDto.builder()
+			.id(1L)
 			.loginId("test")
 			.certified(true)
 			.build();
 
-		given(userDao.findByLoginId("test")).willReturn(userDto);
+		given(userDao.findById(1L)).willReturn(userDto);
 
-		assertThatThrownBy(() -> userService.resendCertificationMail("test"))
+		assertThatThrownBy(() -> userService.resendCertificationMail(1L))
 			.isInstanceOf(AlreadyCertifiedException.class);
 
-		then(userDao).should(times(1)).findByLoginId("test");
+		then(userDao).should(times(1)).findById(1L);
 	}
 
 	@Test
 	@DisplayName("인증 메일을 재전송한다.")
 	void resendCertificationMail() {
 		userDto = UserDto.builder()
+			.id(1L)
 			.loginId("test")
 			.email(TEST_MAIL)
 			.certified(false)
 			.build();
 
-		given(userDao.findByLoginId("test")).willReturn(userDto);
+		given(userDao.findById(1L)).willReturn(userDto);
 
-		userService.resendCertificationMail("test");
+		userService.resendCertificationMail(1L);
 
 		then(mailService).should(times(1)).send(any());
 		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
@@ -190,78 +180,78 @@ class UserServiceTest {
 	@Test
 	@DisplayName("비밀번호가 일치하지 않으면 회원탈퇴에 실패한다.")
 	void failToMemberWithdrawalIfPasswordNotMatch() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
-		assertThatThrownBy(() -> userService.delete("test", "1234"))
+		given(userDao.existsByIdAndPassword(eq(1L), any())).willReturn(false);
+		assertThatThrownBy(() -> userService.delete(1L, "1234"))
 			.isInstanceOf(NoMatchedPasswordException.class);
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(userDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("비밀번호가 일치하면 회원탈퇴에 성공한다.")
 	void successToMemberWithdrawal() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
-		userService.delete("test", "1234");
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		given(userDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
+		userService.delete(1L, "1234");
+		then(userDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("기존 비밀번호로 유효하지 않으면 비밀번호 업데이트에 실패한다.")
 	void failToUpdatePasswordIfOldPasswordInvalid() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(false);
+		given(userDao.existsByIdAndPassword(eq(1L), any())).willReturn(false);
 
-		assertThatThrownBy(() -> userService.updatePassword("test", UpdatePasswordDto.builder()
+		assertThatThrownBy(() -> userService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("5678")
 			.build()))
 			.isInstanceOf(NoMatchedPasswordException.class);
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(userDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("신규 비밀번호가 기존 비밀번호와 일치할 경우 비밀번호 업데이트에 실패한다.")
 	void failToUpdatePasswordIfNewPasswordEqualsOldPassword() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(userDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
 
-		assertThatThrownBy(() -> userService.updatePassword("test", UpdatePasswordDto.builder()
+		assertThatThrownBy(() -> userService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("1234")
 			.build()))
 			.isInstanceOf(ConflictPasswordException.class);
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
+		then(userDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("비밀번호 업데이트에 성공한다.")
 	void successToUpdatePassword() {
-		given(userDao.existsByLoginIdAndPassword(eq("test"), any())).willReturn(true);
+		given(userDao.existsByIdAndPassword(eq(1L), any())).willReturn(true);
 
-		userService.updatePassword("test", UpdatePasswordDto.builder()
+		userService.updatePassword(1L, UpdatePasswordDto.builder()
 			.oldPassword("1234")
 			.newPassword("5678")
 			.build());
 
-		then(userDao).should(times(1)).existsByLoginIdAndPassword(eq("test"), any());
-		then(userDao).should(times(1)).updatePassword(eq("test"), any());
+		then(userDao).should(times(1)).existsByIdAndPassword(eq(1L), any());
+		then(userDao).should(times(1)).updatePassword(eq(1L), any());
 	}
 
 	@Test
 	@DisplayName("메일을 변경하면 인증 메일을 전송한다.")
 	void sendCertificationMailIfMailChange() {
 		String changeMail = "change@test.com";
-		given(userDao.findByLoginId("test")).willReturn(UserDto.builder()
-			.loginId("test")
+		given(userDao.findById(1L)).willReturn(UserDto.builder()
+			.id(1L)
 			.email(changeMail)
 			.certified(false)
 			.build());
 
-		userService.update("test", UpdateUserDto.builder()
+		userService.update(1L, UpdateUserDto.builder()
 			.email(changeMail)
 			.regionCd("002")
 			.build());
 
-		then(userDao).should(times(1)).findByLoginId("test");
+		then(userDao).should(times(1)).findById(1L);
 		then(mailService).should(times(1)).send(any());
 		then(mailTokenDao).should(times(1)).create(eq(Role.USER), eq(changeMail), any(), eq(Duration.ofSeconds(86400)));
 	}
@@ -269,18 +259,18 @@ class UserServiceTest {
 	@Test
 	@DisplayName("메일이 변경되지 않았으면 메일을 전송하지 않는다.")
 	void notSendCertificationMailIfMailNotChange() {
-		given(userDao.findByLoginId("test")).willReturn(UserDto.builder()
-			.loginId("test")
+		given(userDao.findById(1L)).willReturn(UserDto.builder()
+			.id(1L)
 			.email(TEST_MAIL)
 			.certified(true)
 			.build());
 
-		userService.update("test", UpdateUserDto.builder()
+		userService.update(1L, UpdateUserDto.builder()
 			.email(TEST_MAIL)
 			.regionCd("002")
 			.build());
 
-		then(userDao).should(times(1)).findByLoginId("test");
+		then(userDao).should(times(1)).findById(1L);
 		then(mailService).should(times(0)).send(any());
 		then(mailTokenDao).should(times(0)).create(eq(Role.USER), eq(TEST_MAIL), any(), eq(Duration.ofSeconds(86400)));
 	}

@@ -19,10 +19,17 @@
         VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
     </insert>
 
-    <select id="existsByLoginIdAndPassword" resultType="boolean">
+    <select id="findIdByLoginIdAndPassword" resultType="long">
+        SELECT id
+          FROM users
+         WHERE login_id = #{loginId}
+           AND password = #{password}
+    </select>
+
+    <select id="existsByIdAndPassword" resultType="boolean">
         SELECT EXISTS(SELECT 1
                         FROM users
-                       WHERE login_id = #{loginId}
+                       WHERE id = #{id}
                          AND password = #{password})
     </select>
 
@@ -33,35 +40,35 @@
          WHERE email = #{email}
     </update>
 
-    <select id="findByLoginId" parameterType="string" resultType="UserDto">
+    <select id="findById" parameterType="long" resultType="UserDto">
         SELECT id
              , login_id AS loginId
              , email
              , certified
              , region_cd AS regionCd
           FROM users
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </select>
 
-    <delete id="deleteByLoginId" parameterType="string">
+    <delete id="deleteById" parameterType="long">
         DELETE
           FROM users
-         WHERE login_id = #{login_id}
+         WHERE id = #{id}
     </delete>
 
     <update id="updatePassword">
         UPDATE users
            SET password = #{password}
              , update_at = now()
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </update>
 
-    <update id="updateByLoginId" parameterType="UserDto">
+    <update id="updateById" parameterType="UserDto">
         UPDATE users
            SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
              , email = #{email}
              , region_cd = #{regionCd}
              , update_at = now()
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </update>
 </mapper>

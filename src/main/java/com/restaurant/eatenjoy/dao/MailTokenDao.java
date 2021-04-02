@@ -5,7 +5,7 @@ import java.time.Duration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.restaurant.eatenjoy.util.Role;
+import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.RequiredArgsConstructor;
 

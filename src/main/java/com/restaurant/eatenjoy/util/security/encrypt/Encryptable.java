@@ -1,4 +1,4 @@
-package com.restaurant.eatenjoy.util.encrypt;
+package com.restaurant.eatenjoy.util.security.encrypt;
 
 public interface Encryptable {
 

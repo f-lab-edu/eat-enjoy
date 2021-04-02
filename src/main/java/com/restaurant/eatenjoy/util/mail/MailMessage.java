@@ -1,6 +1,6 @@
 package com.restaurant.eatenjoy.util.mail;
 
-import com.restaurant.eatenjoy.util.Role;
+import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.Builder;
 import lombok.Getter;
