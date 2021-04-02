@@ -24,7 +24,8 @@ public class MenuGroupDto {
 	@Min(1)
 	private int sort;
 
-	private boolean used;
+	@Builder.Default
+	private boolean used = true;
 
 	private Long restaurantId;
 
