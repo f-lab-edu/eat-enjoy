@@ -7,26 +7,26 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import com.restaurant.eatenjoy.annotation.LoginUserId;
-import com.restaurant.eatenjoy.service.LoginService;
+import com.restaurant.eatenjoy.annotation.LoginAuthId;
+import com.restaurant.eatenjoy.util.security.LoginService;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class LoginUserIdArgumentResolver implements HandlerMethodArgumentResolver {
+public class LoginAuthIdArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final LoginService loginService;
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(LoginUserId.class);
+		return parameter.hasParameterAnnotation(LoginAuthId.class);
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+	public Long resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-		return loginService.getLoginUserId();
+		return loginService.getLoginAuthId();
 	}
 
 }

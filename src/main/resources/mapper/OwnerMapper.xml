@@ -19,10 +19,17 @@
         VALUES(#{loginId}, #{password}, #{email})
     </insert>
 
-    <select id="existsByLoginIdAndPassword" resultType="boolean">
+    <select id="findIdByLoginIdAndPassword" resultType="long">
+        SELECT id
+          FROM owner
+         WHERE login_id = #{loginId}
+           AND password = #{password}
+    </select>
+
+    <select id="existsByIdAndPassword" resultType="boolean">
         SELECT EXISTS(SELECT 1
                         FROM owner
-                       WHERE login_id = #{loginId}
+                       WHERE id = #{id}
                          AND password = #{password})
     </select>
 
@@ -33,33 +40,33 @@
          WHERE email = #{email}
     </update>
 
-    <select id="findByLoginId" parameterType="string" resultType="OwnerDto">
+    <select id="findById" parameterType="long" resultType="OwnerDto">
         SELECT id
              , login_id AS loginId
              , email
              , certified
           FROM owner
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </select>
 
-    <delete id="deleteByLoginId" parameterType="string">
+    <delete id="deleteById" parameterType="long">
         DELETE
           FROM owner
-         WHERE login_id = #{login_id}
+         WHERE id = #{id}
     </delete>
 
     <update id="updatePassword">
         UPDATE owner
            SET password = #{password}
              , update_at = now()
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </update>
 
-    <update id="updateMailByLoginId" parameterType="OwnerDto">
+    <update id="updateMailById" parameterType="OwnerDto">
         UPDATE owner
            SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
              , email = #{email}
              , update_at = now()
-         WHERE login_id = #{loginId}
+         WHERE id = #{id}
     </update>
 </mapper>
