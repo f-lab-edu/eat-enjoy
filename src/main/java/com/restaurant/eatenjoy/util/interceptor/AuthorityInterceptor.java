@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.util.interceptor;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,8 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.util.security.LoginService;
-import com.restaurant.eatenjoy.service.OwnerService;
-import com.restaurant.eatenjoy.service.UserService;
+import com.restaurant.eatenjoy.util.security.UserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +21,7 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 
 	private final LoginService loginService;
 
-	private final UserService userService;
-
-	private final OwnerService ownerService;
+	private final List<UserDetailsService> userDetailsServices; 
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -34,17 +33,15 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 		if (authority == null) {
 			return true;
 		}
-
-		switch (authority.value()) {
-			case USER:
-				loginService.validateAuthority(userService);
-				break;
-			case OWNER:
-				loginService.validateAuthority(ownerService);
-				break;
+		
+		for (UserDetailsService userDetailsService : userDetailsServices) {
+			if (authority.value() == userDetailsService.getRole()) {
+				loginService.validateAuthority(userDetailsService);
+				return true;
+			}
 		}
-
-		return true;
+		
+		return false;
 	}
 
 	private Authority findAuthorityAnnotation(HandlerMethod handlerMethod) {
