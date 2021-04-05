@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.restaurant.eatenjoy.dao.MenuGroupDao;
 import com.restaurant.eatenjoy.dto.MenuGroupDto;
@@ -40,18 +41,19 @@ class MenuGroupServiceTest {
 	@Test
 	@DisplayName("같은 이름이 이미 존재할 경우 메뉴 그룹을 등록할 수 없다.")
 	void failToRegisterMenuGroupIfSameNameAlreadyExists() {
-		given(menuGroupDao.existsByName("test")).willReturn(true);
+		doThrow(DuplicateKeyException.class).when(menuGroupDao).register(any());
+
 		assertThatThrownBy(() -> menuGroupService.register(1L, menuGroupDto))
 			.isInstanceOf(DuplicateValueException.class);
-		then(menuGroupDao).should(times(1)).existsByName("test");
+
+		then(menuGroupDao).should(times(1)).register(any());
 	}
 
 	@Test
-	@DisplayName("메뉴그룹 등록을 할 수 있다.")
+	@DisplayName("메뉴 그룹 등록에 성공하면 데이터베이스에 성공적으로 입력된다.")
 	void successToRegisterMenuGroup() {
-		given(menuGroupDao.existsByName("test")).willReturn(false);
 		menuGroupService.register(1L, menuGroupDto);
-		then(menuGroupDao).should(times(1)).existsByName("test");
+		then(menuGroupDao).should(times(1)).register(any());
 	}
 
 }
