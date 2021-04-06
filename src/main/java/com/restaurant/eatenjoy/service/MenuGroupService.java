@@ -23,7 +23,6 @@ public class MenuGroupService {
 			menuGroupDao.register(MenuGroupDto.builder()
 				.name(menuGroupDto.getName())
 				.sort(menuGroupDto.getSort())
-				.used(menuGroupDto.isUsed())
 				.restaurantId(restaurantId)
 				.build());
 		} catch (DuplicateKeyException ex) {

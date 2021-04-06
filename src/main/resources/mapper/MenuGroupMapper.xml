@@ -3,15 +3,14 @@
 
 <mapper namespace="com.restaurant.eatenjoy.dao.MenuGroupDao">
     <insert id="register" parameterType="MenuGroupDto">
-        INSERT INTO menu_group(name, sort, used, restaurant_id)
-        VALUES(#{name}, #{sort}, #{used}, #{restaurantId})
+        INSERT INTO menu_group(name, sort, restaurant_id)
+        VALUES(#{name}, #{sort}, #{restaurantId})
     </insert>
 
     <update id="updateById" parameterType="UpdateMenuGroupDto">
         UPDATE menu_group
            SET name = #{id}
              , sort = #{sort}
-             , used = #{used}
          WHERE id = #{id}
     </update>
 </mapper>

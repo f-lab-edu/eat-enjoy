@@ -34,7 +34,6 @@ class MenuGroupServiceTest {
 			.id(1L)
 			.name("test")
 			.sort(1)
-			.used(true)
 			.restaurantId(1L)
 			.build();
 	}
@@ -64,7 +63,6 @@ class MenuGroupServiceTest {
 			.id(1L)
 			.name("test")
 			.sort(1)
-			.used(true)
 			.build();
 
 		doThrow(DuplicateKeyException.class).when(menuGroupDao).updateById(updateMenuGroupDto);
@@ -82,7 +80,6 @@ class MenuGroupServiceTest {
 			.id(1L)
 			.name("test")
 			.sort(1)
-			.used(true)
 			.build();
 
 		menuGroupService.update(updateMenuGroupDto);

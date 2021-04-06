@@ -26,6 +26,4 @@ public class UpdateMenuGroupDto {
 	@Min(1)
 	private int sort;
 
-	private boolean used;
-
 }
