@@ -6,4 +6,12 @@
         INSERT INTO menu_group(name, sort, used, restaurant_id)
         VALUES(#{name}, #{sort}, #{used}, #{restaurantId})
     </insert>
+
+    <update id="updateById" parameterType="UpdateMenuGroupDto">
+        UPDATE menu_group
+           SET name = #{id}
+             , sort = #{sort}
+             , used = #{used}
+         WHERE id = #{id}
+    </update>
 </mapper>

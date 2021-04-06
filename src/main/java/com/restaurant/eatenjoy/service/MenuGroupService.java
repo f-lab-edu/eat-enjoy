@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.MenuGroupDao;
 import com.restaurant.eatenjoy.dto.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,15 @@ public class MenuGroupService {
 				.used(menuGroupDto.isUsed())
 				.restaurantId(restaurantId)
 				.build());
+		} catch (DuplicateKeyException ex) {
+			throw new DuplicateValueException(menuGroupDto.getName() + "은(는) 이미 존재하는 메뉴그룹명 입니다.", ex);
+		}
+	}
+
+	@Transactional
+	public void update(UpdateMenuGroupDto menuGroupDto) {
+		try {
+			menuGroupDao.updateById(menuGroupDto);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateValueException(menuGroupDto.getName() + "은(는) 이미 존재하는 메뉴그룹명 입니다.", ex);
 		}
