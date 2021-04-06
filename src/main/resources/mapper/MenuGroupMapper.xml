@@ -13,6 +13,7 @@
              , sort = #{sort}
              , update_at = now()
          WHERE id = #{id}
+           AND used = 1
     </update>
 
     <update id="deleteById" parameterType="long">

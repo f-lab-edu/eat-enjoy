@@ -8,6 +8,7 @@ import com.restaurant.eatenjoy.dao.MenuGroupDao;
 import com.restaurant.eatenjoy.dto.MenuGroupDto;
 import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +34,10 @@ public class MenuGroupService {
 	@Transactional
 	public void update(UpdateMenuGroupDto menuGroupDto) {
 		try {
-			menuGroupDao.updateById(menuGroupDto);
+			int result = menuGroupDao.updateById(menuGroupDto);
+			if (result == 0) {
+				throw new NotFoundException("해당 메뉴그룹을 찾을 수 없습니다.");
+			}
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateValueException(menuGroupDto.getName() + "은(는) 이미 존재하는 메뉴그룹명 입니다.", ex);
 		}

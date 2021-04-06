@@ -7,7 +7,7 @@ public interface MenuGroupDao {
 
 	void register(MenuGroupDto menuGroupDto);
 
-	void updateById(UpdateMenuGroupDto menuGroupDto);
+	int updateById(UpdateMenuGroupDto menuGroupDto);
 
 	void deleteById(Long menuGroupId);
 
