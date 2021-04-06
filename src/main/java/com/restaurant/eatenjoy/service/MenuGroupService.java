@@ -39,4 +39,9 @@ public class MenuGroupService {
 		}
 	}
 
+	@Transactional
+	public void delete(Long menuGroupId) {
+		menuGroupDao.deleteById(menuGroupId);
+	}
+
 }

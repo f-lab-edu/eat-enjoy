@@ -9,4 +9,6 @@ public interface MenuGroupDao {
 
 	void updateById(UpdateMenuGroupDto menuGroupDto);
 
+	void deleteById(Long menuGroupId);
+
 }

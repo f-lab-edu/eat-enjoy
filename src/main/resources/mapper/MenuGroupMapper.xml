@@ -11,6 +11,14 @@
         UPDATE menu_group
            SET name = #{id}
              , sort = #{sort}
+             , update_at = now()
+         WHERE id = #{id}
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE menu_group
+           SET used = 0
+             , update_at = now()
          WHERE id = #{id}
     </update>
 </mapper>
