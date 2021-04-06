@@ -86,4 +86,11 @@ class MenuGroupServiceTest {
 		then(menuGroupDao).should(times(1)).updateById(updateMenuGroupDto);
 	}
 
+	@Test
+	@DisplayName("메뉴 그룹 삭제에 성공하면 데이터베이스에 성공적으로 반영된다.")
+	void successToDeleteMenuGroup() {
+		menuGroupService.delete(1L);
+		then(menuGroupDao).should(times(1)).deleteById(1L);
+	}
+
 }
