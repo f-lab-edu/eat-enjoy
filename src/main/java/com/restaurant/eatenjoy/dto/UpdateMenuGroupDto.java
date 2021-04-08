@@ -2,6 +2,7 @@ package com.restaurant.eatenjoy.dto;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -13,8 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuGroupDto {
+public class UpdateMenuGroupDto {
 
+	@NotNull(message = "메뉴그룹 id는 필수 값 입니다.")
 	private Long id;
 
 	@NotBlank(message = "메뉴 그룹명을 입력해주세요.")
@@ -23,7 +25,5 @@ public class MenuGroupDto {
 
 	@Min(1)
 	private int sort;
-
-	private Long restaurantId;
 
 }
