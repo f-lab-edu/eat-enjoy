@@ -84,6 +84,24 @@ class RestaurantServiceTest {
 		return restaurantDto;
 	}
 
+	private RestaurantDto successRestaurantDto() {
+		RestaurantDto restaurantDto = RestaurantDto.builder()
+			.name("청기와")
+			.bizrNo("1234567891")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("청기와 소개글")
+			.paymentType("매장 결재")
+			.ownerId(OWNER_ID)
+			.categoryId(1L)
+			.openTime(LocalTime.of(9,00))
+			.closeTime(LocalTime.of(23, 00))
+			.build();
+
+		return restaurantDto;
+	}
+
 	@Test
 	@DisplayName("매장 방식이 선불인 경우 최소 주문 가격이 0원이 될 순 없다")
 	void failToMinOrderPriceByPaymentType() {
@@ -106,5 +124,16 @@ class RestaurantServiceTest {
 		assertThrows(BizrNoValidException.class, () -> {
 			restaurantService.register(notExistBizrNoRestaurntDto(), OWNER_ID);
 		});
+	}
+
+	@Test
+	@DisplayName("사업자 번호가 중복되지 않는다면 식당 등록을 성공한다")
+	void successToRegisterRestaurant() {
+		given(restaurantDao.findByBizrNo(successRestaurantDto().getBizrNo())).willReturn(false);
+
+		restaurantService.register(successRestaurantDto(), OWNER_ID);
+
+		then(restaurantDao).should(times(1)).findByBizrNo(successRestaurantDto().getBizrNo());
+		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
 	}
 }
