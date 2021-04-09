@@ -8,7 +8,7 @@ public class BizrNoValidCheck {
 
 	private static final int[] bizrNoValidKey = new int[] { 1, 3, 7, 1, 3, 7, 1, 3, 5 };
 
-	public static boolean validBizrNo(String bizrNo) {
+	public static boolean valid(String bizrNo) {
 
 		bizrNo = bizrNo.replace("-", "");
 

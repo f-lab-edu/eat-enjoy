@@ -29,7 +29,7 @@ public class RestaurantService {
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다");
 		}
 
-		if (!BizrNoValidCheck.validBizrNo(restaurantDto.getBizrNo())) {
+		if (!BizrNoValidCheck.valid(restaurantDto.getBizrNo())) {
 			throw new BizrNoValidException("사업자 등록 번호가 잘못 되었습니다");
 		}
 
