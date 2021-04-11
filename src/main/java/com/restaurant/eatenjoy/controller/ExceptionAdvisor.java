@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.controller;
 
+import java.time.DateTimeException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
+import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
 import lombok.Builder;
@@ -26,7 +29,7 @@ import lombok.Getter;
 public class ExceptionAdvisor {
 
 	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class,
-		NoMatchedPasswordException.class, ConflictPasswordException.class })
+		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class })
 	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}
@@ -51,6 +54,11 @@ public class ExceptionAdvisor {
 	public ResponseEntity<String> processAuthorizationError(AuthorizationException exception) {
 		String message = StringUtils.hasLength(exception.getMessage()) ? exception.getMessage() : "해당 리소스에 접근할 수 없습니다.";
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
+	}
+
+	@ExceptionHandler(DateTimeException.class)
+	public ResponseEntity<String> processDateTimeInsert() {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("시간을 잘못 입력 하였습니다");
 	}
 
 	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {
