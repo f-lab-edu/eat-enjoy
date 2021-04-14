@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
+import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -135,5 +136,14 @@ class RestaurantServiceTest {
 
 		then(restaurantDao).should(times(1)).findByBizrNo(successRestaurantDto().getBizrNo());
 		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
+	}
+
+	@Test
+	@DisplayName("식당 목록 조회 성공")
+	void successGetRestaurntList() {
+		PageDto pageDto = new PageDto(0);
+		restaurantService.getListOfRestaurant(pageDto);
+
+		then(restaurantDao).should(times(1)).findAllRestaurantList(any(PageDto.class));
 	}
 }
