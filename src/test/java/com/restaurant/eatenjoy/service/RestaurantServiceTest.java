@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
@@ -103,6 +106,16 @@ class RestaurantServiceTest {
 		return restaurantDto;
 	}
 
+	private RestaurantListDto createRestaurantData(long id, String name, String intrDc) {
+		RestaurantListDto restaurantListDto = RestaurantListDto.builder()
+			.id(id)
+			.name(name)
+			.intrdc(intrDc)
+			.build();
+
+		return restaurantListDto;
+	}
+
 	@Test
 	@DisplayName("매장 방식이 선불인 경우 최소 주문 가격이 0원이 될 순 없다")
 	void failToMinOrderPriceByPaymentType() {
@@ -139,11 +152,37 @@ class RestaurantServiceTest {
 	}
 
 	@Test
-	@DisplayName("식당 목록 조회 성공")
-	void successGetRestaurntList() {
+	@DisplayName("식당 목록 데이터가 있는 경우 리스트를 반환한다")
+	void getExistRestaurntList() {
+		// given
+		List<RestaurantListDto> existRestaurantList = new ArrayList<>();
+		existRestaurantList.add(createRestaurantData(1L, "김밥나라", "김밥나라 소개글"));
+		existRestaurantList.add(createRestaurantData(1L, "맥도날드", "맥도날드 소개글"));
+		
 		PageDto pageDto = new PageDto(0);
-		restaurantService.getListOfRestaurant(pageDto);
 
-		then(restaurantDao).should(times(1)).findAllRestaurantList(any(PageDto.class));
+		when(restaurantDao.findAllRestaurantList(pageDto)).thenReturn(existRestaurantList);
+
+		// when
+		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(pageDto);
+
+		// then
+		assertEquals(existRestaurantList, result);
+	}
+
+	@Test
+	@DisplayName("식당 목록 데이터가 없는 경우 비어있는 리스트를 리턴한다")
+	void getEmptyRestaurantList() {
+		// given
+		List<RestaurantListDto> emptyRestaurantList = new ArrayList<>();
+		PageDto pageDto = new PageDto(0);
+
+		when(restaurantDao.findAllRestaurantList(pageDto)).thenReturn(emptyRestaurantList);
+
+		// when
+		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(pageDto);
+
+		// then
+		assertEquals(emptyRestaurantList, result);
 	}
 }
