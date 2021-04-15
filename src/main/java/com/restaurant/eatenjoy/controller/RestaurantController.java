@@ -5,7 +5,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,20 +25,20 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/restaurants")
 @RequiredArgsConstructor
+@Authority(Role.OWNER)
 public class RestaurantController {
 
 	private final RestaurantService restaurantService;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@Authority(Role.OWNER)
 	public void addRestaurant(@RequestBody @Valid RestaurantDto restaurantDto, @LoginAuthId Long ownerId) {
 		restaurantService.register(restaurantDto, ownerId);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<RestaurantListDto>> getRestaurantList(long lastRestaurantId) {
-		List<RestaurantListDto> list = restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
-		return ResponseEntity.ok().body(list);
+	@Authority(Role.USER)
+	public List<RestaurantListDto> getRestaurantList(long lastRestaurantId) {
+		return restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
 	}
 }
