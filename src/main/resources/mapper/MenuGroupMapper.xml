@@ -2,6 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.MenuGroupDao">
+    <select id="findAllByRestaurantId" parameterType="long" resultType="MenuGroupDto">
+        SELECT id
+             , name
+             , sort
+             , restaurant_id AS restaurantId
+          FROM menu_group
+         WHERE restaurant_id = #{restaurantId}
+           AND used = 1
+         ORDER BY sort
+    </select>
+
     <insert id="register" parameterType="MenuGroupDto">
         INSERT INTO menu_group(name, sort, restaurant_id)
         VALUES(#{name}, #{sort}, #{restaurantId})

@@ -1,9 +1,12 @@
 package com.restaurant.eatenjoy.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +30,11 @@ import lombok.RequiredArgsConstructor;
 public class MenuGroupController {
 
 	private final MenuGroupService menuGroupService;
+
+	@GetMapping
+	public List<MenuGroupDto> menuGroups(@PathVariable Long restaurantId) {
+		return menuGroupService.findAllByRestaurantId(restaurantId);
+	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)

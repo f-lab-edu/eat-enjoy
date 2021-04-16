@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.List;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,10 @@ import lombok.RequiredArgsConstructor;
 public class MenuGroupService {
 
 	private final MenuGroupDao menuGroupDao;
+
+	public List<MenuGroupDto> findAllByRestaurantId(Long restaurantId) {
+		return menuGroupDao.findAllByRestaurantId(restaurantId);
+	}
 
 	@Transactional
 	public void register(Long restaurantId, MenuGroupDto menuGroupDto) {
