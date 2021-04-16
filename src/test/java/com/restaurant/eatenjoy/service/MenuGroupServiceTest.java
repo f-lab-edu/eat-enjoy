@@ -3,6 +3,9 @@ package com.restaurant.eatenjoy.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -112,6 +115,36 @@ class MenuGroupServiceTest {
 	void successToDeleteMenuGroup() {
 		menuGroupService.delete(1L);
 		then(menuGroupDao).should(times(1)).deleteById(1L);
+	}
+
+	@Test
+	@DisplayName("레스토랑 아이디에 속한 메뉴그룹들을 조회한다.")
+	void findAllByRestaurantId() {
+		List<MenuGroupDto> menuGroups = new ArrayList<>();
+		for (int i = 1; i < 5; i++) {
+			menuGroups.add(MenuGroupDto.builder()
+				.id((long) i)
+				.name("menuGroup" + i)
+				.sort(i)
+				.restaurantId(1L)
+				.build());
+		}
+
+		given(menuGroupDao.findAllByRestaurantId(1L)).willReturn(menuGroups);
+
+		assertThat(menuGroupService.findAllByRestaurantId(1L)).isEqualTo(menuGroups);
+
+		then(menuGroupDao).should(times(1)).findAllByRestaurantId(1L);
+	}
+
+	@Test
+	@DisplayName("메뉴그룹이 존재하지 않을 경우 빈 리스트를 반환한다.")
+	void getEmptyListIfMenuGroupNotExists() {
+		given(menuGroupDao.findAllByRestaurantId(1L)).willReturn(new ArrayList<>());
+
+		assertThat(menuGroupService.findAllByRestaurantId(1L)).hasSize(0);
+
+		then(menuGroupDao).should(times(1)).findAllByRestaurantId(1L);
 	}
 
 }
