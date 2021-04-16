@@ -12,4 +12,16 @@
                           FROM restaurant
                       WHERE bizr_no = #{bizrNo})
     </select>
+
+    <select id="findAllRestaurantList" parameterType="PageDto" resultType="RestaurantListDto">
+        SELECT id
+             , name
+             , intr_dc
+          FROM restaurant
+        <if test=" lastRestaurantId != 0 ">
+            WHERE id <![CDATA[ < ]]> #{lastRestaurantId}
+        </if>
+            ORDER BY id DESC
+         LIMIT 10
+    </select>
 </mapper>

@@ -1,10 +1,14 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
+import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
@@ -53,5 +57,9 @@ public class RestaurantService {
 
 	public boolean findByBizrNo(String bizrNo) {
 		return restaurantDao.findByBizrNo(bizrNo);
+	}
+
+	public List<RestaurantListDto> getListOfRestaurant(PageDto pageDto) {
+		return restaurantDao.findAllRestaurantList(pageDto);
 	}
 }
