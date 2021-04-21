@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.restaurant.eatenjoy.dao.MenuDao">
+    <insert id="register" parameterType="MenuDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO menu(name, intr_dc, price, sort, menu_group_id)
+        VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId})
+    </insert>
+
+    <update id="updateFileIdById">
+        UPDATE menu
+           SET file_id = #{fileId}
+             , update_at = now()
+         WHERE id = #{menuId}
+           AND used = 1
+    </update>
+</mapper>
