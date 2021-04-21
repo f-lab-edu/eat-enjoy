@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -40,5 +42,11 @@ public class RestaurantController {
 	@Authority(Role.USER)
 	public List<RestaurantListDto> getRestaurantList(long lastRestaurantId) {
 		return restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
+	}
+
+	@GetMapping("{restaurantId}")
+	@Authority(Role.USER)
+	public RestaurantInfo getRestaurant(@PathVariable(value = "restaurantId") Long restaurantId) {
+		return restaurantService.findById(restaurantId);
 	}
 }

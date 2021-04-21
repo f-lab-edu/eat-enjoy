@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.bizrNoValid.BizrNoValidCheck;
 
@@ -61,5 +63,18 @@ public class RestaurantService {
 
 	public List<RestaurantListDto> getListOfRestaurant(PageDto pageDto) {
 		return restaurantDao.findAllRestaurantList(pageDto);
+	}
+
+	public RestaurantInfo findById(Long id) {
+
+		if (!isRestaurantInfoExists(id)) {
+			throw new NotFoundException("등록되어 있지 않은 식당 입니다");
+		}
+
+		return restaurantDao.findById(id);
+	}
+
+	public boolean isRestaurantInfoExists(Long id) {
+		return restaurantDao.isRestaurantInfoExists(id);
 	}
 }

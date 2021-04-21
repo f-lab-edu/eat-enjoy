@@ -24,4 +24,26 @@
             ORDER BY id DESC
          LIMIT 10
     </select>
+
+    <select id="findById" parameterType="Long" resultType="RestaurantInfo">
+        SELECT id
+             , name
+             , bizr_no
+             , address
+             , region_cd
+             , tel_no
+             , intr_dc
+             , min_order_price
+             , payment_type
+             , open_time
+             , close_time
+        FROM restaurant
+          WHERE id = #{id}
+    </select>
+
+    <select id="isRestaurantInfoExists" parameterType="Long" resultType="boolean">
+        SELECT EXISTS(SELECT id
+                        FROM restaurant
+                      WHERE id = #{id})
+    </select>
 </mapper>
