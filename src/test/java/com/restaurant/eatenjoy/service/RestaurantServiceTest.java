@@ -8,16 +8,19 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.ObjectUtils;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -106,6 +109,24 @@ class RestaurantServiceTest {
 		return restaurantDto;
 	}
 
+	private RestaurantInfo generateRestaurantInfo() {
+		RestaurantInfo restaurantInfo = RestaurantInfo.builder()
+			.id(1L)
+			.name("청기와")
+			.bizrNo("1234567891")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("청기와 소개글")
+			.minOrderPrice(0)
+			.paymentType("매장 결재")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23,00))
+			.build();
+
+		return restaurantInfo;
+	}
+
 	private RestaurantListDto createRestaurantData(long id, String name, String intrDc) {
 		RestaurantListDto restaurantListDto = RestaurantListDto.builder()
 			.id(id)
@@ -184,5 +205,34 @@ class RestaurantServiceTest {
 
 		// then
 		assertEquals(emptyRestaurantList, result);
+	}
+
+	@Test
+	@DisplayName("아이디에 해당하는 식당데이터가 존재한다면 식당 데이터를 반환한다")
+	void getExistRestaurantInfo() {
+		// given
+		RestaurantInfo existRestaurantInfo = generateRestaurantInfo();
+
+		when(restaurantDao.isRestaurantInfoExists(1L)).thenReturn(true);
+		when(restaurantDao.findById(1L)).thenReturn(existRestaurantInfo);
+
+		// when
+		RestaurantInfo result = restaurantService.findById(1L);
+
+		// then
+		assertEquals(existRestaurantInfo, result);
+	}
+
+	@Test
+	@DisplayName("아이디에 해당하는 식당 데이터가 존재하지 않은 경우")
+	void getEmptyRestaurantInfo() {
+		// given
+		when(restaurantDao.isRestaurantInfoExists(1L)).thenReturn(false);
+
+		// when
+		boolean result = restaurantService.isRestaurantInfoExists(1L);
+
+		// then
+		assertFalse(result);
 	}
 }
