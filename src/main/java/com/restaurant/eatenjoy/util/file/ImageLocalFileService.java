@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ImageFileService extends FileService {
+public class ImageLocalFileService extends LocalFileService {
 
 	private static final Set<String> includeExtensions = Set.of("jpg", "jpeg", "png", "gif", "bmp");
 

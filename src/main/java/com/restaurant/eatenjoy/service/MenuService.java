@@ -9,7 +9,7 @@ import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.util.file.ImageFileService;
+import com.restaurant.eatenjoy.util.file.ImageLocalFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +19,7 @@ public class MenuService {
 
 	private final MenuDao menuDao;
 
-	private final ImageFileService fileService;
+	private final ImageLocalFileService fileService;
 
 	@Transactional
 	public void register(MenuDto menuDto, MultipartFile photo) {
