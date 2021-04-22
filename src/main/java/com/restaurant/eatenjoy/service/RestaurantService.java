@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,16 +66,14 @@ public class RestaurantService {
 		return restaurantDao.findAllRestaurantList(pageDto);
 	}
 
-	public RestaurantInfo findById(Long id) {
+	public RestaurantInfo findByIdAndOwnerId(Long id, Long ownerId) {
 
-		if (!isRestaurantInfoExists(id)) {
+		RestaurantInfo restaurantInfo = restaurantDao.findByIdAndOwnerId(id, ownerId);
+
+		if (Objects.isNull(restaurantInfo)) {
 			throw new NotFoundException("등록되어 있지 않은 식당 입니다");
 		}
 
-		return restaurantDao.findById(id);
-	}
-
-	public boolean isRestaurantInfoExists(Long id) {
-		return restaurantDao.isRestaurantInfoExists(id);
+		return restaurantInfo;
 	}
 }

@@ -25,7 +25,7 @@ import com.restaurant.eatenjoy.util.security.Role;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/restaurants")
+@RequestMapping("/api/owners/restaurants")
 @RequiredArgsConstructor
 @Authority(Role.OWNER)
 public class RestaurantController {
@@ -44,9 +44,14 @@ public class RestaurantController {
 		return restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
 	}
 
+	/*
+	* 레스토랑 정보를 조회한다
+	* @param restaurantId 조회할 레스토랑의 id
+	* @param 로그인한 사장님의 id
+	* @return 레스토랑 정보
+	* */
 	@GetMapping("{restaurantId}")
-	@Authority(Role.USER)
-	public RestaurantInfo getRestaurant(@PathVariable(value = "restaurantId") Long restaurantId) {
-		return restaurantService.findById(restaurantId);
+	public RestaurantInfo getRestaurant(@PathVariable(value = "restaurantId") Long restaurantId, @LoginAuthId Long ownerId) {
+		return restaurantService.findByIdAndOwnerId(restaurantId, ownerId);
 	}
 }
