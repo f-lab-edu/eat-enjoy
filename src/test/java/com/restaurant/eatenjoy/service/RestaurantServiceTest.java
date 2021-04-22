@@ -8,14 +8,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.ObjectUtils;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.PageDto;
@@ -24,6 +22,7 @@ import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 
 @ExtendWith(MockitoExtension.class)
@@ -213,26 +212,19 @@ class RestaurantServiceTest {
 		// given
 		RestaurantInfo existRestaurantInfo = generateRestaurantInfo();
 
-		when(restaurantDao.isRestaurantInfoExists(1L)).thenReturn(true);
-		when(restaurantDao.findById(1L)).thenReturn(existRestaurantInfo);
+		when(restaurantDao.findByIdAndOwnerId(1L, 1L)).thenReturn(existRestaurantInfo);
 
 		// when
-		RestaurantInfo result = restaurantService.findById(1L);
+		RestaurantInfo result = restaurantService.findByIdAndOwnerId(1L, 1L);
 
 		// then
 		assertEquals(existRestaurantInfo, result);
 	}
 
 	@Test
-	@DisplayName("아이디에 해당하는 식당 데이터가 존재하지 않은 경우")
+	@DisplayName("아이디에 해당하는 식당 데이터가 존재하지 않은 경우 NotFoundException이 발생 한다")
 	void getEmptyRestaurantInfo() {
-		// given
-		when(restaurantDao.isRestaurantInfoExists(1L)).thenReturn(false);
-
-		// when
-		boolean result = restaurantService.isRestaurantInfoExists(1L);
-
-		// then
-		assertFalse(result);
+		given(restaurantDao.findByIdAndOwnerId(any(Long.class), any(Long.class))).willReturn(null);
+		assertThrows(NotFoundException.class, () -> restaurantService.findByIdAndOwnerId(1L, 8L));
 	}
 }
