@@ -15,7 +15,5 @@ public interface RestaurantDao {
 
 	List<RestaurantListDto> findAllRestaurantList(PageDto pageDto);
 
-	RestaurantInfo findById(Long id);
-
-	boolean isRestaurantInfoExists(Long id);
+	RestaurantInfo findByIdAndOwnerId(Long id, Long ownerId);
 }

@@ -25,7 +25,7 @@
          LIMIT 10
     </select>
 
-    <select id="findById" parameterType="Long" resultType="RestaurantInfo">
+    <select id="findByIdAndOwnerId" parameterType="Long" resultType="RestaurantInfo">
         SELECT id
              , name
              , bizr_no
@@ -38,12 +38,6 @@
              , open_time
              , close_time
         FROM restaurant
-          WHERE id = #{id}
-    </select>
-
-    <select id="isRestaurantInfoExists" parameterType="Long" resultType="boolean">
-        SELECT EXISTS(SELECT id
-                        FROM restaurant
-                      WHERE id = #{id})
+          WHERE id = #{id} and owner_id = #{ownerId}
     </select>
 </mapper>
