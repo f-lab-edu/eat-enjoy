@@ -39,14 +39,6 @@ public abstract class FileService {
 		return fileName.substring(fileName.lastIndexOf(".") + 1);
 	}
 
-	/**
-	 * 서브 클래스는 실제 파일 업로드를 수행하기 위해 이 메서드를 구현해야 합니다.
-	 * @param multipartFile 업로드할 MultipartFile 객체
-	 * @param serverFileName 업로드할 파일명(UUID)
-	 * @return 업로드된 파일 경로
-	 * @throws FileUploadFailedException 파일 업로드 수행 중 실패 시 발생합니다.
-	 */
-	protected abstract String transferTo(MultipartFile multipartFile, String serverFileName)
-		throws FileUploadFailedException;
+	protected abstract String transferTo(MultipartFile multipartFile, String serverFileName);
 
 }
