@@ -19,7 +19,7 @@ import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
-import com.restaurant.eatenjoy.util.file.ImageLocalFileService;
+import com.restaurant.eatenjoy.util.file.FileService;
 
 @ExtendWith(MockitoExtension.class)
 public class MenuServiceTest {
@@ -28,7 +28,7 @@ public class MenuServiceTest {
 	private MenuDao menuDao;
 
 	@Mock
-	private ImageLocalFileService fileService;
+	private FileService fileService;
 
 	@InjectMocks
 	private MenuService menuService;
@@ -56,6 +56,8 @@ public class MenuServiceTest {
 			.isInstanceOf(DuplicateValueException.class);
 
 		then(menuDao).should(times(1)).register(menuDto);
+		then(fileService).should(times(0)).uploadFile(null);
+		then(fileService).should(times(0)).saveFileInfo(any());
 		then(menuDao).should(times(0)).updateFileIdById(any(), any());
 	}
 
@@ -64,6 +66,8 @@ public class MenuServiceTest {
 	void successToRegisterMenu() {
 		menuService.register(menuDto, null);
 		then(menuDao).should(times(1)).register(menuDto);
+		then(fileService).should(times(0)).uploadFile(null);
+		then(fileService).should(times(0)).saveFileInfo(any());
 		then(menuDao).should(times(0)).updateFileIdById(any(), any());
 	}
 
@@ -72,12 +76,12 @@ public class MenuServiceTest {
 	void failToRegisterMenuIfUploadFileIsNotImage() {
 		MultipartFile multipartFile = new MockMultipartFile("text", "test.txt", null, "text".getBytes());
 
-		given(fileService.upload(multipartFile)).willThrow(FileNotSupportException.class);
-
 		assertThatThrownBy(() -> menuService.register(menuDto, multipartFile))
 			.isInstanceOf(FileNotSupportException.class);
 
 		then(menuDao).should(times(1)).register(menuDto);
+		then(fileService).should(times(0)).uploadFile(multipartFile);
+		then(fileService).should(times(0)).saveFileInfo(any());
 		then(menuDao).should(times(0)).updateFileIdById(any(), any());
 	}
 
@@ -86,13 +90,18 @@ public class MenuServiceTest {
 	void successToRegisterMenuIfUploadFileIsImage() {
 		MultipartFile multipartFile = new MockMultipartFile("image", "image.jpg", null, "image".getBytes());
 
-		given(fileService.upload(multipartFile)).willReturn(FileDto.builder()
+		FileDto fileDto = FileDto.builder()
 			.id(1L)
-			.build());
+			.build();
+
+		given(fileService.uploadFile(multipartFile)).willReturn(fileDto);
+		given(fileService.saveFileInfo(fileDto)).willReturn(1L);
 
 		menuService.register(menuDto, multipartFile);
 
 		then(menuDao).should(times(1)).register(menuDto);
+		then(fileService).should(times(1)).uploadFile(multipartFile);
+		then(fileService).should(times(1)).saveFileInfo(any());
 		then(menuDao).should(times(1)).updateFileIdById(1L, 1L);
 	}
 
