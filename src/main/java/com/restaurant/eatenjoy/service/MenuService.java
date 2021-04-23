@@ -9,7 +9,8 @@ import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.util.file.ImageLocalFileService;
+import com.restaurant.eatenjoy.util.file.FileExtension;
+import com.restaurant.eatenjoy.util.file.FileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,16 +20,21 @@ public class MenuService {
 
 	private final MenuDao menuDao;
 
-	private final ImageLocalFileService fileService;
+	private final FileService fileService;
 
 	@Transactional
 	public void register(MenuDto menuDto, MultipartFile photo) {
 		saveMenu(menuDto);
 
-		if (photo != null) {
-			FileDto fileDto = fileService.upload(photo);
-			menuDao.updateFileIdById(menuDto.getId(), fileDto.getId());
+		if (photo == null) {
+			return;
 		}
+
+		FileExtension.IMAGE.validate(photo);
+
+		FileDto fileDto = fileService.uploadFile(photo);
+		Long fileId = fileService.saveFileInfo(fileDto);
+		menuDao.updateFileIdById(menuDto.getId(), fileId);
 	}
 
 	private void saveMenu(MenuDto menuDto) {
