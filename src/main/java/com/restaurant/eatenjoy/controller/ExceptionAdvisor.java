@@ -1,7 +1,6 @@
 package com.restaurant.eatenjoy.controller;
 
 import java.time.DateTimeException;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +16,7 @@ import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
@@ -59,6 +59,11 @@ public class ExceptionAdvisor {
 	@ExceptionHandler(DateTimeException.class)
 	public ResponseEntity<String> processDateTimeInsert() {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("시간을 잘못 입력 하였습니다");
+	}
+
+	@ExceptionHandler(FileNotSupportException.class)
+	public ResponseEntity<String> processFileNotSupportError(FileNotSupportException exception) {
+		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(exception.getMessage());
 	}
 
 	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {
