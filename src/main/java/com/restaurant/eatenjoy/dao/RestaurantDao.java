@@ -15,5 +15,7 @@ public interface RestaurantDao {
 
 	List<RestaurantListDto> findAllRestaurantList(PageDto pageDto);
 
-	RestaurantInfo findByIdAndOwnerId(Long id, Long ownerId);
+	RestaurantInfo findByIdAndOwnerId(Long id);
+
+	Long findById(Long restaurantId);
 }

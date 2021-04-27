@@ -10,7 +10,7 @@
     <select id="findByBizrNo" parameterType="string" resultType="boolean">
         SELECT EXISTS(SELECT bizr_no
                           FROM restaurant
-                      WHERE bizr_no = #{bizrNo})
+                       WHERE bizr_no = #{bizrNo})
     </select>
 
     <select id="findAllRestaurantList" parameterType="PageDto" resultType="RestaurantListDto">
@@ -39,5 +39,11 @@
              , close_time
         FROM restaurant
           WHERE id = #{id} and owner_id = #{ownerId}
+    </select>
+
+    <select id="findById" parameterType="Long" resultType="Long">
+        SELECT owner_id
+          FROM restaurant
+         WHERE id = #{restaurantId};
     </select>
 </mapper>

@@ -66,14 +66,25 @@ public class RestaurantService {
 		return restaurantDao.findAllRestaurantList(pageDto);
 	}
 
-	public RestaurantInfo findByIdAndOwnerId(Long id, Long ownerId) {
+	public RestaurantInfo findByIdAndOwnerId(Long id) {
 
-		RestaurantInfo restaurantInfo = restaurantDao.findByIdAndOwnerId(id, ownerId);
+		RestaurantInfo restaurantInfo = restaurantDao.findByIdAndOwnerId(id);
 
 		if (Objects.isNull(restaurantInfo)) {
 			throw new NotFoundException("등록되어 있지 않은 식당 입니다");
 		}
 
 		return restaurantInfo;
+	}
+
+	public Long findById(Long restaurantId) {
+
+		Long restaurantOwnerId = restaurantDao.findById(restaurantId);
+
+		if (Objects.isNull(restaurantOwnerId)) {
+			throw new NotFoundException("등록되어 있는 식당이 존재하지 않습니다");
+		}
+
+		return restaurantOwnerId;
 	}
 }
