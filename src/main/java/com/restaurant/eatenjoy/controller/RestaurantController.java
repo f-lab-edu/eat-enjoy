@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
+import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
@@ -25,7 +26,7 @@ import com.restaurant.eatenjoy.util.security.Role;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/owners/restaurants")
+@RequestMapping("/api/restaurants")
 @RequiredArgsConstructor
 @Authority(Role.OWNER)
 public class RestaurantController {
@@ -51,7 +52,8 @@ public class RestaurantController {
 	* @return 레스토랑 정보
 	* */
 	@GetMapping("{restaurantId}")
-	public RestaurantInfo getRestaurant(@PathVariable(value = "restaurantId") Long restaurantId, @LoginAuthId Long ownerId) {
-		return restaurantService.findByIdAndOwnerId(restaurantId, ownerId);
+	@OwnersRestaurantCheck
+	public RestaurantInfo getRestaurant(@PathVariable Long restaurantId) {
+		return restaurantService.findByIdAndOwnerId(restaurantId);
 	}
 }
