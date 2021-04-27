@@ -2,6 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.MenuGroupDao">
+    <resultMap type="SimpleMenuGroupInfo" id="simpleMenuGroupInfo">
+        <id property="menuGroupId" column="menuGroupId"/>
+        <result property="menuGroupName" column="menuGroupName"/>
+        <result property="restaurantId" column="restaurantId"/>
+        <collection property="menus" ofType="com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo$MenuInfo">
+            <id property="menuId" column="menuId"/>
+            <result property="menuName" column="menuName"/>
+            <result property="intrDc" column="intrDc"/>
+        </collection>
+    </resultMap>
+
     <select id="findAllByRestaurantId" parameterType="long" resultType="MenuGroupDto">
         SELECT id
              , name
@@ -11,6 +22,22 @@
          WHERE restaurant_id = #{restaurantId}
            AND used = 1
          ORDER BY sort
+    </select>
+
+    <select id="findAllAndMenusByRestaurantId" parameterType="long" resultMap="simpleMenuGroupInfo">
+        SELECT A.id AS menuGroupId
+             , A.name AS menuGroupName
+             , A.restaurant_id AS restaurantId
+             , B.id AS menuId
+             , B.name AS menuName
+             , B.intr_dc AS intrDc
+          FROM menu_group A
+          LEFT OUTER JOIN menu B
+            ON A.id = B.menu_group_id
+           AND B.used = 1
+         WHERE A.restaurant_id = #{restaurantId}
+           AND A.used = 1
+         ORDER BY A.sort, B.sort
     </select>
 
     <insert id="register" parameterType="MenuGroupDto">

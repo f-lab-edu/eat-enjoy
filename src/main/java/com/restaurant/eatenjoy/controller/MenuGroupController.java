@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.dto.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.service.MenuGroupService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -34,6 +35,11 @@ public class MenuGroupController {
 	@GetMapping
 	public List<MenuGroupDto> menuGroups(@PathVariable Long restaurantId) {
 		return menuGroupService.findAllByRestaurantId(restaurantId);
+	}
+
+	@GetMapping("/menus")
+	public List<SimpleMenuGroupInfo> simpleMenuGroupInfos(@PathVariable Long restaurantId) {
+		return menuGroupService.getSimpleMenuGroupInfos(restaurantId);
 	}
 
 	@PostMapping
