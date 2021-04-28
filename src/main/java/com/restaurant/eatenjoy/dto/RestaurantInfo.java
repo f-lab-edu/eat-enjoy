@@ -11,6 +11,8 @@ public class RestaurantInfo {
 
 	private Long id;
 
+	private Long ownerId;
+
 	private String name;
 
 	private String bizrNo;

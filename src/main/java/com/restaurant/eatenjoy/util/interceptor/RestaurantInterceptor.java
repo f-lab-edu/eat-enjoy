@@ -12,6 +12,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.LoginService;
@@ -22,11 +23,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RestaurantInterceptor implements HandlerInterceptor {
 
+	private static final String RESTAURANT_ID = "restaurantId";
+
 	private final RestaurantService restaurantService;
 
 	private final LoginService loginService;
-
-	private static final String RESTAURANT_ID = "restaurantId";
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -54,10 +55,8 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 			HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
 		Long restaurantId = null;
-		for (String key : map.keySet()) {
-			if (RESTAURANT_ID.equals(key)) {
-				restaurantId = Long.parseLong(map.get(RESTAURANT_ID));
-			}
+		if (map.containsKey(RESTAURANT_ID)) {
+			restaurantId = Long.parseLong(map.get(RESTAURANT_ID));
 		}
 
 		// 잘못된 PathVariable 값을 지정할 경우 에외가 발생한다
@@ -65,17 +64,13 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 			throw new IllegalArgumentException("@PathVariable의 value가 잘못 설정 되어있습니다.");
 		}
 
-		Long findRestaurantOwnerId = restaurantService.findById(restaurantId);
-		if (ownerId.equals(findRestaurantOwnerId)) {
-			return true;
-		}
-
 		// 자신의 식당이 아닌 정보에 접근 했을때 Exception 발생
-		if (!ownerId.equals(findRestaurantOwnerId)) {
+		RestaurantInfo restaurantInfo = restaurantService.findById(restaurantId);
+		if (!ownerId.equals(restaurantInfo.getOwnerId())) {
 			throw new UnauthorizedException();
 		}
 
-		return false;
+		return true;
 	}
 
 	private OwnersRestaurantCheck findAnnotation(HandlerMethod handlerMethod) {
@@ -90,5 +85,4 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 
 		return null;
 	}
-
 }

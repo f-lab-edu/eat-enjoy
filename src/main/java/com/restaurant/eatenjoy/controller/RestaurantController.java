@@ -40,20 +40,19 @@ public class RestaurantController {
 	}
 
 	@GetMapping
-	@Authority(Role.USER)
 	public List<RestaurantListDto> getRestaurantList(long lastRestaurantId) {
 		return restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
 	}
 
 	/*
-	* 레스토랑 정보를 조회한다
-	* @param restaurantId 조회할 레스토랑의 id
-	* @param 로그인한 사장님의 id
-	* @return 레스토랑 정보
-	* */
+	 * 레스토랑 정보를 조회한다
+	 * @param restaurantId 조회할 레스토랑의 id
+	 * @param 로그인한 사장님의 id
+	 * @return 레스토랑 정보
+	 * */
 	@GetMapping("{restaurantId}")
 	@OwnersRestaurantCheck
 	public RestaurantInfo getRestaurant(@PathVariable Long restaurantId) {
-		return restaurantService.findByIdAndOwnerId(restaurantId);
+		return restaurantService.findById(restaurantId);
 	}
 }

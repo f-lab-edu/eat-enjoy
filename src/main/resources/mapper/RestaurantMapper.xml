@@ -25,8 +25,9 @@
          LIMIT 10
     </select>
 
-    <select id="findByIdAndOwnerId" parameterType="Long" resultType="RestaurantInfo">
+    <select id="findById" parameterType="Long" resultType="RestaurantInfo">
         SELECT id
+             , owner_id
              , name
              , bizr_no
              , address
@@ -38,12 +39,6 @@
              , open_time
              , close_time
         FROM restaurant
-          WHERE id = #{id} and owner_id = #{ownerId}
-    </select>
-
-    <select id="findById" parameterType="Long" resultType="Long">
-        SELECT owner_id
-          FROM restaurant
-         WHERE id = #{restaurantId};
+          WHERE id = #{restaurantId}
     </select>
 </mapper>
