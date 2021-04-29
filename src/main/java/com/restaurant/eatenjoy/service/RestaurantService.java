@@ -64,11 +64,6 @@ public class RestaurantService {
 	}
 
 	public List<RestaurantListDto> getListOfRestaurant(Long lastRestaurantId, Long ownerId) {
-
-		if (Objects.isNull(lastRestaurantId)) {
-			throw new NotFoundException("식당 조회를 실패 하였습니다");
-		}
-
 		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
 	}
 

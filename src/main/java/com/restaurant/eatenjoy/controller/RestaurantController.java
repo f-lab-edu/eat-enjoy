@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -19,6 +20,7 @@ import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.Role;
 
@@ -46,6 +48,11 @@ public class RestaurantController {
 	 * */
 	@GetMapping
 	public List<RestaurantListDto> getRestaurantList(Long lastRestaurantId, @LoginAuthId Long ownerId) {
+
+		if (Objects.isNull(lastRestaurantId)) {
+			throw new NotFoundException("식당 조회에 실패하였습니다");
+		}
+
 		return restaurantService.getListOfRestaurant(lastRestaurantId, ownerId);
 	}
 
