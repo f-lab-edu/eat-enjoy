@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.MenuGroupDao;
 import com.restaurant.eatenjoy.dto.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
@@ -22,6 +23,10 @@ public class MenuGroupService {
 
 	public List<MenuGroupDto> findAllByRestaurantId(Long restaurantId) {
 		return menuGroupDao.findAllByRestaurantId(restaurantId);
+	}
+
+	public List<SimpleMenuGroupInfo> getSimpleMenuGroupInfos(Long restaurantId) {
+		return menuGroupDao.findAllAndMenusByRestaurantId(restaurantId);
 	}
 
 	@Transactional
