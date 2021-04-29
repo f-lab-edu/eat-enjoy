@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
+import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.util.file.FileExtension;
 import com.restaurant.eatenjoy.util.file.FileService;
@@ -43,6 +44,10 @@ public class MenuService {
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateValueException(menuDto.getName() + "은(는) 이미 존재하는 메뉴명 입니다.", ex);
 		}
+	}
+
+	public MenuInfo getMenuInfo(Long menuId) {
+		return menuDao.findById(menuId);
 	}
 
 }
