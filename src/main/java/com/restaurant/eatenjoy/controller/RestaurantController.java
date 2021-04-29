@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
-import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
@@ -39,16 +38,21 @@ public class RestaurantController {
 		restaurantService.register(restaurantDto, ownerId);
 	}
 
+	/*
+	 * 사장님의 식당 리스트 정보를 조회한다
+	 * @param lastRestaurantId
+	 * @param ownerId 로그인한 사장님의 id
+	 * @return List<RestaurantListDto>
+	 * */
 	@GetMapping
-	public List<RestaurantListDto> getRestaurantList(long lastRestaurantId) {
-		return restaurantService.getListOfRestaurant(new PageDto(lastRestaurantId));
+	public List<RestaurantListDto> getRestaurantList(Long lastRestaurantId, @LoginAuthId Long ownerId) {
+		return restaurantService.getListOfRestaurant(lastRestaurantId, ownerId);
 	}
 
 	/*
-	 * 레스토랑 정보를 조회한다
+	 * 사장님의 식당 정보를 조회한다
 	 * @param restaurantId 조회할 레스토랑의 id
-	 * @param 로그인한 사장님의 id
-	 * @return 레스토랑 정보
+	 * @return RestaurantInfo
 	 * */
 	@GetMapping("{restaurantId}")
 	@OwnersRestaurantCheck

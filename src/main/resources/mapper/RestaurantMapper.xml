@@ -13,16 +13,19 @@
                        WHERE bizr_no = #{bizrNo})
     </select>
 
-    <select id="findAllRestaurantList" parameterType="PageDto" resultType="RestaurantListDto">
+    <select id="findAllRestaurantList" parameterType="Long" resultType="RestaurantListDto">
         SELECT id
              , name
              , intr_dc
           FROM restaurant
+            WHERE
         <if test=" lastRestaurantId != 0 ">
-            WHERE id <![CDATA[ < ]]> #{lastRestaurantId}
+              id <![CDATA[ < ]]> #{lastRestaurantId}
+                AND
         </if>
+              owner_id = #{ownerId}
             ORDER BY id DESC
-         LIMIT 10
+         LIMIT 3
     </select>
 
     <select id="findById" parameterType="Long" resultType="RestaurantInfo">
