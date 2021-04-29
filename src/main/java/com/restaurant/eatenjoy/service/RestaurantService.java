@@ -65,13 +65,11 @@ public class RestaurantService {
 
 	public List<RestaurantListDto> getListOfRestaurant(Long lastRestaurantId, Long ownerId) {
 
-		List<RestaurantListDto> restaurantList = restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
-
 		if (Objects.isNull(lastRestaurantId)) {
 			throw new NotFoundException("식당 조회를 실패 하였습니다");
 		}
 
-		return restaurantList;
+		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
 	}
 
 	public RestaurantInfo findById(Long restaurantId) {
