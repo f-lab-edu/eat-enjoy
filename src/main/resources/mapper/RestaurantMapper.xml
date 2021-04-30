@@ -18,14 +18,11 @@
              , name
              , intr_dc
           FROM restaurant
-            WHERE
+            WHERE owner_id = #{ownerId}
         <if test=" lastRestaurantId != 0 ">
-              id <![CDATA[ < ]]> #{lastRestaurantId}
-                AND
+              AND id <![CDATA[ > ]]> #{lastRestaurantId}
         </if>
-              owner_id = #{ownerId}
-            ORDER BY id DESC
-         LIMIT 3
+          LIMIT 10
     </select>
 
     <select id="findById" parameterType="Long" resultType="RestaurantInfo">
