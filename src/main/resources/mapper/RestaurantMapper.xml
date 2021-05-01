@@ -22,6 +22,7 @@
         <if test=" lastRestaurantId != 0 ">
               AND id <![CDATA[ > ]]> #{lastRestaurantId}
         </if>
+            ORDER BY id
           LIMIT 10
     </select>
 
