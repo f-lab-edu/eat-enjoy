@@ -175,6 +175,32 @@ public class MenuServiceTest {
 		then(fileService).should(times(1)).saveFileInfo(any());
 	}
 
+	@Test
+	@DisplayName("메뉴를 삭제하면 데이터베이스에 정상적으로 반영된다.")
+	void successToDeleteMenu() {
+		given(menuDao.findById(1L)).willReturn(getMenuInfo());
+
+		menuService.delete(1L);
+
+		then(menuDao).should(times(1)).deleteById(1L);
+		then(fileService).should(times(0)).deleteFile(any());
+		then(fileService).should(times(0)).deleteFileInfo(any());
+	}
+
+	@Test
+	@DisplayName("메뉴 이미지가 존재하고 메뉴를 삭제하면 데이터베이스에 정상적으로 반영되고, 파일이 삭제된다.")
+	void successToDeleteMenuAndFileIfFileExists() {
+		MenuInfo menuInfo = getMenuInfoWithFile();
+
+		given(menuDao.findById(1L)).willReturn(menuInfo);
+
+		menuService.delete(1L);
+
+		then(menuDao).should(times(1)).deleteById(1L);
+		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
+		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
+	}
+
 	private MockMultipartFile getMockMultipartFile(String name, String originalFilename) {
 		return new MockMultipartFile(name, originalFilename, null, name.getBytes());
 	}
