@@ -59,6 +59,12 @@
            SET file_id = #{fileId}
              , update_at = now()
          WHERE id = #{menuId}
-           AND used = 1
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE menu
+           SET used = 0
+             , update_at = now()
+         WHERE id = #{id}
     </update>
 </mapper>

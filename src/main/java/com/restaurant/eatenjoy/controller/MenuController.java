@@ -3,6 +3,7 @@ package com.restaurant.eatenjoy.controller;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,11 @@ public class MenuController {
 	@PutMapping
 	public void update(@RequestPart @Valid UpdateMenuDto updateMenuDto, @RequestPart(required = false) MultipartFile photo) {
 		menuService.update(updateMenuDto, photo);
+	}
+
+	@DeleteMapping("/{menuId}")
+	public void delete(@PathVariable Long menuId) {
+		menuService.delete(menuId);
 	}
 
 }

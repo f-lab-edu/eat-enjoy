@@ -59,6 +59,16 @@ public class MenuService {
 		}
 	}
 
+	@Transactional
+	public void delete(Long menuId) {
+		MenuInfo menuInfo = getMenuInfo(menuId);
+		menuDao.deleteById(menuId);
+
+		if (menuInfo.getFile() != null) {
+			deleteFile(menuInfo);
+		}
+	}
+
 	private void saveFile(Long menuId, MultipartFile photo) {
 		FileExtension.IMAGE.validate(photo);
 

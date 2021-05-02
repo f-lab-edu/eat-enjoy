@@ -16,4 +16,6 @@ public interface MenuDao {
 
 	void updateById(UpdateMenuDto menuDto);
 
+	void deleteById(Long menuId);
+
 }
