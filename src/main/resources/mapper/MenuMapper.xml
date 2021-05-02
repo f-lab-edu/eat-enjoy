@@ -42,6 +42,18 @@
         VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId})
     </insert>
 
+    <update id="updateById" parameterType="UpdateMenuDto">
+        UPDATE menu
+           SET name = #{name}
+             , intr_dc = #{intrDc}
+             , price = #{price}
+             , sort = #{sort}
+             , menu_group_id = #{menuGroupId}
+             , update_at = now()
+         WHERE id = #{id}
+           AND used = 1
+    </update>
+
     <update id="updateFileIdById">
         UPDATE menu
            SET file_id = #{fileId}

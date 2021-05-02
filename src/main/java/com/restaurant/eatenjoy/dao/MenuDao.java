@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.dto.MenuInfo;
+import com.restaurant.eatenjoy.dto.UpdateMenuDto;
 
 public interface MenuDao {
 
@@ -12,5 +13,7 @@ public interface MenuDao {
 	void updateFileIdById(@Param("menuId") Long menuId, @Param("fileId") Long fileId);
 
 	MenuInfo findById(Long menuId);
+
+	void updateById(UpdateMenuDto menuDto);
 
 }
