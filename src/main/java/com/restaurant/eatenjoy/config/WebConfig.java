@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.restaurant.eatenjoy.util.interceptor.AuthorityInterceptor;
 import com.restaurant.eatenjoy.util.interceptor.MenuGroupInterceptor;
+import com.restaurant.eatenjoy.util.interceptor.RestaurantInterceptor;
 import com.restaurant.eatenjoy.util.resolver.LoginAuthIdArgumentResolver;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
 
 	private final MenuGroupInterceptor menuGroupInterceptor;
 
+	private final RestaurantInterceptor restaurantInterceptor;
+
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		resolvers.add(loginAuthIdArgumentResolver);
@@ -35,6 +38,9 @@ public class WebConfig implements WebMvcConfigurer {
 
 		registry.addInterceptor(menuGroupInterceptor)
 			.addPathPatterns("/api/restaurants/*/menu-groups/**");
+
+		registry.addInterceptor(restaurantInterceptor)
+			.addPathPatterns("/api/restaurants/**");
 	}
 
 }

@@ -28,8 +28,9 @@ import lombok.Getter;
 @RestControllerAdvice
 public class ExceptionAdvisor {
 
-	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class,
-		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class })
+	@ExceptionHandler({DuplicateValueException.class, AlreadyCertifiedException.class,
+		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class,
+		IllegalArgumentException.class})
 	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}

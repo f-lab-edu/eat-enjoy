@@ -10,18 +10,36 @@
     <select id="findByBizrNo" parameterType="string" resultType="boolean">
         SELECT EXISTS(SELECT bizr_no
                           FROM restaurant
-                      WHERE bizr_no = #{bizrNo})
+                       WHERE bizr_no = #{bizrNo})
     </select>
 
-    <select id="findAllRestaurantList" parameterType="PageDto" resultType="RestaurantListDto">
+    <select id="findAllRestaurantList" parameterType="Long" resultType="RestaurantListDto">
         SELECT id
              , name
              , intr_dc
           FROM restaurant
+            WHERE owner_id = #{ownerId}
         <if test=" lastRestaurantId != 0 ">
-            WHERE id <![CDATA[ < ]]> #{lastRestaurantId}
+              AND id <![CDATA[ > ]]> #{lastRestaurantId}
         </if>
-            ORDER BY id DESC
-         LIMIT 10
+            ORDER BY id
+          LIMIT 10
+    </select>
+
+    <select id="findById" parameterType="Long" resultType="RestaurantInfo">
+        SELECT id
+             , owner_id
+             , name
+             , bizr_no
+             , address
+             , region_cd
+             , tel_no
+             , intr_dc
+             , min_order_price
+             , payment_type
+             , open_time
+             , close_time
+        FROM restaurant
+          WHERE id = #{restaurantId}
     </select>
 </mapper>

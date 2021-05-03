@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,12 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.bizrNoValid.BizrNoValidCheck;
 
+import io.netty.util.internal.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -59,7 +63,18 @@ public class RestaurantService {
 		return restaurantDao.findByBizrNo(bizrNo);
 	}
 
-	public List<RestaurantListDto> getListOfRestaurant(PageDto pageDto) {
-		return restaurantDao.findAllRestaurantList(pageDto);
+	public List<RestaurantListDto> getListOfRestaurant(Long lastRestaurantId, Long ownerId) {
+		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
+	}
+
+	public RestaurantInfo findById(Long restaurantId) {
+
+		RestaurantInfo restaurantInfo = restaurantDao.findById(restaurantId);
+
+		if (Objects.isNull(restaurantInfo)) {
+			throw new NotFoundException("등록되어 있지 않은 식당 입니다");
+		}
+
+		return restaurantInfo;
 	}
 }

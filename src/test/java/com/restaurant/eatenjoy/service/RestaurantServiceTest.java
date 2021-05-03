@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
-import com.restaurant.eatenjoy.dto.PageDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
+import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -35,7 +35,7 @@ class RestaurantServiceTest {
 	private RestaurantService restaurantService;
 
 	private RestaurantDto duplicatedBizrNoRestaurantDto() {
-		RestaurantDto restaurantDto	= RestaurantDto.builder()
+		RestaurantDto restaurantDto = RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
 			.address("수원시")
@@ -45,7 +45,7 @@ class RestaurantServiceTest {
 			.paymentType("매장 결재")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9,00))
+			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
@@ -63,7 +63,7 @@ class RestaurantServiceTest {
 			.paymentType("선불")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9,00))
+			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
@@ -81,7 +81,7 @@ class RestaurantServiceTest {
 			.paymentType("매장 결재")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9,00))
+			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
@@ -99,11 +99,29 @@ class RestaurantServiceTest {
 			.paymentType("매장 결재")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9,00))
+			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
 		return restaurantDto;
+	}
+
+	private RestaurantInfo generateRestaurantInfo() {
+		RestaurantInfo restaurantInfo = RestaurantInfo.builder()
+			.id(1L)
+			.name("청기와")
+			.bizrNo("1234567891")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("청기와 소개글")
+			.minOrderPrice(0)
+			.paymentType("매장 결재")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.build();
+
+		return restaurantInfo;
 	}
 
 	private RestaurantListDto createRestaurantData(long id, String name, String intrDc) {
@@ -128,7 +146,7 @@ class RestaurantServiceTest {
 	@DisplayName("중복된 사업자 번호는 식당 등록을 할 수 없다")
 	void failToRegisterRestaurantToBizrNoDuplicated() {
 		given(restaurantDao.findByBizrNo("1234567891")).willReturn(true);
-		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(),OWNER_ID)).isInstanceOf(
+		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID)).isInstanceOf(
 			DuplicateValueException.class);
 	}
 
@@ -157,17 +175,31 @@ class RestaurantServiceTest {
 		// given
 		List<RestaurantListDto> existRestaurantList = new ArrayList<>();
 		existRestaurantList.add(createRestaurantData(1L, "김밥나라", "김밥나라 소개글"));
-		existRestaurantList.add(createRestaurantData(1L, "맥도날드", "맥도날드 소개글"));
-		
-		PageDto pageDto = new PageDto(0);
+		existRestaurantList.add(createRestaurantData(2L, "맥도날드", "맥도날드 소개글"));
 
-		when(restaurantDao.findAllRestaurantList(pageDto)).thenReturn(existRestaurantList);
+		when(restaurantDao.findAllRestaurantList(0L, OWNER_ID)).thenReturn(existRestaurantList);
 
 		// when
-		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(pageDto);
+		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(0L, OWNER_ID);
 
 		// then
 		assertEquals(existRestaurantList, result);
+	}
+
+	@Test
+	@DisplayName("식당 리스트 페이징")
+	void getRestaurantListPaging() {
+		// given
+		List<RestaurantListDto> pagingRestaurList = new ArrayList<>();
+		pagingRestaurList.add(createRestaurantData(1L, "롯데리아", "맥도날드 소개글"));
+
+		when(restaurantDao.findAllRestaurantList(2L, OWNER_ID)).thenReturn(pagingRestaurList);
+
+		// when
+		List<RestaurantListDto> actual = restaurantService.getListOfRestaurant(2L, OWNER_ID);
+
+		// then
+		assertEquals(pagingRestaurList, actual);
 	}
 
 	@Test
@@ -175,12 +207,11 @@ class RestaurantServiceTest {
 	void getEmptyRestaurantList() {
 		// given
 		List<RestaurantListDto> emptyRestaurantList = new ArrayList<>();
-		PageDto pageDto = new PageDto(0);
 
-		when(restaurantDao.findAllRestaurantList(pageDto)).thenReturn(emptyRestaurantList);
+		when(restaurantDao.findAllRestaurantList(0L, OWNER_ID)).thenReturn(emptyRestaurantList);
 
 		// when
-		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(pageDto);
+		List<RestaurantListDto> result = restaurantService.getListOfRestaurant(0L, OWNER_ID);
 
 		// then
 		assertEquals(emptyRestaurantList, result);
