@@ -17,6 +17,7 @@ import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.bizrNoValid.BizrNoValidCheck;
 
+import io.netty.util.internal.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -62,8 +63,8 @@ public class RestaurantService {
 		return restaurantDao.findByBizrNo(bizrNo);
 	}
 
-	public List<RestaurantListDto> getListOfRestaurant(PageDto pageDto) {
-		return restaurantDao.findAllRestaurantList(pageDto);
+	public List<RestaurantListDto> getListOfRestaurant(Long lastRestaurantId, Long ownerId) {
+		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
 	}
 
 	public RestaurantInfo findById(Long restaurantId) {
