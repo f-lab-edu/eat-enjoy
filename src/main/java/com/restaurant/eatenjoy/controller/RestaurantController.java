@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
+import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -65,5 +67,16 @@ public class RestaurantController {
 	@OwnersRestaurantCheck
 	public RestaurantInfo getRestaurant(@PathVariable Long restaurantId) {
 		return restaurantService.findById(restaurantId);
+	}
+
+	/*
+	* 사장님의 식당 정보를 수정한다
+	* @param restaurantId 수정할 레스토랑의 id
+	* */
+	@PatchMapping("{restaurantId}")
+	@ResponseStatus(HttpStatus.CREATED)
+	@OwnersRestaurantCheck
+	public void updateRestaurant(@RequestBody @Valid UpdateRestaurant restaurant) {
+		restaurantService.updateRestaurant(restaurant);
 	}
 }
