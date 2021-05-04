@@ -1,4 +1,4 @@
-package com.restaurant.eatenjoy.util.bizrNoValid;
+package com.restaurant.eatenjoy.util.restaurant.bizrNoValid;
 
 import java.util.stream.Stream;
 
