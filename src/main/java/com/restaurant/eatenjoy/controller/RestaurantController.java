@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -73,8 +74,7 @@ public class RestaurantController {
 	* 사장님의 식당 정보를 수정한다
 	* @param restaurantId 수정할 레스토랑의 id
 	* */
-	@PatchMapping("{restaurantId}")
-	@ResponseStatus(HttpStatus.CREATED)
+	@PutMapping("{restaurantId}")
 	@OwnersRestaurantCheck
 	public void updateRestaurant(@RequestBody @Valid UpdateRestaurant restaurant) {
 		restaurantService.updateRestaurant(restaurant);
