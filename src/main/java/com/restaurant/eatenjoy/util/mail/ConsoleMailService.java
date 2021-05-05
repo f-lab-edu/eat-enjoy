@@ -14,11 +14,10 @@ public class ConsoleMailService implements MailService {
 
 	@Override
 	public void send(MailMessage mailMessage) {
-		String checkMailTokenUrl = "http://localhost:8080/api/ROLE/check-mail-token?email=EMAIL&token=TOKEN"
+		log.info("Check Mail Token URL: {}", CHECK_MAIL_TOKEN_URL
 			.replace("ROLE", mailMessage.getRole() == Role.USER ? "users" : "owners")
-			.replace("EMAIL", mailMessage.getTo()).replace("TOKEN", mailMessage.getToken());
-
-		log.info("Check Mail Token URL: {}", checkMailTokenUrl);
+			.replace("EMAIL", mailMessage.getTo())
+			.replace("TOKEN", mailMessage.getToken()));
 	}
 
 }
