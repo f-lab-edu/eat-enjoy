@@ -15,6 +15,7 @@ import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 import com.restaurant.eatenjoy.util.restaurant.bizrNoValid.BizrNoValidCheck;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,8 @@ public class RestaurantService {
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
 
-		if (restaurantDto.getPaymentType().equals("선불") && restaurantDto.getMinOrderPrice() == 0) {
+		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(restaurantDto.getPaymentType())
+			&& restaurantDto.getMinOrderPrice() == 0){
 			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}
 
@@ -79,7 +81,8 @@ public class RestaurantService {
 
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
 
-		if (updateRestaurant.getPaymentType().equals("선불") && updateRestaurant.getMinOrderPrice() == 0) {
+		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(updateRestaurant.getPaymentType())
+				&& updateRestaurant.getMinOrderPrice() == 0){
 			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}
 
