@@ -7,12 +7,6 @@
         VALUES (#{name}, #{bizrNo}, #{address}, #{regionCd}, #{telNo}, #{intrDc}, #{minOrderPrice}, #{paymentType}, #{ownerId}, #{categoryId}, #{openTime}, #{closeTime})
     </insert>
 
-    <select id="existByBizrNo" parameterType="string" resultType="boolean">
-        SELECT EXISTS(SELECT bizr_no
-                          FROM restaurant
-                       WHERE bizr_no = #{bizrNo})
-    </select>
-
     <select id="findAllRestaurantList" parameterType="Long" resultType="RestaurantListDto">
         SELECT id
              , name

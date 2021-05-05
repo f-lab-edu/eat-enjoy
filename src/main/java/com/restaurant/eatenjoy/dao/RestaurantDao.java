@@ -11,8 +11,6 @@ public interface RestaurantDao {
 
 	void register(RestaurantDto restaurantDto);
 
-	boolean existByBizrNo(String bizrNo);
-
 	List<RestaurantListDto> findAllRestaurantList(Long lastRestaurantId, Long ownerId);
 
 	RestaurantInfo findById(Long id);

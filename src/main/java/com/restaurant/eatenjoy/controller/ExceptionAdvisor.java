@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
+import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
@@ -30,7 +31,7 @@ public class ExceptionAdvisor {
 
 	@ExceptionHandler({DuplicateValueException.class, AlreadyCertifiedException.class,
 		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class,
-		IllegalArgumentException.class})
+		IllegalArgumentException.class, BizrNoValidException.class})
 	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}

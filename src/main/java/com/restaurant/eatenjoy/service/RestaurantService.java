@@ -3,6 +3,7 @@ package com.restaurant.eatenjoy.service;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +31,8 @@ public class RestaurantService {
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
 
 		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(restaurantDto.getPaymentType())
-			&& restaurantDto.getMinOrderPrice() == 0){
+			&& restaurantDto.getMinOrderPrice() == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
-		}
-
-		if (existByBizrNo(restaurantDto.getBizrNo())) {
-			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다");
 		}
 
 		if (!BizrNoValidCheck.valid(restaurantDto.getBizrNo())) {
@@ -57,11 +54,11 @@ public class RestaurantService {
 			.closeTime(restaurantDto.getCloseTime())
 			.build();
 
-		restaurantDao.register(restaurantDto);
-	}
-
-	public boolean existByBizrNo(String bizrNo) {
-		return restaurantDao.existByBizrNo(bizrNo);
+		try {
+			restaurantDao.register(restaurantDto);
+		} catch (DuplicateKeyException ex) {
+			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
+		}
 	}
 
 	public List<RestaurantListDto> getListOfRestaurant(Long lastRestaurantId, Long ownerId) {
@@ -79,10 +76,11 @@ public class RestaurantService {
 		return restaurantInfo;
 	}
 
+	@Transactional
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
 
 		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(updateRestaurant.getPaymentType())
-				&& updateRestaurant.getMinOrderPrice() == 0){
+			&& updateRestaurant.getMinOrderPrice() == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}
 
@@ -90,7 +88,11 @@ public class RestaurantService {
 			throw new BizrNoValidException("사업자 등록 번호가 잘못 되었습니다");
 		}
 
-		restaurantDao.modifyRestaurantInfo(updateRestaurant);
+		try {
+			restaurantDao.modifyRestaurantInfo(updateRestaurant);
+		} catch (DuplicateKeyException ex) {
+			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
+		}
 	}
 
 }
