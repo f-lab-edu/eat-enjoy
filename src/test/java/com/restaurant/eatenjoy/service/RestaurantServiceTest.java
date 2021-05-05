@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
@@ -200,9 +201,14 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("중복된 사업자 번호는 식당 등록을 할 수 없다")
 	void failToRegisterRestaurantToBizrNoDuplicated() {
-		given(restaurantDao.existByBizrNo("1234567891")).willReturn(true);
-		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID)).isInstanceOf(
-			DuplicateValueException.class);
+
+		doThrow(DuplicateKeyException.class).when(restaurantDao).register(any());
+
+		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID))
+			.isInstanceOf(DuplicateValueException.class);
+
+		then(restaurantDao).should(times(1)).register(any());
+
 	}
 
 	@Test
@@ -216,11 +222,7 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("사업자 번호가 중복되지 않는다면 식당 등록을 성공한다")
 	void successToRegisterRestaurant() {
-		given(restaurantDao.existByBizrNo(successRestaurantDto().getBizrNo())).willReturn(false);
-
 		restaurantService.register(successRestaurantDto(), OWNER_ID);
-
-		then(restaurantDao).should(times(1)).existByBizrNo(successRestaurantDto().getBizrNo());
 		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
 	}
 
@@ -299,5 +301,16 @@ class RestaurantServiceTest {
 		assertThrows(RestaurantMinOrderPriceValueException.class, () -> {
 			restaurantService.updateRestaurant(paymentTypeUpdateRestaurant());
 		});
+	}
+
+	@Test
+	@DisplayName("식당 데이터 수정 실패 - 이미 존재하는 사업자 번호")
+	void failModifyRestaurantByExistBizrNo() {
+		doThrow(DuplicateKeyException.class).when(restaurantDao).modifyRestaurantInfo(any());
+
+		assertThatThrownBy(() -> restaurantService.updateRestaurant(createUpdateRestaurantData()))
+			.isInstanceOf(DuplicateValueException.class);
+
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(any());
 	}
 }
