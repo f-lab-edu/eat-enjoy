@@ -83,7 +83,7 @@ public class RestaurantService {
 		}
 	}
 
-	public void paymentTypeAndBizrNoValidCheck(String paymentType, int minOrderPrice, String bizrNo) {
+	private void paymentTypeAndBizrNoValidCheck(String paymentType, int minOrderPrice, String bizrNo) {
 
 		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(paymentType)
 			&& minOrderPrice == 0) {
