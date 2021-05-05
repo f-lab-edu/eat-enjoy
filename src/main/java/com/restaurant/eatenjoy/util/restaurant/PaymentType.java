@@ -3,7 +3,8 @@ package com.restaurant.eatenjoy.util.restaurant;
 public enum PaymentType {
 
 	PREPAYMENT("선불"),
-	POSTPAID("매장 결재");
+	POSTPAID("매장 결제"),
+	FREE("자유 결제");
 
 	private String paymentType;
 
