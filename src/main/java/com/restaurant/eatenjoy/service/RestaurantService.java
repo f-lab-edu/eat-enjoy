@@ -17,7 +17,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
-import com.restaurant.eatenjoy.util.restaurant.bizrNoValid.BizrNoValidCheck;
+import com.restaurant.eatenjoy.util.BizrNoValidCheck;
 
 import lombok.RequiredArgsConstructor;
 
