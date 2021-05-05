@@ -16,8 +16,8 @@ import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
-import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 import com.restaurant.eatenjoy.util.BizrNoValidCheck;
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,14 +30,8 @@ public class RestaurantService {
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
 
-		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(restaurantDto.getPaymentType())
-			&& restaurantDto.getMinOrderPrice() == 0) {
-			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
-		}
-
-		if (!BizrNoValidCheck.valid(restaurantDto.getBizrNo())) {
-			throw new BizrNoValidException("사업자 등록 번호가 잘못 되었습니다");
-		}
+		paymentTypeAndBizrNoValidCheck(restaurantDto.getPaymentType(), restaurantDto.getMinOrderPrice(),
+			restaurantDto.getBizrNo());
 
 		restaurantDto = RestaurantDto.builder()
 			.name(restaurantDto.getName())
@@ -79,19 +73,25 @@ public class RestaurantService {
 	@Transactional
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
 
-		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(updateRestaurant.getPaymentType())
-			&& updateRestaurant.getMinOrderPrice() == 0) {
-			throw new RestaurantMinOrderPriceValueException("매장 결재 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
-		}
-
-		if (!BizrNoValidCheck.valid(updateRestaurant.getBizrNo())) {
-			throw new BizrNoValidException("사업자 등록 번호가 잘못 되었습니다");
-		}
+		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
+			updateRestaurant.getBizrNo());
 
 		try {
 			restaurantDao.modifyRestaurantInfo(updateRestaurant);
 		} catch (DuplicateKeyException ex) {
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
+		}
+	}
+
+	public void paymentTypeAndBizrNoValidCheck(String paymentType, int minOrderPrice, String bizrNo) {
+
+		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(paymentType)
+			&& minOrderPrice == 0) {
+			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
+		}
+
+		if (!BizrNoValidCheck.valid(bizrNo)) {
+			throw new BizrNoValidException("사업자 등록 번호가 잘못 되었습니다");
 		}
 	}
 
