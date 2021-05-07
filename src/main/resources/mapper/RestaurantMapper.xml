@@ -7,12 +7,6 @@
         VALUES (#{name}, #{bizrNo}, #{address}, #{regionCd}, #{telNo}, #{intrDc}, #{minOrderPrice}, #{paymentType}, #{ownerId}, #{categoryId}, #{openTime}, #{closeTime})
     </insert>
 
-    <select id="findByBizrNo" parameterType="string" resultType="boolean">
-        SELECT EXISTS(SELECT bizr_no
-                          FROM restaurant
-                       WHERE bizr_no = #{bizrNo})
-    </select>
-
     <select id="findAllRestaurantList" parameterType="Long" resultType="RestaurantListDto">
         SELECT id
              , name
@@ -42,4 +36,21 @@
         FROM restaurant
           WHERE id = #{restaurantId}
     </select>
+
+    <update id="modifyRestaurantInfo" parameterType="UpdateRestaurant">
+        UPDATE restaurant
+           SET name = #{name}
+             , bizr_no = #{bizrNo}
+             , address = #{address}
+             , region_cd = #{regionCd}
+             , tel_no = #{telNo}
+             , intr_dc = #{intrDc}
+             , min_order_price = #{minOrderPrice}
+             , payment_type = #{paymentType}
+             , open_time = #{openTime}
+             , close_time = #{closeTime}
+             , category_id = #{categoryId}
+             , update_at = now()
+         WHERE id = #{id}
+    </update>
 </mapper>

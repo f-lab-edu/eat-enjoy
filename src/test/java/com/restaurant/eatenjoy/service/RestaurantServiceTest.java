@@ -14,11 +14,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
+import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
@@ -42,7 +44,7 @@ class RestaurantServiceTest {
 			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결재")
+			.paymentType("매장 결제")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -78,7 +80,7 @@ class RestaurantServiceTest {
 			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결재")
+			.paymentType("매장 결제")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -96,7 +98,7 @@ class RestaurantServiceTest {
 			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결재")
+			.paymentType("매장 결제")
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -116,7 +118,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
-			.paymentType("매장 결재")
+			.paymentType("매장 결제")
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
@@ -134,6 +136,60 @@ class RestaurantServiceTest {
 		return restaurantListDto;
 	}
 
+	private UpdateRestaurant createUpdateRestaurantData() {
+		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+			.id(1L)
+			.name("테스트 식당")
+			.bizrNo("1234567891")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("테스트 식당 수정글")
+			.minOrderPrice(0)
+			.paymentType("매장 결제")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.build();
+
+		return updateRestaurant;
+	}
+
+	private UpdateRestaurant notExistBizrNoUpdateRestaurantData() {
+		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+			.id(1L)
+			.name("테스트 식당")
+			.bizrNo("1234567892")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("테스트 식당 수정글")
+			.minOrderPrice(0)
+			.paymentType("매장 결제")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.build();
+
+		return updateRestaurant;
+	}
+
+	private UpdateRestaurant paymentTypeUpdateRestaurant() {
+		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+			.id(1L)
+			.name("테스트 식당")
+			.bizrNo("1234567892")
+			.address("수원시")
+			.regionCd("cod")
+			.telNo("02-123-4567")
+			.intrDc("테스트 식당 수정글")
+			.minOrderPrice(0)
+			.paymentType("선불")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.build();
+
+		return updateRestaurant;
+	}
+
 	@Test
 	@DisplayName("매장 방식이 선불인 경우 최소 주문 가격이 0원이 될 순 없다")
 	void failToMinOrderPriceByPaymentType() {
@@ -145,9 +201,14 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("중복된 사업자 번호는 식당 등록을 할 수 없다")
 	void failToRegisterRestaurantToBizrNoDuplicated() {
-		given(restaurantDao.findByBizrNo("1234567891")).willReturn(true);
-		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID)).isInstanceOf(
-			DuplicateValueException.class);
+
+		doThrow(DuplicateKeyException.class).when(restaurantDao).register(any());
+
+		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID))
+			.isInstanceOf(DuplicateValueException.class);
+
+		then(restaurantDao).should(times(1)).register(any());
+
 	}
 
 	@Test
@@ -161,11 +222,7 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("사업자 번호가 중복되지 않는다면 식당 등록을 성공한다")
 	void successToRegisterRestaurant() {
-		given(restaurantDao.findByBizrNo(successRestaurantDto().getBizrNo())).willReturn(false);
-
 		restaurantService.register(successRestaurantDto(), OWNER_ID);
-
-		then(restaurantDao).should(times(1)).findByBizrNo(successRestaurantDto().getBizrNo());
 		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
 	}
 
@@ -215,5 +272,45 @@ class RestaurantServiceTest {
 
 		// then
 		assertEquals(emptyRestaurantList, result);
+	}
+
+	@Test
+	@DisplayName("식당 데이터 수정 성공")
+	void successModifyRestaurant() {
+		// given
+		UpdateRestaurant restaurant = createUpdateRestaurantData();
+
+		// when
+		restaurantService.updateRestaurant(restaurant);
+
+		// then
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
+	}
+
+	@Test
+	@DisplayName("식당 데이터 수정 실패 - 유효하지 않은 사업자 번호")
+	void failModifyRestaurantByBizrNo() {
+		assertThrows(BizrNoValidException.class, () -> {
+			restaurantService.updateRestaurant(notExistBizrNoUpdateRestaurantData());
+		});
+	}
+
+	@Test
+	@DisplayName("식당 데이터 수정 실패 - RestaurantMinOrderPriceValueException 발생")
+	void failModifyRestaurantByPaymentTypeAndMinOrderPrice() {
+		assertThrows(RestaurantMinOrderPriceValueException.class, () -> {
+			restaurantService.updateRestaurant(paymentTypeUpdateRestaurant());
+		});
+	}
+
+	@Test
+	@DisplayName("식당 데이터 수정 실패 - 이미 존재하는 사업자 번호")
+	void failModifyRestaurantByExistBizrNo() {
+		doThrow(DuplicateKeyException.class).when(restaurantDao).modifyRestaurantInfo(any());
+
+		assertThatThrownBy(() -> restaurantService.updateRestaurant(createUpdateRestaurantData()))
+			.isInstanceOf(DuplicateValueException.class);
+
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(any());
 	}
 }
