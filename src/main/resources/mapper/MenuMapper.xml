@@ -37,14 +37,22 @@
            AND A.used = 1
     </select>
 
-    <insert id="register" parameterType="MenuDto" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO menu(name, intr_dc, price, sort, menu_group_id)
-        VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId})
+    <insert id="register" parameterType="MenuDto">
+        INSERT INTO menu(name, intr_dc, price, sort, menu_group_id<if test="uploadFile != null">, file_id</if>)
+        VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId}<if test="uploadFile != null">, #{uploadFile.id}</if>)
     </insert>
 
     <update id="updateById" parameterType="UpdateMenuDto">
         UPDATE menu
            SET name = #{name}
+             <choose>
+                 <when test="uploadFile != null">
+                     , file_id = #{uploadFile.id}
+                 </when>
+                 <when test="originFile == null">
+                     , file_id = null
+                 </when>
+             </choose>
              , intr_dc = #{intrDc}
              , price = #{price}
              , sort = #{sort}
@@ -54,17 +62,12 @@
            AND used = 1
     </update>
 
-    <update id="updateFileIdById">
-        UPDATE menu
-           SET file_id = #{fileId}
-             , update_at = now()
-         WHERE id = #{menuId}
-    </update>
-
     <update id="deleteById" parameterType="long">
         UPDATE menu
-           SET used = 0
+           SET file_id = null
+             , used = 0
              , update_at = now()
          WHERE id = #{id}
+           AND used = 1
     </update>
 </mapper>

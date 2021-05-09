@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.FileDao;
@@ -45,7 +44,6 @@ public class LocalFileService implements FileService {
 			.build();
 	}
 
-	@Transactional
 	@Override
 	public Long saveFileInfo(FileDto fileDto) {
 		fileDao.register(fileDto);
@@ -61,7 +59,6 @@ public class LocalFileService implements FileService {
 		}
 	}
 
-	@Transactional
 	@Override
 	public void deleteFileInfo(Long fileId) {
 		fileDao.deleteById(fileId);

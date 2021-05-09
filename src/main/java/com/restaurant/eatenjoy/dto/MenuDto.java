@@ -36,4 +36,6 @@ public class MenuDto {
 	@NotNull(message = "메뉴그룹을 선택하세요.")
 	private Long menuGroupId;
 
+	private FileDto uploadFile;
+
 }
