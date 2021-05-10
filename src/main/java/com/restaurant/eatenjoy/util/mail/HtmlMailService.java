@@ -18,26 +18,25 @@ import com.restaurant.eatenjoy.exception.MailSendFailedException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.util.security.Role;
 
-import lombok.RequiredArgsConstructor;
-
 @Profile("dev")
 @Component
-@RequiredArgsConstructor
 public class HtmlMailService implements MailService {
 
-	private static final String HTML_CONTENT;
+	private final JavaMailSender javaMailSender;
 
-	static {
+	private final String htmlContent;
+
+	public HtmlMailService(JavaMailSender javaMailSender) {
 		ClassPathResource resource = new ClassPathResource("static/welcome.html");
 		try {
 			Path path = Paths.get(resource.getURI());
-			HTML_CONTENT = String.join("\n", Files.readAllLines(path));
+			htmlContent = String.join("\n", Files.readAllLines(path));
 		} catch (IOException e) {
 			throw new NotFoundException("메일 양식을 찾을 수 없습니다.");
 		}
-	}
 
-	private final JavaMailSender javaMailSender;
+		this.javaMailSender = javaMailSender;
+	}
 
 	@Override
 	public void send(MailMessage mailMessage) {
@@ -46,7 +45,7 @@ public class HtmlMailService implements MailService {
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 			mimeMessageHelper.setTo(mailMessage.getTo());
 			mimeMessageHelper.setSubject(mailMessage.getSubject());
-			mimeMessageHelper.setText(HTML_CONTENT.replace("CHECK_MAIL_TOKEN_URL", CHECK_MAIL_TOKEN_URL)
+			mimeMessageHelper.setText(htmlContent.replace("CHECK_MAIL_TOKEN_URL", CHECK_MAIL_TOKEN_URL)
 				.replace("LOGIN_ID", mailMessage.getLoginId())
 				.replace("ROLE", mailMessage.getRole() == Role.USER ? "users" : "owners")
 				.replace("EMAIL", mailMessage.getTo()).replace("TOKEN", mailMessage.getToken())
