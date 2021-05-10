@@ -10,4 +10,8 @@ public interface FileService {
 
 	Long saveFileInfo(FileDto fileDto);
 
+	void deleteFile(FileDto fileDto);
+
+	void deleteFileInfo(Long fileId);
+
 }

@@ -6,4 +6,6 @@ public interface FileDao {
 
 	void register(FileDto fileDto);
 
+	void deleteById(Long fileId);
+
 }

@@ -6,4 +6,10 @@
         INSERT INTO files(origFilename, serverFilename, filePath, size)
         VALUES(#{origFilename}, #{serverFilename}, #{filePath}, #{size})
     </insert>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM files
+         WHERE id = #{id}
+    </delete>
 </mapper>

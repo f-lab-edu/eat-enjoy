@@ -3,9 +3,12 @@ package com.restaurant.eatenjoy.controller;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.annotation.Authority;
+import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.dto.MenuInfo;
+import com.restaurant.eatenjoy.dto.UpdateMenuDto;
 import com.restaurant.eatenjoy.service.MenuService;
 import com.restaurant.eatenjoy.util.security.Role;
 
@@ -35,8 +40,24 @@ public class MenuController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(@RequestPart @Valid MenuDto menuDto, @RequestPart(required = false) MultipartFile photo) {
-		menuService.register(menuDto, photo);
+	public void register(@RequestBody @Valid MenuDto menuDto) {
+		menuService.register(menuDto);
+	}
+
+	@PutMapping
+	public void update(@RequestBody @Valid UpdateMenuDto updateMenuDto) {
+		menuService.update(updateMenuDto);
+	}
+
+	@DeleteMapping("/{menuId}")
+	public void delete(@PathVariable Long menuId) {
+		menuService.delete(menuId);
+	}
+
+	@PostMapping("/images")
+	@ResponseStatus(HttpStatus.CREATED)
+	public FileDto imageUpload(@RequestPart MultipartFile photo) {
+		return menuService.uploadImage(photo);
 	}
 
 }
