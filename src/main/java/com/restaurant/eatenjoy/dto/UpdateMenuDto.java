@@ -14,15 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuDto {
+public class UpdateMenuDto {
 
+	@NotNull(message = "메뉴 아이디가 존재하지 않습니다.")
 	private Long id;
 
 	@NotBlank(message = "메뉴명을 입력해주세요.")
 	@Size(max = 20, message = "최대 20자리까지 입력 가능합니다.")
 	private String name;
-
-	private Long fileId;
 
 	@NotBlank(message = "메뉴 소개글을 입력해주세요.")
 	private String intrDc;
@@ -35,6 +34,8 @@ public class MenuDto {
 
 	@NotNull(message = "메뉴그룹을 선택하세요.")
 	private Long menuGroupId;
+
+	private FileDto originFile;
 
 	private FileDto uploadFile;
 

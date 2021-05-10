@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.FileDao;
@@ -35,17 +34,16 @@ public class LocalFileService implements FileService {
 		String subPath = LocalDate.now().format(dateFormatter);
 		String uploadDirectoryPath = initializeUploadDirectoryPath(subPath);
 
-		transferTo(multipartFile, serverFileName, uploadDirectoryPath);
+		transferTo(multipartFile, uploadDirectoryPath, serverFileName);
 
 		return FileDto.builder()
 			.origFilename(multipartFile.getOriginalFilename())
 			.serverFilename(serverFileName)
-			.filePath(uploadDirectoryPath)
+			.filePath(subPath)
 			.size(multipartFile.getSize())
 			.build();
 	}
 
-	@Transactional
 	@Override
 	public Long saveFileInfo(FileDto fileDto) {
 		fileDao.register(fileDto);
@@ -53,8 +51,21 @@ public class LocalFileService implements FileService {
 		return fileDto.getId();
 	}
 
+	@Override
+	public void deleteFile(FileDto fileDto) {
+		File file = new File(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
+		if (file.exists()) {
+			file.delete();
+		}
+	}
+
+	@Override
+	public void deleteFileInfo(Long fileId) {
+		fileDao.deleteById(fileId);
+	}
+
 	private String initializeUploadDirectoryPath(String subPath) {
-		String uploadDirectoryPath = Paths.get(getAbsoluteRootPath(), subPath).toString();
+		String uploadDirectoryPath = getUploadDirectoryPath(subPath);
 		File uploadDirectory = new File(uploadDirectoryPath);
 		if (!uploadDirectory.exists()) {
 			uploadDirectory.mkdir();
@@ -63,16 +74,24 @@ public class LocalFileService implements FileService {
 		return uploadDirectoryPath;
 	}
 
-	private String getAbsoluteRootPath() {
-		return Paths.get(System.getProperty("user.home"), rootPath).toString();
-	}
-
-	private void transferTo(MultipartFile multipartFile, String serverFileName, String uploadDirectoryPath) {
+	private void transferTo(MultipartFile multipartFile, String uploadDirectoryPath, String serverFileName) {
 		try {
 			multipartFile.transferTo(new File(uploadDirectoryPath + "\\" + serverFileName));
 		} catch (IOException e) {
 			throw new FileUploadFailedException("파일 업로드에 실패하였습니다.", e);
 		}
+	}
+
+	private String getAbsoluteRootPath() {
+		return Paths.get(System.getProperty("user.home"), rootPath).toString();
+	}
+
+	private String getUploadDirectoryPath(String subPath) {
+		return Paths.get(getAbsoluteRootPath(), subPath).toString();
+	}
+
+	private String getRealServerFilePath(String subPath, String serverFileName) {
+		return Paths.get(getUploadDirectoryPath(subPath), serverFileName).toString();
 	}
 
 }

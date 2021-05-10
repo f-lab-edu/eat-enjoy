@@ -2,16 +2,72 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.MenuDao">
-    <insert id="register" parameterType="MenuDto" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO menu(name, intr_dc, price, sort, menu_group_id)
-        VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId})
+    <resultMap type="MenuInfo" id="menuInfo">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="intrDc" column="intr_dc"/>
+        <result property="price" column="price"/>
+        <result property="sort" column="sort"/>
+        <result property="menuGroupId" column="menu_group_id"/>
+        <association property="file" javaType="FileDto">
+            <id property="id" column="file_id"/>
+            <result property="origFilename" column="origFilename"/>
+            <result property="serverFilename" column="serverFilename"/>
+            <result property="filePath" column="filePath"/>
+            <result property="size" column="size"/>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="menuInfo">
+        SELECT A.id
+             , A.name
+             , A.intr_dc
+             , A.price
+             , A.sort
+             , A.menu_group_id
+             , B.id AS file_id
+             , B.origFilename
+             , B.serverFilename
+             , B.filePath
+             , B.size
+          FROM menu A
+          LEFT OUTER JOIN files B
+            ON A.file_id = B.id
+         WHERE A.id = #{id}
+           AND A.used = 1
+    </select>
+
+    <insert id="register" parameterType="MenuDto">
+        INSERT INTO menu(name, intr_dc, price, sort, menu_group_id<if test="uploadFile != null">, file_id</if>)
+        VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId}<if test="uploadFile != null">, #{uploadFile.id}</if>)
     </insert>
 
-    <update id="updateFileIdById">
+    <update id="updateById" parameterType="UpdateMenuDto">
         UPDATE menu
-           SET file_id = #{fileId}
+           SET name = #{name}
+             <choose>
+                 <when test="uploadFile != null">
+                     , file_id = #{uploadFile.id}
+                 </when>
+                 <when test="originFile == null">
+                     , file_id = null
+                 </when>
+             </choose>
+             , intr_dc = #{intrDc}
+             , price = #{price}
+             , sort = #{sort}
+             , menu_group_id = #{menuGroupId}
              , update_at = now()
-         WHERE id = #{menuId}
+         WHERE id = #{id}
+           AND used = 1
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE menu
+           SET file_id = null
+             , used = 0
+             , update_at = now()
+         WHERE id = #{id}
            AND used = 1
     </update>
 </mapper>
