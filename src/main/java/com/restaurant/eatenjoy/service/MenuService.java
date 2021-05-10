@@ -1,7 +1,6 @@
 package com.restaurant.eatenjoy.service;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,12 +27,10 @@ public class MenuService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public void register(MenuDto menuDto) {
-		try {
-			menuDao.register(menuDto);
-		} catch (DuplicateKeyException ex) {
-			publishFileDeleteAndThrowDuplicateValueException(menuDto.getUploadFile(), menuDto.getName(), ex);
-		}
+	public void register(Long restaurantId, MenuDto menuDto) {
+		validateMenuName(restaurantId, null, menuDto.getName(), menuDto.getUploadFile());
+
+		menuDao.register(menuDto);
 	}
 
 	public MenuInfo getMenuInfo(Long menuId) {
@@ -41,12 +38,10 @@ public class MenuService {
 	}
 
 	@Transactional
-	public void update(UpdateMenuDto updateMenuDto) {
-		try {
-			menuDao.updateById(updateMenuDto);
-		} catch (DuplicateKeyException ex) {
-			publishFileDeleteAndThrowDuplicateValueException(updateMenuDto.getUploadFile(), updateMenuDto.getName(), ex);
-		}
+	public void update(Long restaurantId, UpdateMenuDto updateMenuDto) {
+		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
+
+		menuDao.updateById(updateMenuDto);
 
 		MenuInfo menuInfo = getMenuInfo(updateMenuDto.getId());
 		if (canDeleteSavedFile(updateMenuDto, menuInfo.getFile())) {
@@ -73,6 +68,18 @@ public class MenuService {
 		return fileDto;
 	}
 
+	private void validateMenuName(Long restaurantId, Long menuId, String menuName, FileDto fileDto) {
+		if (!menuDao.existsByRestaurantIdAndName(restaurantId, menuId, menuName)) {
+			return;
+		}
+
+		if (fileDto != null) {
+			eventPublisher.publishEvent(fileDto);
+		}
+
+		throw new DuplicateValueException(menuName + "은(는) 이미 존재하는 메뉴명 입니다.");
+	}
+
 	private void deleteFile(FileDto fileDto) {
 		fileService.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
@@ -81,14 +88,6 @@ public class MenuService {
 	private boolean canDeleteSavedFile(UpdateMenuDto updateMenuDto, FileDto savedFile) {
 		return (updateMenuDto.getOriginFile() == null && savedFile != null)
 			|| (savedFile != null && updateMenuDto.getUploadFile() != null);
-	}
-
-	private void publishFileDeleteAndThrowDuplicateValueException(FileDto fileDto, String menuName, DuplicateKeyException cause) {
-		if (fileDto != null) {
-			eventPublisher.publishEvent(fileDto);
-		}
-
-		throw new DuplicateValueException(menuName + "은(는) 이미 존재하는 메뉴명 입니다.", cause);
 	}
 
 }

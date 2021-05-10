@@ -1,10 +1,15 @@
 package com.restaurant.eatenjoy.dao;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.dto.UpdateMenuDto;
 
 public interface MenuDao {
+
+	boolean existsByRestaurantIdAndName(@Param("restaurantId") Long restaurantId,
+		@Param("menuId") Long menuId, @Param("name") String name);
 
 	void register(MenuDto menuDto);
 
