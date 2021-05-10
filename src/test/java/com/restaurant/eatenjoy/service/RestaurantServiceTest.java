@@ -14,16 +14,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
+import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
 import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.FileNotSupportException;
+import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
+import com.restaurant.eatenjoy.util.file.FileService;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantServiceTest {
@@ -33,15 +40,19 @@ class RestaurantServiceTest {
 	@Mock
 	private RestaurantDao restaurantDao;
 
+	@Mock
+	private FileService fileService;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+
 	@InjectMocks
 	private RestaurantService restaurantService;
 
-	private RestaurantDto duplicatedBizrNoRestaurantDto() {
+	private RestaurantDto duplicatedBizrNoRestaurantDto(FileDto fileDto) {
 		RestaurantDto restaurantDto = RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.paymentType("매장 결제")
@@ -49,6 +60,11 @@ class RestaurantServiceTest {
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
+			.uploadFile(fileDto)
 			.build();
 
 		return restaurantDto;
@@ -58,8 +74,6 @@ class RestaurantServiceTest {
 		RestaurantDto restaurantDto = RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.paymentType("선불")
@@ -67,6 +81,10 @@ class RestaurantServiceTest {
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
 			.build();
 
 		return restaurantDto;
@@ -76,8 +94,6 @@ class RestaurantServiceTest {
 		RestaurantDto restaurantDto = RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567892")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.paymentType("매장 결제")
@@ -85,6 +101,10 @@ class RestaurantServiceTest {
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
 			.build();
 
 		return restaurantDto;
@@ -94,8 +114,6 @@ class RestaurantServiceTest {
 		RestaurantDto restaurantDto = RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.paymentType("매장 결제")
@@ -103,6 +121,11 @@ class RestaurantServiceTest {
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
+			.uploadFile(null)
 			.build();
 
 		return restaurantDto;
@@ -190,8 +213,40 @@ class RestaurantServiceTest {
 		return updateRestaurant;
 	}
 
+	private MockMultipartFile getMockMultipartFile(String name, String originalFilename) {
+		return new MockMultipartFile(name, originalFilename, null, name.getBytes());
+	}
+
 	@Test
-	@DisplayName("매장 방식이 선불인 경우 최소 주문 가격이 0원이 될 순 없다")
+	@DisplayName("식당 등록 성공 - 이미지 파일을 올리지 않고 식당 등록을 성공한다")
+	void successToRegisterRestaurantNoImageFile() {
+		restaurantService.register(successRestaurantDto(), OWNER_ID);
+		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
+	}
+
+	@Test
+	@DisplayName("식당 이미지 파일 업로드에 성공한다")
+	void successToUploadFile() {
+		// given
+		MultipartFile photo = getMockMultipartFile("test", "test.jpg");
+
+		FileDto fileDto = FileDto.builder()
+			.id(1L)
+			.build();
+
+		given(fileService.uploadFile(photo)).willReturn(fileDto);
+		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
+
+		// when
+		restaurantService.uploadImage(photo);
+
+		// then
+		then(fileService).should(times(1)).uploadFile(photo);
+		then(fileService).should(times(1)).saveFileInfo(fileDto);
+	}
+
+	@Test
+	@DisplayName("식당 등록 실패 - 매장 결제 방식이 선불인 경우 최소 주문 가격이 0원이 된다면 식당 등록을 실패한다")
 	void failToMinOrderPriceByPaymentType() {
 		assertThrows(RestaurantMinOrderPriceValueException.class, () -> {
 			restaurantService.register(paymentTypeRestaurantDto(), OWNER_ID);
@@ -199,20 +254,7 @@ class RestaurantServiceTest {
 	}
 
 	@Test
-	@DisplayName("중복된 사업자 번호는 식당 등록을 할 수 없다")
-	void failToRegisterRestaurantToBizrNoDuplicated() {
-
-		doThrow(DuplicateKeyException.class).when(restaurantDao).register(any());
-
-		assertThatThrownBy(() -> restaurantService.register(duplicatedBizrNoRestaurantDto(), OWNER_ID))
-			.isInstanceOf(DuplicateValueException.class);
-
-		then(restaurantDao).should(times(1)).register(any());
-
-	}
-
-	@Test
-	@DisplayName("존재하지 않는 사업자 등록번호를 입력하면 식당 등록을 할 수 없다")
+	@DisplayName("식당 등록 실패 - 유효하지 않은 사업자 등록 번호를 입력하면 식당 등록을 실패한다")
 	void failToRegisterRestaurantByNotExistsBizrNo() {
 		assertThrows(BizrNoValidException.class, () -> {
 			restaurantService.register(notExistBizrNoRestaurntDto(), OWNER_ID);
@@ -220,10 +262,32 @@ class RestaurantServiceTest {
 	}
 
 	@Test
-	@DisplayName("사업자 번호가 중복되지 않는다면 식당 등록을 성공한다")
-	void successToRegisterRestaurant() {
-		restaurantService.register(successRestaurantDto(), OWNER_ID);
-		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
+	@DisplayName("식당 등록 실패 - 지원하지 않는 확장자를 사용하면 파일 업로드에 실패한다")
+	void failByNotSupportedFileExtension() {
+		// given
+		MultipartFile photo = getMockMultipartFile("test", "test.txt");
+
+		// when
+		assertThatThrownBy(() -> restaurantService.uploadImage(photo)).isInstanceOf(FileNotSupportException.class);
+	}
+
+	@Test
+	@DisplayName("식당 등록 실패 - 중복된 사업자 번호로 식당 등록을 할 경우 식당 등록에 실패하고 업로드된 파일은 삭제한다")
+	void failByExistBizrNoAndDeleteUploadFile() {
+
+		FileDto fileDto = FileDto.builder()
+			.id(1L)
+			.build();
+
+		RestaurantDto dto = duplicatedBizrNoRestaurantDto(fileDto);
+
+		doThrow(DuplicateKeyException.class).when(restaurantDao).register(any());
+
+		assertThatThrownBy(() -> restaurantService.register(dto, OWNER_ID))
+			.isInstanceOf(DuplicateValueException.class);
+
+		then(restaurantDao).should(times(1)).register(any());
+		then(eventPublisher).should(times(1)).publishEvent(dto.getUploadFile());
 	}
 
 	@Test
