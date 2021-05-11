@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +25,8 @@ import com.restaurant.eatenjoy.util.file.FileService;
 
 @ExtendWith(MockitoExtension.class)
 public class MenuServiceTest {
+
+	private static final Long RESTAURANT_ID = 1L;
 
 	@Mock
 	private MenuDao menuDao;
@@ -54,19 +55,20 @@ public class MenuServiceTest {
 	}
 
 	@Test
-	@DisplayName("같은 이름이 이미 존재할 경우 메뉴를 등록할 수 없다.")
+	@DisplayName("특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 등록할 수 없다.")
 	void failToRegisterMenuIfSameNameAlreadyExists() {
-		doThrow(DuplicateKeyException.class).when(menuDao).register(menuDto);
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName())).willReturn(true);
 
-		assertThatThrownBy(() -> menuService.register(menuDto))
+		assertThatThrownBy(() -> menuService.register(RESTAURANT_ID, menuDto))
 			.isInstanceOf(DuplicateValueException.class);
 
-		then(menuDao).should(times(1)).register(menuDto);
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName());
+		then(menuDao).should(times(0)).register(menuDto);
 		then(eventPublisher).should(times(0)).publishEvent(any());
 	}
 
 	@Test
-	@DisplayName("업로드한 파일이 있고, 같은 메뉴 이름이 이미 존재할 경우 메뉴를 등록할 수 없고 업로드된 파일은 삭제된다.")
+	@DisplayName("업로드한 파일이 있고, 특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 메뉴를 등록할 수 없고 업로드된 파일은 삭제된다.")
 	void failToRegisterMenuAndDeleteFileIfSameNameAndUploadFileAlreadyExists() {
 		MenuDto menuDtoWithUploadFile = MenuDto.builder()
 			.id(1L)
@@ -78,19 +80,24 @@ public class MenuServiceTest {
 			.uploadFile(FileDto.builder().id(1L).build())
 			.build();
 
-		doThrow(DuplicateKeyException.class).when(menuDao).register(menuDtoWithUploadFile);
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDtoWithUploadFile.getName())).willReturn(true);
 
-		assertThatThrownBy(() -> menuService.register(menuDtoWithUploadFile))
+		assertThatThrownBy(() -> menuService.register(RESTAURANT_ID, menuDtoWithUploadFile))
 			.isInstanceOf(DuplicateValueException.class);
 
-		then(menuDao).should(times(1)).register(menuDtoWithUploadFile);
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName());
+		then(menuDao).should(times(0)).register(menuDtoWithUploadFile);
 		then(eventPublisher).should(times(1)).publishEvent(menuDtoWithUploadFile.getUploadFile());
 	}
 
 	@Test
 	@DisplayName("메뉴 등록에 성공하면 데이터베이스에 성공적으로 입력된다.")
 	void successToRegisterMenu() {
-		menuService.register(menuDto);
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName())).willReturn(false);
+
+		menuService.register(RESTAURANT_ID, menuDto);
+
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName());
 		then(menuDao).should(times(1)).register(menuDto);
 	}
 
@@ -125,28 +132,32 @@ public class MenuServiceTest {
 	}
 
 	@Test
-	@DisplayName("같은 메뉴 이름이 이미 존재할 경우 메뉴를 수정할 수 없다.")
+	@DisplayName("특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 메뉴를 수정할 수 없다.")
 	void fileToUpdateMenuIfSameNameAlreadyExists() {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDto();
-		doThrow(DuplicateKeyException.class).when(menuDao).updateById(updateMenuDto);
 
-		assertThatThrownBy(() -> menuService.update(updateMenuDto))
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName())).willReturn(true);
+
+		assertThatThrownBy(() -> menuService.update(RESTAURANT_ID, updateMenuDto))
 			.isInstanceOf(DuplicateValueException.class);
 
-		then(menuDao).should(times(1)).updateById(updateMenuDto);
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
+		then(menuDao).should(times(0)).updateById(updateMenuDto);
 		then(eventPublisher).should(times(0)).publishEvent(any());
 	}
 
 	@Test
-	@DisplayName("업로드한 파일이 있고, 같은 메뉴 이름이 이미 존재할 경우 메뉴를 수정할 수 없고 업로드된 파일은 삭제된다.")
+	@DisplayName("업로드한 파일이 있고, 특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 메뉴를 수정할 수 없고 업로드된 파일은 삭제된다.")
 	void failToUpdateMenuAndDeleteFileIfSameNameAndUploadFileAlreadyExists() {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDtoWithFile();
-		doThrow(DuplicateKeyException.class).when(menuDao).updateById(updateMenuDto);
 
-		assertThatThrownBy(() -> menuService.update(updateMenuDto))
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName())).willReturn(true);
+
+		assertThatThrownBy(() -> menuService.update(RESTAURANT_ID, updateMenuDto))
 			.isInstanceOf(DuplicateValueException.class);
 
-		then(menuDao).should(times(1)).updateById(updateMenuDto);
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
+		then(menuDao).should(times(0)).updateById(updateMenuDto);
 		then(eventPublisher).should(times(1)).publishEvent(updateMenuDto.getUploadFile());
 	}
 
@@ -155,10 +166,12 @@ public class MenuServiceTest {
 	void successToUpdateMenu() {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDto();
 
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName())).willReturn(false);
 		given(menuDao.findById(updateMenuDto.getId())).willReturn(getMenuInfo());
 
-		menuService.update(updateMenuDto);
+		menuService.update(RESTAURANT_ID, updateMenuDto);
 
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
 		then(fileService).should(times(0)).deleteFile(any());
 		then(fileService).should(times(0)).deleteFileInfo(any());
@@ -170,10 +183,12 @@ public class MenuServiceTest {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDto();
 		MenuInfo menuInfo = getMenuInfoWithFile();
 
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName())).willReturn(false);
 		given(menuDao.findById(updateMenuDto.getId())).willReturn(menuInfo);
 
-		menuService.update(updateMenuDto);
+		menuService.update(RESTAURANT_ID, updateMenuDto);
 
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
 		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
 		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
@@ -185,10 +200,12 @@ public class MenuServiceTest {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDtoWithFile();
 		MenuInfo menuInfo = getMenuInfoWithFile();
 
+		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName())).willReturn(false);
 		given(menuDao.findById(updateMenuDto.getId())).willReturn(menuInfo);
 
-		menuService.update(updateMenuDto);
+		menuService.update(RESTAURANT_ID, updateMenuDto);
 
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
 		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
 		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
