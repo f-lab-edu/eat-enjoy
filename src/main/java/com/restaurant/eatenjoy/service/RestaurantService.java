@@ -38,7 +38,6 @@ public class RestaurantService {
 
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
-
 		paymentTypeAndBizrNoValidCheck(restaurantDto.getPaymentType(), restaurantDto.getMinOrderPrice(),
 			restaurantDto.getBizrNo());
 
@@ -85,7 +84,6 @@ public class RestaurantService {
 	}
 
 	public RestaurantInfo findById(Long restaurantId) {
-
 		RestaurantInfo restaurantInfo = restaurantDao.findById(restaurantId);
 
 		if (Objects.isNull(restaurantInfo)) {
@@ -97,7 +95,6 @@ public class RestaurantService {
 
 	@Transactional
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
-
 		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
 			updateRestaurant.getBizrNo());
 
@@ -109,7 +106,6 @@ public class RestaurantService {
 	}
 
 	private void paymentTypeAndBizrNoValidCheck(String paymentType, int minOrderPrice, String bizrNo) {
-
 		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(paymentType)
 			&& minOrderPrice == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
@@ -124,7 +120,6 @@ public class RestaurantService {
 	* 트랜잭션 롤백 발생을 감지
 	* */
 	private void publishFileDeleteAndThrowDuplicateValueException(FileDto fileDto, DuplicateKeyException cause) {
-
 		if (fileDto != null) {
 			eventPublisher.publishEvent(fileDto);
 		}

@@ -31,7 +31,6 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-
 		if (!(handler instanceof HandlerMethod)) {
 			return true;
 		}
@@ -46,7 +45,6 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 	}
 
 	private boolean checkLoginOwnerIdAndRestaurantId(HttpServletRequest request) {
-
 		// 현재 로그인한 사장님 아이디 체크
 		Long ownerId = loginService.getLoginAuthId();
 

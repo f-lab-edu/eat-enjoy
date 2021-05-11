@@ -274,7 +274,6 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("식당 등록 실패 - 중복된 사업자 번호로 식당 등록을 할 경우 식당 등록에 실패하고 업로드된 파일은 삭제한다")
 	void failByExistBizrNoAndDeleteUploadFile() {
-
 		FileDto fileDto = FileDto.builder()
 			.id(1L)
 			.build();

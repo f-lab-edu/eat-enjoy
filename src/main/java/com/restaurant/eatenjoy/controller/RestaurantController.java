@@ -58,7 +58,6 @@ public class RestaurantController {
 	 * */
 	@GetMapping
 	public List<RestaurantListDto> getRestaurantList(Long lastRestaurantId, @LoginAuthId Long ownerId) {
-
 		if (Objects.isNull(lastRestaurantId)) {
 			throw new NotFoundException("식당 조회에 실패하였습니다");
 		}
