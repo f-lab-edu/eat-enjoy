@@ -124,8 +124,6 @@ public class RestaurantService {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCompletion(int status) {
-					System.out.println("########");
-					System.out.println(status);
 					if (status == STATUS_ROLLED_BACK) {
 						deleteUploadFile(fileDto);
 					}
