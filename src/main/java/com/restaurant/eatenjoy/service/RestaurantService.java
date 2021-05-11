@@ -1,12 +1,17 @@
 package com.restaurant.eatenjoy.service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.context.ApplicationEventPublisher;
+import javax.validation.ConstraintViolationException;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
@@ -34,14 +39,13 @@ public class RestaurantService {
 
 	private final FileService fileService;
 
-	private final ApplicationEventPublisher eventPublisher;
-
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
 		paymentTypeAndBizrNoValidCheck(restaurantDto.getPaymentType(), restaurantDto.getMinOrderPrice(),
 			restaurantDto.getBizrNo());
 
 		saveRestaurant(restaurantDto, ownerId);
+		restaurantFileDeleteOnRollback(restaurantDto.getUploadFile());
 	}
 
 	private void saveRestaurant(RestaurantDto restaurantDto, Long ownerId) {
@@ -66,7 +70,7 @@ public class RestaurantService {
 		try {
 			restaurantDao.register(restaurantDto);
 		} catch (DuplicateKeyException ex) {
-			publishFileDeleteAndThrowDuplicateValueException(restaurantDto.getUploadFile(), ex);
+			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}
 
@@ -116,15 +120,22 @@ public class RestaurantService {
 		}
 	}
 
-	/*
-	* 트랜잭션 롤백 발생을 감지
-	* */
-	private void publishFileDeleteAndThrowDuplicateValueException(FileDto fileDto, DuplicateKeyException cause) {
-		if (fileDto != null) {
-			eventPublisher.publishEvent(fileDto);
-		}
+	private void restaurantFileDeleteOnRollback(FileDto fileDto) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCompletion(int status) {
+					System.out.println("########");
+					System.out.println(status);
+					if (status == STATUS_ROLLED_BACK) {
+						deleteUploadFile(fileDto);
+					}
+				}
+			});
+	}
 
-		throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", cause);
+	private void deleteUploadFile(FileDto fileDto) {
+		fileService.deleteFile(fileDto);
+		fileService.deleteFileInfo(fileDto.getId());
 	}
 
 }
