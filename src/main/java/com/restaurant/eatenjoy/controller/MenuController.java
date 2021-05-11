@@ -40,13 +40,13 @@ public class MenuController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(@RequestBody @Valid MenuDto menuDto) {
-		menuService.register(menuDto);
+	public void register(@PathVariable Long restaurantId, @RequestBody @Valid MenuDto menuDto) {
+		menuService.register(restaurantId, menuDto);
 	}
 
 	@PutMapping
-	public void update(@RequestBody @Valid UpdateMenuDto updateMenuDto) {
-		menuService.update(updateMenuDto);
+	public void update(@PathVariable Long restaurantId, @RequestBody @Valid UpdateMenuDto updateMenuDto) {
+		menuService.update(restaurantId, updateMenuDto);
 	}
 
 	@DeleteMapping("/{menuId}")

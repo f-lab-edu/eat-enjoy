@@ -3,6 +3,8 @@ package com.restaurant.eatenjoy.service;
 import java.time.Duration;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.MailTokenNotFoundException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.UserNotFoundException;
+import com.restaurant.eatenjoy.util.cache.CacheNames;
 import com.restaurant.eatenjoy.util.security.Role;
 import com.restaurant.eatenjoy.util.security.UserDetailsService;
 import com.restaurant.eatenjoy.util.security.encrypt.Encryptable;
@@ -62,6 +65,7 @@ public class UserService implements UserDetailsService {
 		return userDao.findIdByLoginIdAndPassword(loginDto.getLoginId(), encryptable.encrypt(loginDto.getPassword()));
 	}
 
+	@Cacheable(value = CacheNames.USER_MAIL_CERTIFIED, key = "#id")
 	@Override
 	public boolean isMailCertified(Long id) {
 		UserDto userDto = userDao.findById(id);
@@ -99,6 +103,7 @@ public class UserService implements UserDetailsService {
 		return userDao.findById(userId);
 	}
 
+	@CacheEvict(value = CacheNames.USER_MAIL_CERTIFIED, key = "#userId")
 	@Transactional
 	public void delete(Long userId, String password) {
 		if (!userDao.existsByIdAndPassword(userId, encryptable.encrypt(password))) {
@@ -124,6 +129,7 @@ public class UserService implements UserDetailsService {
 			.build();
 	}
 
+	@CacheEvict(value = CacheNames.USER_MAIL_CERTIFIED, key = "#userId")
 	@Transactional
 	public void update(Long userId, UpdateUserDto userDto) {
 		userDao.updateById(UserDto.builder()

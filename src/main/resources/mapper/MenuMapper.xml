@@ -37,6 +37,18 @@
            AND A.used = 1
     </select>
 
+    <select id="existsByRestaurantIdAndName" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM menu A
+                       INNER JOIN menu_group B
+                          ON A.menu_group_id = B.id
+                       WHERE B.restaurant_id = #{restaurantId}
+                        <if test="menuId != null">
+                            AND A.id <![CDATA[<>]]> #{menuId}
+                        </if>
+                         AND A.name = #{name})
+    </select>
+
     <insert id="register" parameterType="MenuDto">
         INSERT INTO menu(name, intr_dc, price, sort, menu_group_id<if test="uploadFile != null">, file_id</if>)
         VALUES(#{name}, #{intrDc}, #{price}, #{sort}, #{menuGroupId}<if test="uploadFile != null">, #{uploadFile.id}</if>)
