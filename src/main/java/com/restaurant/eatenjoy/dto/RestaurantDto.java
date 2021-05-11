@@ -56,7 +56,7 @@ public class RestaurantDto {
 	private LocalTime closeTime;
 
 	@NotNull(message = "우편번호를 입력해주세요")
-	@Size(min = 5, message = "우편번호는 5자리 입니다")
+	@Size(min = 5, max = 5, message = "우편번호는 5자리 입니다")
 	private String postCd;
 
 	@NotBlank(message = "주소를 입력해주세요")
@@ -66,8 +66,8 @@ public class RestaurantDto {
 	@Size(max = 100, message = "상세주소는 100자를 넘길 수 없습니다")
 	private String detailAddress;
 
-	@NotNull(message = "주소를 입력해주세요")
-	@Size(min = 5, message = "시/군/구 코드는 5자리 입니다")
+	@NotNull(message = "시/군/구 코드를 입력해주세요")
+	@Size(min = 5, max = 5, message = "시/군/구 코드는 5자리 입니다")
 	private String sigunguCd;
 
 	private FileDto uploadFile;
