@@ -1,12 +1,8 @@
 package com.restaurant.eatenjoy.service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Objects;
 
-import javax.validation.ConstraintViolationException;
-
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +41,6 @@ public class RestaurantService {
 			restaurantDto.getBizrNo());
 
 		saveRestaurant(restaurantDto, ownerId);
-		restaurantFileDeleteOnRollback(restaurantDto.getUploadFile());
 	}
 
 	private void saveRestaurant(RestaurantDto restaurantDto, Long ownerId) {
@@ -70,6 +65,7 @@ public class RestaurantService {
 		try {
 			restaurantDao.register(restaurantDto);
 		} catch (DuplicateKeyException ex) {
+			restaurantFileDeleteOnRollback(restaurantDto.getUploadFile());
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}
@@ -122,13 +118,13 @@ public class RestaurantService {
 
 	private void restaurantFileDeleteOnRollback(FileDto fileDto) {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCompletion(int status) {
-					if (status == STATUS_ROLLED_BACK) {
-						deleteUploadFile(fileDto);
-					}
+			@Override
+			public void afterCompletion(int status) {
+				if (status == STATUS_ROLLED_BACK) {
+					deleteUploadFile(fileDto);
 				}
-			});
+			}
+		});
 	}
 
 	private void deleteUploadFile(FileDto fileDto) {
