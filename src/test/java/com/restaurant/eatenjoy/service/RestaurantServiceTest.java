@@ -8,15 +8,16 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
@@ -28,7 +29,6 @@ import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
-import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.file.FileService;
 
@@ -42,9 +42,6 @@ class RestaurantServiceTest {
 
 	@Mock
 	private FileService fileService;
-
-	@Mock
-	private ApplicationEventPublisher eventPublisher;
 
 	@InjectMocks
 	private RestaurantService restaurantService;
@@ -66,6 +63,7 @@ class RestaurantServiceTest {
 			.sigunguCd("41135")
 			.uploadFile(fileDto)
 			.build();
+		TransactionSynchronizationManager.initSynchronization();
 
 		return restaurantDto;
 	}
@@ -127,6 +125,7 @@ class RestaurantServiceTest {
 			.sigunguCd("41135")
 			.uploadFile(null)
 			.build();
+		TransactionSynchronizationManager.initSynchronization();
 
 		return restaurantDto;
 	}
@@ -213,6 +212,11 @@ class RestaurantServiceTest {
 		return updateRestaurant;
 	}
 
+	@AfterEach
+	void cleanUp() {
+		TransactionSynchronizationManager.clear();
+	}
+
 	private MockMultipartFile getMockMultipartFile(String name, String originalFilename) {
 		return new MockMultipartFile(name, originalFilename, null, name.getBytes());
 	}
@@ -222,6 +226,8 @@ class RestaurantServiceTest {
 	void successToRegisterRestaurantNoImageFile() {
 		restaurantService.register(successRestaurantDto(), OWNER_ID);
 		then(restaurantDao).should(times(1)).register(any(RestaurantDto.class));
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
 	}
 
 	@Test
@@ -286,7 +292,8 @@ class RestaurantServiceTest {
 			.isInstanceOf(DuplicateValueException.class);
 
 		then(restaurantDao).should(times(1)).register(any());
-		then(eventPublisher).should(times(1)).publishEvent(dto.getUploadFile());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isOne();
 	}
 
 	@Test
