@@ -65,7 +65,5 @@ public class UpdateRestaurant {
 	@Size(min = 5, max = 5, message = "시/군/구 코드는 5자리 입니다")
 	private String sigunguCd;
 
-	private FileDto originFile;
-
 	private FileDto uploadFile;
 }
