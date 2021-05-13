@@ -40,12 +40,12 @@ public class MenuService {
 	public void update(Long restaurantId, UpdateMenuDto updateMenuDto) {
 		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
 
-		menuDao.updateById(updateMenuDto);
-
 		MenuInfo menuInfo = getMenuInfo(updateMenuDto.getId());
 		if (canDeleteSavedFile(updateMenuDto, menuInfo.getFile())) {
 			deleteFile(menuInfo.getFile());
 		}
+
+		menuDao.updateById(updateMenuDto);
 	}
 
 	@Transactional
