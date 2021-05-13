@@ -49,10 +49,10 @@
              , F.serverFilename
              , F.filePath
              , F.size
-        FROM restaurant R
-         LEFT OUTER JOIN files F
-         ON R.file_id = F.id
-        WHERE R.id = #{id}
+          FROM restaurant R
+          LEFT OUTER JOIN files F
+            ON R.file_id = F.id
+         WHERE R.id = #{id}
     </select>
 
     <insert id="register" parameterType="RestaurantDto">
@@ -129,7 +129,7 @@
                  <when test="uploadFile != null">
                      , file_id = #{uploadFile.id}
                  </when>
-                 <when test="originFile == null">
+                 <when test="uploadFile == null">
                      , file_id = null
                  </when>
              </choose>
