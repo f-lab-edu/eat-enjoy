@@ -29,6 +29,7 @@ import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.file.FileService;
 
@@ -135,14 +136,40 @@ class RestaurantServiceTest {
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType("매장 결제")
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.categoryId(1L)
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
+			.uploadFile(null)
+			.build();
+
+		return restaurantInfo;
+	}
+
+	private RestaurantInfo generateRestaurantInfo(FileDto fileDto) {
+		RestaurantInfo restaurantInfo = RestaurantInfo.builder()
+			.id(1L)
+			.name("청기와")
+			.bizrNo("1234567891")
+			.telNo("02-123-4567")
+			.intrDc("청기와 소개글")
+			.minOrderPrice(0)
+			.paymentType("매장 결제")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.categoryId(1L)
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
+			.uploadFile(fileDto)
 			.build();
 
 		return restaurantInfo;
@@ -158,20 +185,46 @@ class RestaurantServiceTest {
 		return restaurantListDto;
 	}
 
-	private UpdateRestaurant createUpdateRestaurantData() {
+	private UpdateRestaurant createUpdateRestaurantData(FileDto fileDto) {
 		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
 			.id(1L)
-			.name("테스트 식당")
+			.name("청기와")
 			.bizrNo("1234567891")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
-			.intrDc("테스트 식당 수정글")
+			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType("매장 결제")
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
+			.categoryId(2L)
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.detailAddress(null)
+			.sigunguCd("41135")
+			.originFile(null)
+			.uploadFile(fileDto)
 			.build();
+
+		return updateRestaurant;
+	}
+
+	private UpdateRestaurant createUpdateRestaurantData() {
+		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+			.id(1L)
+			.name("청기와")
+			.bizrNo("1234567891")
+			.telNo("02-123-4567")
+			.intrDc("청기와 소개글")
+			.minOrderPrice(0)
+			.paymentType("매장 결제")
+			.openTime(LocalTime.of(9, 00))
+			.closeTime(LocalTime.of(23, 00))
+			.categoryId(2L)
+			.postCd("13494")
+			.baseAddress("경기 성남시 분당구 판교역로 235")
+			.sigunguCd("41135")
+			.build();
+		TransactionSynchronizationManager.initSynchronization();
 
 		return updateRestaurant;
 	}
@@ -181,8 +234,6 @@ class RestaurantServiceTest {
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
@@ -199,8 +250,6 @@ class RestaurantServiceTest {
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
-			.address("수원시")
-			.regionCd("cod")
 			.telNo("02-123-4567")
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
@@ -345,15 +394,123 @@ class RestaurantServiceTest {
 	}
 
 	@Test
-	@DisplayName("식당 데이터 수정 성공")
+	@DisplayName("식당 조회 성공")
+	void successRestaurantInfo() {
+		// given
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
+
+		// when
+		restaurantService.findById(1L);
+
+		// then
+		then(restaurantDao).should(times(1)).findById(1L);
+	}
+
+	@Test
+	@DisplayName("식당 조회 실패")
+	void failRestaurantInfo() {
+		// given
+		given(restaurantDao.findById(1L)).willReturn(null);
+
+		// when
+		assertThrows(NotFoundException.class, () -> {
+			restaurantService.findById(1L);
+		});
+
+		// then
+		then(restaurantDao).should(times(1)).findById(1L);
+	}
+
+	@Test
+	@DisplayName("식당 수정 성공")
 	void successModifyRestaurant() {
 		// given
-		UpdateRestaurant restaurant = createUpdateRestaurantData();
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
+
+		UpdateRestaurant restaurant = createUpdateRestaurantData(null);
 
 		// when
 		restaurantService.updateRestaurant(restaurant);
 
 		// then
+		then(restaurantDao).should(times(1)).findById(restaurant.getId());
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
+	}
+
+	@Test
+	@DisplayName("식당 수정 성공 - 파일 업로드")
+	void successModifyRestaurantWithUploadFile() {
+		// given
+		MockMultipartFile photo = getMockMultipartFile("test", "test.jpg");
+
+		FileDto fileDto = FileDto.builder()
+			.id(1L)
+			.build();
+
+		given(fileService.uploadFile(photo)).willReturn(fileDto);
+		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
+
+		UpdateRestaurant restaurant = createUpdateRestaurantData(fileDto);
+
+		// when
+		restaurantService.uploadImage(photo);
+		restaurantService.updateRestaurant(restaurant);
+
+		// then
+		then(fileService).should(times(1)).uploadFile(photo);
+		then(fileService).should(times(1)).saveFileInfo(fileDto);
+		then(restaurantDao).should(times(1)).findById(restaurant.getId());
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
+	}
+
+	@Test
+	@DisplayName("식당 수정 성공 - 이미지 파일 제거")
+	void successModifyRestaurantDeleteImageFile() {
+		// given
+		FileDto fileDto = FileDto.builder()
+			.id(1L)
+			.build();
+
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(fileDto));
+
+		UpdateRestaurant restaurant = createUpdateRestaurantData(null);
+
+		// when
+		restaurantService.updateRestaurant(restaurant);
+
+		// then
+		then(fileService).should(times(1)).deleteFile(fileDto);
+		then(fileService).should(times(1)).deleteFileInfo(fileDto.getId());
+		then(restaurantDao).should(times(1)).findById(restaurant.getId());
+		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
+	}
+
+	@Test
+	@DisplayName("식당 수정 성공 - 이미지 파일 변경")
+	void successModifyRestaurantWithUploadFileAndDeleteOriginFile() {
+		// given
+		MockMultipartFile photo = getMockMultipartFile("test", "test.jpg");
+
+		FileDto fileDto = FileDto.builder()
+			.id(2L)
+			.build();
+
+		given(fileService.uploadFile(photo)).willReturn(fileDto);
+		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(fileDto));
+
+		UpdateRestaurant restaurant = createUpdateRestaurantData(fileDto);
+
+		// when
+		restaurantService.uploadImage(photo);
+		restaurantService.updateRestaurant(restaurant);
+
+
+		// then
+		then(fileService).should(times(1)).deleteFile(fileDto);
+		then(fileService).should(times(1)).deleteFileInfo(fileDto.getId());
+		then(restaurantDao).should(times(1)).findById(restaurant.getId());
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
 	}
 
@@ -376,11 +533,17 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("식당 데이터 수정 실패 - 이미 존재하는 사업자 번호")
 	void failModifyRestaurantByExistBizrNo() {
+		// given
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
+
+		// when
 		doThrow(DuplicateKeyException.class).when(restaurantDao).modifyRestaurantInfo(any());
 
 		assertThatThrownBy(() -> restaurantService.updateRestaurant(createUpdateRestaurantData()))
 			.isInstanceOf(DuplicateValueException.class);
 
+		// then
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(any());
+		assertThat(TransactionSynchronizationManager.getSynchronizations()).size().isOne();
 	}
 }
