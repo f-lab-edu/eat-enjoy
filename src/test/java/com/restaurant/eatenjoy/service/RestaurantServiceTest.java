@@ -201,7 +201,6 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
-			.originFile(null)
 			.uploadFile(fileDto)
 			.build();
 
@@ -492,15 +491,19 @@ class RestaurantServiceTest {
 		// given
 		MockMultipartFile photo = getMockMultipartFile("test", "test.jpg");
 
-		FileDto fileDto = FileDto.builder()
+		FileDto updateFileDto = FileDto.builder()
 			.id(2L)
 			.build();
 
-		given(fileService.uploadFile(photo)).willReturn(fileDto);
-		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
-		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(fileDto));
+		FileDto restaurantInfoFileDto = FileDto.builder()
+			.id(1L)
+			.build();
 
-		UpdateRestaurant restaurant = createUpdateRestaurantData(fileDto);
+		given(fileService.uploadFile(photo)).willReturn(updateFileDto);
+		given(fileService.saveFileInfo(updateFileDto)).willReturn(updateFileDto.getId());
+		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(restaurantInfoFileDto));
+
+		UpdateRestaurant restaurant = createUpdateRestaurantData(updateFileDto);
 
 		// when
 		restaurantService.uploadImage(photo);
@@ -508,8 +511,8 @@ class RestaurantServiceTest {
 
 
 		// then
-		then(fileService).should(times(1)).deleteFile(fileDto);
-		then(fileService).should(times(1)).deleteFileInfo(fileDto.getId());
+		then(fileService).should(times(1)).deleteFile(restaurantInfoFileDto);
+		then(fileService).should(times(1)).deleteFileInfo(restaurantInfoFileDto.getId());
 		then(restaurantDao).should(times(1)).findById(restaurant.getId());
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
 	}
