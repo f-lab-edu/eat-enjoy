@@ -83,8 +83,8 @@ public class RestaurantService {
 		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
 	}
 
-	public RestaurantInfo findById(Long restaurantId) {
-		RestaurantInfo restaurantInfo = restaurantDao.findById(restaurantId);
+	public RestaurantInfo findById(Long id) {
+		RestaurantInfo restaurantInfo = restaurantDao.findById(id);
 
 		if (Objects.isNull(restaurantInfo)) {
 			throw new NotFoundException("등록되어 있지 않은 식당 입니다");
@@ -99,8 +99,15 @@ public class RestaurantService {
 			updateRestaurant.getBizrNo());
 
 		try {
+			RestaurantInfo restaurantInfo = findById(updateRestaurant.getId());
+
 			restaurantDao.modifyRestaurantInfo(updateRestaurant);
+
+			if (deleteOriginFileOrServerFile(updateRestaurant.getOriginFile(), restaurantInfo.getUploadFile())) {
+				deleteUploadFile(restaurantInfo.getUploadFile());
+			}
 		} catch (DuplicateKeyException ex) {
+			restaurantFileDeleteOnRollback(updateRestaurant.getUploadFile());
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}
@@ -130,6 +137,20 @@ public class RestaurantService {
 	private void deleteUploadFile(FileDto fileDto) {
 		fileService.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
+	}
+
+	private boolean deleteOriginFileOrServerFile(FileDto uploadFile, FileDto serverFile) {
+		boolean deleteFile = false;
+
+		if (uploadFile == null && serverFile != null) {
+			deleteFile = true;
+		}
+
+		if (uploadFile != null && serverFile != null) {
+			deleteFile = true;
+		}
+
+		return deleteFile;
 	}
 
 }
