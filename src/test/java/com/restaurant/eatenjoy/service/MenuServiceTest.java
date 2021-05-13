@@ -3,6 +3,7 @@ package com.restaurant.eatenjoy.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.MenuDao;
@@ -34,29 +35,24 @@ public class MenuServiceTest {
 	@Mock
 	private FileService fileService;
 
-	@Mock
-	private ApplicationEventPublisher eventPublisher;
-
 	@InjectMocks
 	private MenuService menuService;
 
-	private MenuDto menuDto;
-
 	@BeforeEach
 	void setUp() {
-		menuDto = MenuDto.builder()
-			.id(1L)
-			.name("test")
-			.intrDc("테스트 메뉴 입니다.")
-			.price(1000)
-			.sort(1)
-			.menuGroupId(1L)
-			.build();
+		TransactionSynchronizationManager.initSynchronization();
+	}
+
+	@AfterEach
+	void cleanUp() {
+		TransactionSynchronizationManager.clear();
 	}
 
 	@Test
 	@DisplayName("특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 등록할 수 없다.")
 	void failToRegisterMenuIfSameNameAlreadyExists() {
+		MenuDto menuDto = getMenuDto();
+
 		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName())).willReturn(true);
 
 		assertThatThrownBy(() -> menuService.register(RESTAURANT_ID, menuDto))
@@ -64,7 +60,8 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName());
 		then(menuDao).should(times(0)).register(menuDto);
-		then(eventPublisher).should(times(0)).publishEvent(any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
 	}
 
 	@Test
@@ -85,14 +82,17 @@ public class MenuServiceTest {
 		assertThatThrownBy(() -> menuService.register(RESTAURANT_ID, menuDtoWithUploadFile))
 			.isInstanceOf(DuplicateValueException.class);
 
-		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName());
+		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDtoWithUploadFile.getName());
 		then(menuDao).should(times(0)).register(menuDtoWithUploadFile);
-		then(eventPublisher).should(times(1)).publishEvent(menuDtoWithUploadFile.getUploadFile());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isOne();
 	}
 
 	@Test
 	@DisplayName("메뉴 등록에 성공하면 데이터베이스에 성공적으로 입력된다.")
 	void successToRegisterMenu() {
+		MenuDto menuDto = getMenuDto();
+
 		given(menuDao.existsByRestaurantIdAndName(RESTAURANT_ID, null, menuDto.getName())).willReturn(false);
 
 		menuService.register(RESTAURANT_ID, menuDto);
@@ -143,7 +143,8 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(0)).updateById(updateMenuDto);
-		then(eventPublisher).should(times(0)).publishEvent(any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
 	}
 
 	@Test
@@ -158,7 +159,8 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(0)).updateById(updateMenuDto);
-		then(eventPublisher).should(times(1)).publishEvent(updateMenuDto.getUploadFile());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isOne();
 	}
 
 	@Test
@@ -173,8 +175,8 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
-		then(fileService).should(times(0)).deleteFile(any());
-		then(fileService).should(times(0)).deleteFileInfo(any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
 	}
 
 	@Test
@@ -239,6 +241,17 @@ public class MenuServiceTest {
 
 	private MockMultipartFile getMockMultipartFile(String name, String originalFilename) {
 		return new MockMultipartFile(name, originalFilename, null, name.getBytes());
+	}
+
+	private MenuDto getMenuDto() {
+		return MenuDto.builder()
+			.id(1L)
+			.name("test")
+			.intrDc("테스트 메뉴 입니다.")
+			.price(1000)
+			.sort(1)
+			.menuGroupId(1L)
+			.build();
 	}
 
 	private UpdateMenuDto getUpdateMenuDto() {

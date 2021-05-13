@@ -1,8 +1,9 @@
 package com.restaurant.eatenjoy.service;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.MenuDao;
@@ -24,8 +25,6 @@ public class MenuService {
 
 	private final FileService fileService;
 
-	private final ApplicationEventPublisher eventPublisher;
-
 	@Transactional
 	public void register(Long restaurantId, MenuDto menuDto) {
 		validateMenuName(restaurantId, null, menuDto.getName(), menuDto.getUploadFile());
@@ -41,12 +40,12 @@ public class MenuService {
 	public void update(Long restaurantId, UpdateMenuDto updateMenuDto) {
 		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
 
-		menuDao.updateById(updateMenuDto);
-
 		MenuInfo menuInfo = getMenuInfo(updateMenuDto.getId());
 		if (canDeleteSavedFile(updateMenuDto, menuInfo.getFile())) {
 			deleteFile(menuInfo.getFile());
 		}
+
+		menuDao.updateById(updateMenuDto);
 	}
 
 	@Transactional
@@ -74,10 +73,21 @@ public class MenuService {
 		}
 
 		if (fileDto != null) {
-			eventPublisher.publishEvent(fileDto);
+			deleteUploadFileOnRollback(fileDto);
 		}
 
 		throw new DuplicateValueException(menuName + "은(는) 이미 존재하는 메뉴명 입니다.");
+	}
+
+	private void deleteUploadFileOnRollback(FileDto fileDto) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCompletion(int status) {
+				if (status == STATUS_ROLLED_BACK) {
+					deleteFile(fileDto);
+				}
+			}
+		});
 	}
 
 	private void deleteFile(FileDto fileDto) {
