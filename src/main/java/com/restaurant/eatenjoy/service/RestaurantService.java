@@ -103,7 +103,7 @@ public class RestaurantService {
 
 			restaurantDao.modifyRestaurantInfo(updateRestaurant);
 
-			if (isDeleteUploadFile(updateRestaurant, restaurantInfo.getUploadFile())) {
+			if (isDeleteServerFile(updateRestaurant.getUploadFile(), restaurantInfo.getUploadFile())) {
 				deleteUploadFile(restaurantInfo.getUploadFile());
 			}
 		} catch (DuplicateKeyException ex) {
@@ -139,22 +139,18 @@ public class RestaurantService {
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 
-	private boolean isDeleteUploadFile(UpdateRestaurant updateRestaurant, FileDto serverFile) {
-		boolean isDelete = false;
+	private boolean isDeleteServerFile(FileDto restaurantImage, FileDto serverFile) {
+		boolean isDelete = isDeleteUploadFile(restaurantImage, serverFile);
 
-		if (serverFile != null && updateRestaurant.getUploadFile() != null) {
-			isDelete = true;
-
-			if (serverFile.getId().equals(updateRestaurant.getUploadFile().getId())) {
-				isDelete = false;
-			}
-		}
-
-		if (serverFile != null && updateRestaurant.getUploadFile() == null) {
+		if (serverFile != null && restaurantImage == null) {
 			isDelete = true;
 		}
 
 		return isDelete;
+	}
+
+	private boolean isDeleteUploadFile(FileDto uploadFileDto, FileDto serverFile) {
+		return serverFile != null && uploadFileDto != null && !serverFile.getId().equals(uploadFileDto.getId());
 	}
 
 }
