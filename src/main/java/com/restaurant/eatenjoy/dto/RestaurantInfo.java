@@ -43,5 +43,7 @@ public class RestaurantInfo {
 
 	private String sigunguCd;
 
+	private String bname;
+
 	private FileDto uploadFile;
 }

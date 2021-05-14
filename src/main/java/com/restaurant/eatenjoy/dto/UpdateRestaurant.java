@@ -65,5 +65,9 @@ public class UpdateRestaurant {
 	@Size(min = 5, max = 5, message = "시/군/구 코드는 5자리 입니다")
 	private String sigunguCd;
 
+	@NotBlank(message = "법정동/법정리 이름을 입력해주세요")
+	@Size(max = 20, message = "법정동/법정리 이름은 20자를 넘길 수 없습니다")
+	private String bname;
+
 	private FileDto uploadFile;
 }

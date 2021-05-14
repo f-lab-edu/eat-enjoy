@@ -18,6 +18,7 @@
         <result property="baseAddress" column="base_address"/>
         <result property="detailAddress" column="detail_address"/>
         <result property="sigunguCd" column="sigungu_cd"/>
+        <result property="bname" column="bname"/>
         <association property="uploadFile" javaType="FileDto">
             <id property="id" column="file_id"/>
             <result property="origFilename" column="origFilename"/>
@@ -43,6 +44,7 @@
              , R.base_address
              , R.detail_address
              , R.sigungu_cd
+             , R.bname
              , F.id as file_id
              , F.origFilename
              , F.serverFilename
@@ -71,6 +73,7 @@
               , base_address
               , detail_address
               , sigungu_cd
+              , bname
               <if test = "uploadFile != null">
                   , file_id
               </if>
@@ -90,6 +93,7 @@
               , #{baseAddress}
               , #{detailAddress}
               , #{sigunguCd}
+              , #{bname}
               <if test = "uploadFile != null">
                   , #{uploadFile.id}
               </if>
@@ -100,6 +104,7 @@
         SELECT id
              , name
              , intr_dc
+             , bname
           FROM restaurant
             WHERE owner_id = #{ownerId}
         <if test=" lastRestaurantId != 0 ">
@@ -124,6 +129,7 @@
              , base_address = #{baseAddress}
              , detail_address = #{detailAddress}
              , sigungu_cd = #{sigunguCd}
+             , bname = #{bname}
              , update_at = now()
              <choose>
                  <when test="uploadFile != null">

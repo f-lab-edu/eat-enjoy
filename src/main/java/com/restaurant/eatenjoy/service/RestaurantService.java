@@ -60,6 +60,7 @@ public class RestaurantService {
 			.detailAddress(restaurantDto.getDetailAddress())
 			.sigunguCd(restaurantDto.getSigunguCd())
 			.uploadFile(restaurantDto.getUploadFile())
+			.bname(restaurantDto.getBname())
 			.build();
 
 		try {
