@@ -31,13 +31,6 @@ public class RestaurantDto {
 	@Size(min = 10, message = "사업자 등록 번호는 10글자 이상입니다")
 	private String bizrNo;
 
-	@NotBlank(message = "주소를 입력해주세요")
-	private String address;
-
-	@NotBlank(message = "지역코드를 입력해주세요.")
-	@Size(max = 3, message = "최대 3자리까지 입력 가능합니다.")
-	private String regionCd;
-
 	@NotBlank(message = "가게 전화번호를 입력해주세요.")
 	@Pattern(regexp = "^(0(2|3[1-3]|4[1-4]|5[1-5]|6[1-4]))-(\\d{3,4})-(\\d{4})$", message = "전화번호 형식이 맞지 않습니다")
 	private String telNo;
@@ -61,4 +54,21 @@ public class RestaurantDto {
 
 	@NotNull(message = "가게 마감 시간을 입력해주세요")
 	private LocalTime closeTime;
+
+	@NotNull(message = "우편번호를 입력해주세요")
+	@Size(min = 5, max = 5, message = "우편번호는 5자리 입니다")
+	private String postCd;
+
+	@NotBlank(message = "주소를 입력해주세요")
+	@Size(max = 100, message = "주소는 100자를 넘길 수 없습니다")
+	private String baseAddress;
+
+	@Size(max = 100, message = "상세주소는 100자를 넘길 수 없습니다")
+	private String detailAddress;
+
+	@NotNull(message = "시/군/구 코드를 입력해주세요")
+	@Size(min = 5, max = 5, message = "시/군/구 코드는 5자리 입니다")
+	private String sigunguCd;
+
+	private FileDto uploadFile;
 }

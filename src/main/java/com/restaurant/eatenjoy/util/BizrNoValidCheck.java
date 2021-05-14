@@ -9,7 +9,6 @@ public class BizrNoValidCheck {
 	private static final int[] bizrNoValidKey = new int[] { 1, 3, 7, 1, 3, 7, 1, 3, 5 };
 
 	public static boolean valid(String bizrNo) {
-
 		bizrNo = bizrNo.replace("-", "");
 
 		if (bizrNo.length() != 10) {

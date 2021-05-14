@@ -3,8 +3,44 @@
 
 <mapper namespace="com.restaurant.eatenjoy.dao.RestaurantDao">
     <insert id="register" parameterType="RestaurantDto">
-        INSERT INTO restaurant(name, bizr_no, address, region_cd, tel_no, intr_dc, min_order_price, payment_type, owner_id, category_id, open_time, close_time)
-        VALUES (#{name}, #{bizrNo}, #{address}, #{regionCd}, #{telNo}, #{intrDc}, #{minOrderPrice}, #{paymentType}, #{ownerId}, #{categoryId}, #{openTime}, #{closeTime})
+        INSERT INTO restaurant(
+                name
+              , bizr_no
+              , tel_no
+              , intr_dc
+              , min_order_price
+              , payment_type
+              , owner_id
+              , category_id
+              , open_time
+              , close_time
+              , post_cd
+              , base_address
+              , detail_address
+              , sigungu_cd
+              <if test = "uploadFile != null">
+                  , file_id
+              </if>
+        )
+        VALUES (
+                #{name}
+              , #{bizrNo}
+              , #{telNo}
+              , #{intrDc}
+              , #{minOrderPrice}
+              , #{paymentType}
+              , #{ownerId}
+              , #{categoryId}
+              , #{openTime}
+              , #{closeTime}
+              , #{postCd}
+              , #{baseAddress}
+              , #{detailAddress}
+              , #{sigunguCd}
+              <if test = "uploadFile != null">
+                  , #{uploadFile.id}
+              </if>
+        )
     </insert>
 
     <select id="findAllRestaurantList" parameterType="Long" resultType="RestaurantListDto">
