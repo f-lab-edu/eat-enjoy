@@ -62,6 +62,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
 		TransactionSynchronizationManager.initSynchronization();
@@ -84,6 +85,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.build();
 
 		return restaurantDto;
@@ -104,6 +106,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.build();
 
 		return restaurantDto;
@@ -124,6 +127,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.uploadFile(null)
 			.build();
 		TransactionSynchronizationManager.initSynchronization();
@@ -147,6 +151,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.uploadFile(null)
 			.build();
 
@@ -169,6 +174,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
 
@@ -201,6 +207,7 @@ class RestaurantServiceTest {
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
+			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
 
