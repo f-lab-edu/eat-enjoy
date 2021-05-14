@@ -103,7 +103,7 @@ public class RestaurantService {
 
 			restaurantDao.modifyRestaurantInfo(updateRestaurant);
 
-			if (deleteUploadFileOrServerFile(updateRestaurant, restaurantInfo.getUploadFile())) {
+			if (isDeleteUploadFile(updateRestaurant, restaurantInfo.getUploadFile())) {
 				deleteUploadFile(restaurantInfo.getUploadFile());
 			}
 		} catch (DuplicateKeyException ex) {
@@ -139,25 +139,22 @@ public class RestaurantService {
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 
-	private boolean deleteUploadFileOrServerFile(UpdateRestaurant updateRestaurant, FileDto serverFile) {
-		boolean deleteFile = false;
+	private boolean isDeleteUploadFile(UpdateRestaurant updateRestaurant, FileDto serverFile) {
+		boolean isDelete = false;
 
-		// 기존 이미지를 수정하는 경우 파일을 삭제한다
 		if (serverFile != null && updateRestaurant.getUploadFile() != null) {
-			deleteFile = true;
+			isDelete = true;
 
-			// 기존 이미지는 그대로두고 다른 필드를 수정하는 경우, 파일을 삭제하지 않는다
-			if (serverFile.getId() == updateRestaurant.getUploadFile().getId()) {
-				deleteFile = false;
+			if (serverFile.getId().equals(updateRestaurant.getUploadFile().getId())) {
+				isDelete = false;
 			}
 		}
 
-		// 식당 이미지를 삭제하는 경우
 		if (serverFile != null && updateRestaurant.getUploadFile() == null) {
-			deleteFile = true;
+			isDelete = true;
 		}
 
-		return deleteFile;
+		return isDelete;
 	}
 
 }
