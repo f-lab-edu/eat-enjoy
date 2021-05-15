@@ -2,9 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.CategoryDao">
+    <resultMap type="SimpleRestaurantDto" id="simpleRestaurantDto">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="intrDc" column="intr_dc"/>
+        <result property="bname" column="bname"/>
+        <association property="file" javaType="FileDto">
+            <id property="id" column="file_id"/>
+            <result property="origFilename" column="origFilename"/>
+            <result property="serverFilename" column="serverFilename"/>
+            <result property="filePath" column="filePath"/>
+            <result property="size" column="size"/>
+        </association>
+    </resultMap>
+
     <select id="findAll" resultType="CategoryDto">
         SELECT id
              , name
           FROM category
+    </select>
+
+    <select id="findRestaurantsByCategoryIdAndSigunguCdAndRestaurantIdGreaterThan" resultMap="simpleRestaurantDto">
+        SELECT A.id
+             , A.name
+             , A.intr_dc
+             , A.bname
+             , B.id AS file_id
+             , B.origFilename
+             , B.serverFilename
+             , B.filePath
+             , B.size
+          FROM restaurant A
+          LEFT OUTER JOIN files B
+            ON A.file_id = B.id
+         WHERE A.category_id = #{categoryId}
+           AND A.sigungu_cd = #{sigunguCd}
+            <if test="lastRestaurantId > 0">
+                AND A.id <![CDATA[>]]> #{lastRestaurantId}
+            </if>
+         ORDER BY A.id
+         LIMIT 20
     </select>
 </mapper>
