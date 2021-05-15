@@ -96,8 +96,8 @@ public class RestaurantService {
 
 	@Transactional
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
-		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
-			updateRestaurant.getBizrNo());
+		// paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
+		// 	updateRestaurant.getBizrNo());
 
 		try {
 			RestaurantInfo restaurantInfo = findById(updateRestaurant.getId());
@@ -143,15 +143,12 @@ public class RestaurantService {
 	private boolean isDeleteServerFile(FileDto restaurantImage, FileDto serverFile) {
 		boolean isDelete = isDeleteUploadFile(restaurantImage, serverFile);
 
-		if (serverFile != null && restaurantImage == null) {
-			isDelete = true;
-		}
-
 		return isDelete;
 	}
 
 	private boolean isDeleteUploadFile(FileDto uploadFileDto, FileDto serverFile) {
-		return serverFile != null && uploadFileDto != null && !serverFile.getId().equals(uploadFileDto.getId());
+		return serverFile != null && uploadFileDto != null && !serverFile.getId().equals(uploadFileDto.getId())
+			|| serverFile != null && uploadFileDto == null;
 	}
 
 }
