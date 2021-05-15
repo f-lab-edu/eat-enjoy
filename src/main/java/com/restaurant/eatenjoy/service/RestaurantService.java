@@ -96,8 +96,8 @@ public class RestaurantService {
 
 	@Transactional
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
-		// paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
-		// 	updateRestaurant.getBizrNo());
+		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
+			updateRestaurant.getBizrNo());
 
 		try {
 			RestaurantInfo restaurantInfo = findById(updateRestaurant.getId());
