@@ -20,6 +20,7 @@ public class SimpleMenuGroupInfo {
 		private Long menuId;
 		private String menuName;
 		private String intrDc;
+		private FileDto file;
 	}
 
 }

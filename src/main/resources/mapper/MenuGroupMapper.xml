@@ -3,13 +3,20 @@
 
 <mapper namespace="com.restaurant.eatenjoy.dao.MenuGroupDao">
     <resultMap type="SimpleMenuGroupInfo" id="simpleMenuGroupInfo">
-        <id property="menuGroupId" column="menuGroupId"/>
-        <result property="menuGroupName" column="menuGroupName"/>
-        <result property="restaurantId" column="restaurantId"/>
+        <id property="menuGroupId" column="menu_group_id"/>
+        <result property="menuGroupName" column="menu_group_name"/>
+        <result property="restaurantId" column="restaurant_id"/>
         <collection property="menus" ofType="com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo$MenuInfo">
-            <id property="menuId" column="menuId"/>
-            <result property="menuName" column="menuName"/>
-            <result property="intrDc" column="intrDc"/>
+            <id property="menuId" column="menu_id"/>
+            <result property="menuName" column="menu_name"/>
+            <result property="intrDc" column="intr_dc"/>
+            <association property="file" javaType="FileDto">
+                <id property="id" column="file_id"/>
+                <result property="origFilename" column="origFilename"/>
+                <result property="serverFilename" column="serverFilename"/>
+                <result property="filePath" column="filePath"/>
+                <result property="size" column="size"/>
+            </association>
         </collection>
     </resultMap>
 
@@ -25,16 +32,23 @@
     </select>
 
     <select id="findAllAndMenusByRestaurantId" parameterType="long" resultMap="simpleMenuGroupInfo">
-        SELECT A.id AS menuGroupId
-             , A.name AS menuGroupName
-             , A.restaurant_id AS restaurantId
-             , B.id AS menuId
-             , B.name AS menuName
-             , B.intr_dc AS intrDc
+        SELECT A.id AS menu_group_id
+             , A.name AS menu_group_name
+             , A.restaurant_id
+             , B.id AS menu_id
+             , B.name AS menu_name
+             , B.intr_dc
+             , C.id AS file_id
+             , C.origFilename
+             , C.serverFilename
+             , C.filePath
+             , C.size
           FROM menu_group A
           LEFT OUTER JOIN menu B
             ON A.id = B.menu_group_id
            AND B.used = 1
+          LEFT OUTER JOIN files C
+            ON B.file_id = C.id
          WHERE A.restaurant_id = #{restaurantId}
            AND A.used = 1
          ORDER BY A.sort, B.sort
