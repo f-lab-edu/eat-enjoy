@@ -21,7 +21,7 @@ public class CategoryService {
 	}
 
 	public List<SimpleRestaurantDto> getRestaurantsBy(Long categoryId, String sigunguCd, Long lastRestaurantId) {
-		return categoryDao.findRestaurantsByCategoryIdAndSigunguCdAndRestaurantIdGreaterThan(categoryId, sigunguCd, lastRestaurantId);
+		return categoryDao.findRestaurantsBy(categoryId, sigunguCd, lastRestaurantId);
 	}
 
 }

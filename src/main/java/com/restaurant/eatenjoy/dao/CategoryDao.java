@@ -11,7 +11,7 @@ public interface CategoryDao {
 
 	List<CategoryDto> findAll();
 
-	List<SimpleRestaurantDto> findRestaurantsByCategoryIdAndSigunguCdAndRestaurantIdGreaterThan(@Param("categoryId") Long categoryId,
-		@Param("sigunguCd") String sigunguCd, @Param("lastRestaurantId") Long lastRestaurantId);
+	List<SimpleRestaurantDto> findRestaurantsBy(@Param("categoryId") Long categoryId, @Param("sigunguCd") String sigunguCd,
+		@Param("lastRestaurantId") Long lastRestaurantId);
 
 }

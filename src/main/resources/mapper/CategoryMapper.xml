@@ -22,7 +22,7 @@
           FROM category
     </select>
 
-    <select id="findRestaurantsByCategoryIdAndSigunguCdAndRestaurantIdGreaterThan" resultMap="simpleRestaurantDto">
+    <select id="findRestaurantsBy" resultMap="simpleRestaurantDto">
         SELECT A.id
              , A.name
              , A.intr_dc
