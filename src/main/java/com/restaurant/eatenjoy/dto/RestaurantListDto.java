@@ -12,4 +12,6 @@ public class RestaurantListDto {
 	private String name;
 
 	private String intrdc;
+
+	private String bname;
 }

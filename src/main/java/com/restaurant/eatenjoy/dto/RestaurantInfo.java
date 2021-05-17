@@ -2,11 +2,15 @@ package com.restaurant.eatenjoy.dto;
 
 import java.time.LocalTime;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RestaurantInfo {
 
 	private Long id;
@@ -16,10 +20,6 @@ public class RestaurantInfo {
 	private String name;
 
 	private String bizrNo;
-
-	private String address;
-
-	private String regionCd;
 
 	private String telNo;
 
@@ -32,4 +32,18 @@ public class RestaurantInfo {
 	private LocalTime openTime;
 
 	private LocalTime closeTime;
+
+	private Long categoryId;
+
+	private String postCd;
+
+	private String baseAddress;
+
+	private String detailAddress;
+
+	private String sigunguCd;
+
+	private String bname;
+
+	private FileDto uploadFile;
 }

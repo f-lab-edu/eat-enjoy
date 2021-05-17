@@ -2,6 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.RestaurantDao">
+    <resultMap type="RestaurantInfo" id="restaurantInfo">
+        <id property="id" column="id"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="name" column="name"/>
+        <result property="bizrNo" column="bizr_no"/>
+        <result property="telNo" column="tel_no"/>
+        <result property="intrDc" column="intr_dc"/>
+        <result property="minOrderPrice" column="min_order_price"/>
+        <result property="paymentType" column="payment_type"/>
+        <result property="openTime" column="open_time"/>
+        <result property="closeTime" column="close_time"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="postCd" column="post_cd"/>
+        <result property="baseAddress" column="base_address"/>
+        <result property="detailAddress" column="detail_address"/>
+        <result property="sigunguCd" column="sigungu_cd"/>
+        <result property="bname" column="bname"/>
+        <association property="uploadFile" javaType="FileDto">
+            <id property="id" column="file_id"/>
+            <result property="origFilename" column="origFilename"/>
+            <result property="serverFilename" column="serverFilename"/>
+            <result property="filePath" column="filePath"/>
+            <result property="size" column="size"/>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="Long" resultMap="restaurantInfo">
+        SELECT R.id
+             , R.owner_id
+             , R.name
+             , R.bizr_no
+             , R.tel_no
+             , R.intr_dc
+             , R.min_order_price
+             , R.payment_type
+             , R.open_time
+             , R.close_time
+             , R.category_id
+             , R.post_cd
+             , R.base_address
+             , R.detail_address
+             , R.sigungu_cd
+             , R.bname
+             , F.id as file_id
+             , F.origFilename
+             , F.serverFilename
+             , F.serverFilename
+             , F.filePath
+             , F.size
+          FROM restaurant R
+          LEFT OUTER JOIN files F
+            ON R.file_id = F.id
+         WHERE R.id = #{id}
+    </select>
+
     <insert id="register" parameterType="RestaurantDto">
         INSERT INTO restaurant(
                 name
@@ -18,6 +73,7 @@
               , base_address
               , detail_address
               , sigungu_cd
+              , bname
               <if test = "uploadFile != null">
                   , file_id
               </if>
@@ -37,6 +93,7 @@
               , #{baseAddress}
               , #{detailAddress}
               , #{sigunguCd}
+              , #{bname}
               <if test = "uploadFile != null">
                   , #{uploadFile.id}
               </if>
@@ -47,6 +104,7 @@
         SELECT id
              , name
              , intr_dc
+             , bname
           FROM restaurant
             WHERE owner_id = #{ownerId}
         <if test=" lastRestaurantId != 0 ">
@@ -56,29 +114,10 @@
           LIMIT 10
     </select>
 
-    <select id="findById" parameterType="Long" resultType="RestaurantInfo">
-        SELECT id
-             , owner_id
-             , name
-             , bizr_no
-             , address
-             , region_cd
-             , tel_no
-             , intr_dc
-             , min_order_price
-             , payment_type
-             , open_time
-             , close_time
-        FROM restaurant
-          WHERE id = #{restaurantId}
-    </select>
-
     <update id="modifyRestaurantInfo" parameterType="UpdateRestaurant">
         UPDATE restaurant
            SET name = #{name}
              , bizr_no = #{bizrNo}
-             , address = #{address}
-             , region_cd = #{regionCd}
              , tel_no = #{telNo}
              , intr_dc = #{intrDc}
              , min_order_price = #{minOrderPrice}
@@ -86,7 +125,20 @@
              , open_time = #{openTime}
              , close_time = #{closeTime}
              , category_id = #{categoryId}
+             , post_cd = #{postCd}
+             , base_address = #{baseAddress}
+             , detail_address = #{detailAddress}
+             , sigungu_cd = #{sigunguCd}
+             , bname = #{bname}
              , update_at = now()
+             <choose>
+                 <when test="uploadFile != null">
+                     , file_id = #{uploadFile.id}
+                 </when>
+                 <when test="uploadFile == null">
+                     , file_id = null
+                 </when>
+             </choose>
          WHERE id = #{id}
     </update>
 </mapper>
