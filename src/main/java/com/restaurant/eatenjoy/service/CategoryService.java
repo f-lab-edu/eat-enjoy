@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dao.CategoryDao;
 import com.restaurant.eatenjoy.dto.CategoryDto;
+import com.restaurant.eatenjoy.dto.SimpleRestaurantDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,10 @@ public class CategoryService {
 
 	public List<CategoryDto> getCategories() {
 		return categoryDao.findAll();
+	}
+
+	public List<SimpleRestaurantDto> getRestaurantsBy(Long categoryId, String sigunguCd, Long lastRestaurantId) {
+		return categoryDao.findRestaurantsBy(categoryId, sigunguCd, lastRestaurantId);
 	}
 
 }
