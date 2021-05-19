@@ -32,6 +32,7 @@ import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantServiceTest {
@@ -53,7 +54,7 @@ class RestaurantServiceTest {
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -76,7 +77,7 @@ class RestaurantServiceTest {
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("선불")
+			.paymentType(PaymentType.PREPAYMENT)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -97,7 +98,7 @@ class RestaurantServiceTest {
 			.bizrNo("1234567892")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -118,7 +119,7 @@ class RestaurantServiceTest {
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
 			.openTime(LocalTime.of(9, 00))
@@ -143,7 +144,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.categoryId(1L)
@@ -166,7 +167,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.categoryId(1L)
@@ -199,7 +200,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.categoryId(2L)
@@ -222,7 +223,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.categoryId(2L)
@@ -243,7 +244,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
-			.paymentType("매장 결제")
+			.paymentType(PaymentType.POSTPAID)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
@@ -259,7 +260,7 @@ class RestaurantServiceTest {
 			.telNo("02-123-4567")
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
-			.paymentType("선불")
+			.paymentType(PaymentType.PREPAYMENT)
 			.openTime(LocalTime.of(9, 00))
 			.closeTime(LocalTime.of(23, 00))
 			.build();
@@ -515,7 +516,6 @@ class RestaurantServiceTest {
 		// when
 		restaurantService.uploadImage(photo);
 		restaurantService.updateRestaurant(restaurant);
-
 
 		// then
 		then(fileService).should(times(1)).deleteFile(restaurantInfoFileDto);
