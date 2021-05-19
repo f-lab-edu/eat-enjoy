@@ -19,7 +19,6 @@ import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
-import com.restaurant.eatenjoy.exception.NotCurrentDateException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
@@ -32,7 +31,7 @@ public class ExceptionAdvisor {
 
 	@ExceptionHandler({DuplicateValueException.class, AlreadyCertifiedException.class,
 		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class,
-		IllegalArgumentException.class, BizrNoValidException.class, NotCurrentDateException.class})
+		IllegalArgumentException.class, BizrNoValidException.class})
 	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}
