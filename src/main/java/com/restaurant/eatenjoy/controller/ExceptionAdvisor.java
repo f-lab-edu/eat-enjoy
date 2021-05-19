@@ -20,6 +20,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
+import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;
 
@@ -29,9 +30,9 @@ import lombok.Getter;
 @RestControllerAdvice
 public class ExceptionAdvisor {
 
-	@ExceptionHandler({DuplicateValueException.class, AlreadyCertifiedException.class,
+	@ExceptionHandler({ DuplicateValueException.class, AlreadyCertifiedException.class,
 		NoMatchedPasswordException.class, ConflictPasswordException.class, RestaurantMinOrderPriceValueException.class,
-		IllegalArgumentException.class, BizrNoValidException.class})
+		IllegalArgumentException.class, BizrNoValidException.class, ReservationException.class })
 	public ResponseEntity<String> processBadRequestError(Exception exception) {
 		return ResponseEntity.badRequest().body(exception.getMessage());
 	}
