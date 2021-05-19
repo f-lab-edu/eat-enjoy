@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.util.restaurant;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum PaymentType {
 
 	PREPAYMENT("선불"),
@@ -8,6 +10,7 @@ public enum PaymentType {
 
 	private String paymentType;
 
+	@JsonValue
 	public String getPaymentType() {
 		return paymentType;
 	}

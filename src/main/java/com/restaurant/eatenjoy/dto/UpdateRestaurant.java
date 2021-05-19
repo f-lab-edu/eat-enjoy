@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,8 +40,8 @@ public class UpdateRestaurant {
 
 	private int minOrderPrice;
 
-	@NotBlank(message = "결재 방식을 선택 해주세요")
-	private String paymentType;
+	@NotNull(message = "결제 방식을 선택 해주세요")
+	private PaymentType paymentType;
 
 	@NotNull(message = "가게 오픈 시간을 입력해주세요")
 	private LocalTime openTime;
