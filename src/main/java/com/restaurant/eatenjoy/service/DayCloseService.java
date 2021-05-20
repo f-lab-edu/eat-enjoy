@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
+import java.time.LocalDate;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,11 @@ public class DayCloseService {
 		try {
 			dayCloseDao.register(dayCloseDto);
 		} catch (DuplicateKeyException ex) {
-			throw new DuplicateValueException("이미 일 마감 처리된 식당 입니다", ex);
+			throw new DuplicateValueException("이미 마감 처리된 식당 입니다", ex);
 		}
+	}
+
+	public boolean isRestaurantDayClose(Long restaurantId, LocalDate closeDate) {
+		return dayCloseDao.existsByRestaurantIdAndCloseDate(restaurantId, closeDate);
 	}
 }
