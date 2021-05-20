@@ -51,4 +51,18 @@ public class ReservationDto {
 
 	private ReservationStatus status;
 
+	public static ReservationDto createReservation(ReservationDto reservationDto, Long userId) {
+		return ReservationDto.builder()
+			.restaurantId(reservationDto.getRestaurantId())
+			.userId(userId)
+			.reservationDate(reservationDto.getReservationDate())
+			.reservationTime(reservationDto.getReservationTime())
+			.peopleCount(reservationDto.getPeopleCount())
+			.paymentType(reservationDto.getPaymentType())
+			.totalPrice(reservationDto.getTotalPrice())
+			.orderMenus(reservationDto.getOrderMenus())
+			.status(ReservationStatus.REQUEST)
+			.build();
+	}
+
 }

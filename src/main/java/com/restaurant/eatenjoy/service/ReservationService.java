@@ -15,7 +15,6 @@ import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
-import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,18 +34,7 @@ public class ReservationService {
 		validatePaymentType(reservationDto.getPaymentType(), restaurantInfo.getPaymentType());
 		List<MenuInfo> menuInfos = validateOrderMenus(reservationDto, restaurantInfo);
 
-		reservationDto = ReservationDto.builder()
-			.restaurantId(reservationDto.getRestaurantId())
-			.userId(userId)
-			.reservationDate(reservationDto.getReservationDate())
-			.reservationTime(reservationDto.getReservationTime())
-			.peopleCount(reservationDto.getPeopleCount())
-			.paymentType(reservationDto.getPaymentType())
-			.totalPrice(reservationDto.getTotalPrice())
-			.orderMenus(reservationDto.getOrderMenus())
-			.status(ReservationStatus.REQUEST)
-			.build();
-
+		reservationDto = ReservationDto.createReservation(reservationDto, userId);
 		reservationDao.reserve(reservationDto);
 
 		if (reservationDto.getPaymentType() == PaymentType.PREPAYMENT) {
@@ -87,17 +75,17 @@ public class ReservationService {
 
 	private List<MenuInfo> validateOrderMenus(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
 		List<OrderMenuDto> orderMenus = reservationDto.getOrderMenus();
-		boolean isPostpaid = (reservationDto.getPaymentType() == PaymentType.POSTPAID);
+		boolean isPostpaid = reservationDto.getPaymentType() == PaymentType.POSTPAID;
 		if (isPostpaid) {
 			if (orderMenus != null && orderMenus.size() > 0) {
-				throw new ReservationException(PaymentType.POSTPAID.getPaymentType() + "일 경우 메뉴를 선택할 수 없습니다.");
+				throw new ReservationException("매장 결제일 경우 메뉴를 선택할 수 없습니다.");
 			}
 
 			return null;
 		}
 
 		if (orderMenus == null || orderMenus.size() == 0) {
-			throw new ReservationException(PaymentType.PREPAYMENT.getPaymentType() + "일 경우 메뉴를 최소 하나 이상 선택해야 합니다.");
+			throw new ReservationException("선결제일 경우 메뉴를 최소 하나 이상 선택해야 합니다.");
 		}
 
 		List<MenuInfo> restaurantMenus = reservationDao.findMenusByOrderMenus(reservationDto);
