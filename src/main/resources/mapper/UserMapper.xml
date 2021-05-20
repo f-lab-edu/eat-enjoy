@@ -15,8 +15,8 @@
     </select>
 
     <insert id="register" parameterType="UserDto">
-        INSERT INTO users(login_id, password, email, region_cd)
-        VALUES(#{loginId}, #{password}, #{email}, #{regionCd})
+        INSERT INTO users(login_id, password, email)
+        VALUES(#{loginId}, #{password}, #{email})
     </insert>
 
     <select id="findIdByLoginIdAndPassword" resultType="long">
@@ -45,7 +45,6 @@
              , login_id AS loginId
              , email
              , certified
-             , region_cd AS regionCd
           FROM users
          WHERE id = #{id}
     </select>
@@ -67,7 +66,6 @@
         UPDATE users
            SET certified = CASE WHEN email = #{email} THEN certified ELSE 0 END
              , email = #{email}
-             , region_cd = #{regionCd}
              , update_at = now()
          WHERE id = #{id}
     </update>

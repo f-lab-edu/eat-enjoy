@@ -20,8 +20,4 @@ public class UpdateUserDto {
 	@Email(message = "이메일 형식이 유효하지 않습니다.")
 	private String email;
 
-	@NotBlank(message = "지역코드를 입력해주세요.")
-	@Size(max = 3, message = "최대 3자리까지 입력 가능합니다.")
-	private String regionCd;
-
 }
