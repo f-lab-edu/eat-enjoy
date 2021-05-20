@@ -146,7 +146,7 @@ class ReservationServiceTest {
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDtoWithOrderMenus(PaymentType.POSTPAID)))
 			.isInstanceOf(ReservationException.class)
-			.hasMessage(PaymentType.POSTPAID.getPaymentType() + "일 경우 메뉴를 선택할 수 없습니다.");
+			.hasMessage("매장 결제일 경우 메뉴를 선택할 수 없습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
@@ -161,7 +161,7 @@ class ReservationServiceTest {
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDto(PaymentType.PREPAYMENT)))
 			.isInstanceOf(ReservationException.class)
-			.hasMessage(PaymentType.PREPAYMENT.getPaymentType() + "일 경우 메뉴를 최소 하나 이상 선택해야 합니다.");
+			.hasMessage("선결제일 경우 메뉴를 최소 하나 이상 선택해야 합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
