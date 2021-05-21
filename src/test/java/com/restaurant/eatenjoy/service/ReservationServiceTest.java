@@ -34,10 +34,15 @@ class ReservationServiceTest {
 
 	private static final Long USER_ID = 1L;
 
+	private static final LocalDate RESERVATION_DATE = LocalDate.of(2021, 5, 19);
+
 	private static final int ORDER_MENU_COUNT = 3;
 
 	@Mock
 	private RestaurantService restaurantService;
+
+	@Mock
+	private DayCloseService dayCloseService;
 
 	@Mock
 	private ReservationDao reservationDao;
@@ -47,7 +52,7 @@ class ReservationServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		LocalDateTimeProvider.mockLocalDateAt(LocalDate.of(2021, 5, 19));
+		LocalDateTimeProvider.mockLocalDateAt(RESERVATION_DATE);
 		LocalDateTimeProvider.mockLocalTimeAt(LocalTime.of(10, 0));
 	}
 
@@ -57,18 +62,41 @@ class ReservationServiceTest {
 	}
 
 	@Test
-	@DisplayName("레스토랑 오픈 시간보다 일찍 예약하면 예약에 실패한다.")
-	void failToReservationIfReservationTimeEarlierThanRestaurantOpenTime() {
+	@DisplayName("예약일이 마감되었으면 예약할 수 없다.")
+	void failToReservationIfReservationDateIsClose() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(null));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(true);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
+			.reservationDate(RESERVATION_DATE)
+			.build()))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("해당 예약일은 이미 마감되었습니다.");
+
+		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
+		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
+		then(reservationDao).should(times(0)).reserve(any());
+		then(reservationDao).should(times(0)).insertOrderMenus(any());
+	}
+
+	@Test
+	@DisplayName("레스토랑 오픈 시간보다 일찍 예약하면 예약에 실패한다.")
+	void failToReservationIfReservationTimeEarlierThanRestaurantOpenTime() {
+		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(null));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
+
+		assertThatThrownBy(() -> reservationService.reserve(USER_ID, ReservationDto.builder()
+			.restaurantId(RESTAURANT_ID)
+			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(8, 0))
 			.build()))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("레스토랑 오픈 시간 이전에 예약할 수 없습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -78,15 +106,18 @@ class ReservationServiceTest {
 	@DisplayName("레스토랑 마감 시간 1시간 전에 예약할 수 없다.")
 	void failToReservationIfRestaurantCloseTime1HourBefore() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(null));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
+			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(19, 1))
 			.build()))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("레스토랑 마감 시간 1시간 전까지 예약이 가능합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -96,6 +127,7 @@ class ReservationServiceTest {
 	@DisplayName("당일 예약이고, 예약 시간 1시간 전에 예약할 수 없다.")
 	void failToReservationIfSameDayReservationAndReservationTime1HourBefore() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(null));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		LocalDateTimeProvider.mockLocalTimeAt(LocalTime.of(11, 1));
 
@@ -104,6 +136,7 @@ class ReservationServiceTest {
 			.hasMessage("당일 예약일 경우 1시간 전에 예약 해야 합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -113,12 +146,14 @@ class ReservationServiceTest {
 	@DisplayName("결제 타입을 자유일 경우 예약할 수 없다.")
 	void failToReservationIfPaymentTypeIsFree() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(null));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDto(PaymentType.FREE)))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("결제 방식을 선택해야 합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -128,12 +163,14 @@ class ReservationServiceTest {
 	@DisplayName("레스토랑 결제 타입과 일치하지 않을 경우 예약할 수 없다.")
 	void failToReservationIfRestaurantPaymentTypeNotSame() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.POSTPAID));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDto(PaymentType.PREPAYMENT)))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("레스토랑 결제 방식과 일치하지 않습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -143,12 +180,14 @@ class ReservationServiceTest {
 	@DisplayName("매장 결제일 경우 메뉴를 선택하면 예약할 수 없다.")
 	void failToReservationIfPaymentTypeIsPostPaidAndOrderMenusExists() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.POSTPAID));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDtoWithOrderMenus(PaymentType.POSTPAID)))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("매장 결제일 경우 메뉴를 선택할 수 없습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -158,12 +197,14 @@ class ReservationServiceTest {
 	@DisplayName("선불일 경우 메뉴를 선택하지 않으면 예약할 수 없다.")
 	void failToReservationIfPaymentTypeIsPrePaidAndOrderMenusNotExists() {
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, getReservationDto(PaymentType.PREPAYMENT)))
 			.isInstanceOf(ReservationException.class)
 			.hasMessage("선결제일 경우 메뉴를 최소 하나 이상 선택해야 합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -175,6 +216,7 @@ class ReservationServiceTest {
 		ReservationDto reservationDto = getReservationDtoWithOrderMenus(PaymentType.PREPAYMENT);
 
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 		given(reservationDao.findMenusByOrderMenus(reservationDto)).willReturn(getMenuInfos(1, 0));
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, reservationDto))
@@ -182,6 +224,7 @@ class ReservationServiceTest {
 			.hasMessage("주문 메뉴가 올바르지 않습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -193,6 +236,7 @@ class ReservationServiceTest {
 		ReservationDto reservationDto = getReservationDtoWithOrderMenus(PaymentType.PREPAYMENT);
 
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 		given(reservationDao.findMenusByOrderMenus(reservationDto)).willReturn(getMenuInfos(ORDER_MENU_COUNT, 3000));
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, reservationDto))
@@ -200,6 +244,7 @@ class ReservationServiceTest {
 			.hasMessage("결제 금액이 일치하지 않습니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -211,6 +256,7 @@ class ReservationServiceTest {
 		ReservationDto reservationDto = getReservationDtoWithOrderMenus(PaymentType.PREPAYMENT);
 
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT, 20000));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 		given(reservationDao.findMenusByOrderMenus(reservationDto)).willReturn(getMenuInfos(ORDER_MENU_COUNT, 5000));
 
 		assertThatThrownBy(() -> reservationService.reserve(USER_ID, reservationDto))
@@ -218,6 +264,7 @@ class ReservationServiceTest {
 			.hasMessage("결제 최소 주문 금액보다 커야 합니다.");
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -229,10 +276,12 @@ class ReservationServiceTest {
 		ReservationDto reservationDto = getReservationDto(PaymentType.POSTPAID);
 
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.POSTPAID));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 
 		reservationService.reserve(USER_ID, reservationDto);
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(1)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
@@ -244,11 +293,13 @@ class ReservationServiceTest {
 		ReservationDto reservationDto = getReservationDtoWithOrderMenus(PaymentType.PREPAYMENT);
 
 		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
 		given(reservationDao.findMenusByOrderMenus(reservationDto)).willReturn(getMenuInfos(ORDER_MENU_COUNT, 5000));
 
 		reservationService.reserve(USER_ID, reservationDto);
 
 		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(1)).reserve(any());
 		then(reservationDao).should(times(1)).insertOrderMenus(reservationDto.getOrderMenus());
@@ -258,7 +309,7 @@ class ReservationServiceTest {
 		return ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
 			.userId(USER_ID)
-			.reservationDate(LocalDate.of(2021, 5, 19))
+			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(12, 0))
 			.paymentType(paymentType)
 			.peopleCount(1)
@@ -271,7 +322,7 @@ class ReservationServiceTest {
 		return ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
 			.userId(USER_ID)
-			.reservationDate(LocalDate.of(2021, 5, 19))
+			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(12, 0))
 			.paymentType(paymentType)
 			.peopleCount(1)
