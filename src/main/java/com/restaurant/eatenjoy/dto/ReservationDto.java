@@ -10,6 +10,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
+import com.restaurant.eatenjoy.util.type.PaymentMethod;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
 import lombok.AllArgsConstructor;
@@ -43,6 +44,8 @@ public class ReservationDto {
 	@NotNull(message = "결제 타입은 필수 값 입니다.")
 	private PaymentType paymentType;
 
+	private PaymentMethod paymentMethod;
+
 	@Min(0)
 	private int totalPrice;
 
@@ -59,6 +62,7 @@ public class ReservationDto {
 			.reservationTime(reservationDto.getReservationTime())
 			.peopleCount(reservationDto.getPeopleCount())
 			.paymentType(reservationDto.getPaymentType())
+			.paymentMethod(reservationDto.getPaymentMethod())
 			.totalPrice(reservationDto.getTotalPrice())
 			.orderMenus(reservationDto.getOrderMenus())
 			.status(ReservationStatus.REQUEST)
