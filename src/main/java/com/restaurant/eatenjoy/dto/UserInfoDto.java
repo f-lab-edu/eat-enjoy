@@ -13,6 +13,4 @@ public class UserInfoDto {
 
 	private final String email;
 
-	private final String regionCd;
-
 }

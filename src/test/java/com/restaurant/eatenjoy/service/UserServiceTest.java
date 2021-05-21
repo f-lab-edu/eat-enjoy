@@ -58,7 +58,6 @@ class UserServiceTest {
 			.loginId("test")
 			.password("1234")
 			.email(TEST_MAIL)
-			.regionCd("001")
 			.build();
 	}
 
@@ -248,7 +247,6 @@ class UserServiceTest {
 
 		userService.update(1L, UpdateUserDto.builder()
 			.email(changeMail)
-			.regionCd("002")
 			.build());
 
 		then(userDao).should(times(1)).findById(1L);
@@ -267,7 +265,6 @@ class UserServiceTest {
 
 		userService.update(1L, UpdateUserDto.builder()
 			.email(TEST_MAIL)
-			.regionCd("002")
 			.build());
 
 		then(userDao).should(times(1)).findById(1L);

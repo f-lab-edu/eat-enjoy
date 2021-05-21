@@ -53,7 +53,6 @@ public class UserService implements UserDetailsService {
 			.loginId(userDto.getLoginId())
 			.password(encryptable.encrypt(userDto.getPassword()))
 			.email(userDto.getEmail())
-			.regionCd(userDto.getRegionCd())
 			.build();
 		userDao.register(userDto);
 
@@ -125,7 +124,6 @@ public class UserService implements UserDetailsService {
 			.id(userDto.getId())
 			.loginId(userDto.getLoginId())
 			.email(userDto.getEmail())
-			.regionCd(userDto.getRegionCd())
 			.build();
 	}
 
@@ -135,7 +133,6 @@ public class UserService implements UserDetailsService {
 		userDao.updateById(UserDto.builder()
 			.id(userId)
 			.email(userDto.getEmail())
-			.regionCd(userDto.getRegionCd())
 			.build());
 
 		UserDto findUser = findById(userId);
