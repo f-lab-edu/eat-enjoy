@@ -6,4 +6,11 @@
         INSERT INTO day_close(restaurant_id, close_date)
         VALUES(#{restaurantId}, #{closeDate})
     </insert>
+
+    <select id="existsByRestaurantIdAndCloseDate" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM day_close
+                       WHERE restaurant_id = #{restaurantId}
+                         AND close_date = #{closeDate})
+    </select>
 </mapper>

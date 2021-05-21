@@ -60,4 +60,18 @@ class DayCloseServiceTest {
 		then(dayCloseDao).should(times(1)).register(dayCloseDto);
 	}
 
+	@Test
+	@DisplayName("일 마감 여부 반환")
+	void successFindDayClose() {
+		// givne
+		DayCloseDto dayCloseDto = getDayCloseDto();
+		given(dayCloseDao.existsByRestaurantIdAndCloseDate(dayCloseDto.getRestaurantId(), dayCloseDto.getCloseDate())).willReturn(true);
+
+		// when
+		dayCloseService.isRestaurantDayClose(dayCloseDto.getRestaurantId(), dayCloseDto.getCloseDate());
+
+		// then
+		then(dayCloseDao).should(times(1)).existsByRestaurantIdAndCloseDate(dayCloseDto.getRestaurantId(), dayCloseDto.getCloseDate());
+	}
+
 }
