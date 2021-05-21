@@ -24,6 +24,8 @@ public class ReservationService {
 
 	private final RestaurantService restaurantService;
 
+	private final DayCloseService dayCloseService;
+
 	private final ReservationDao reservationDao;
 
 	@Transactional
@@ -45,8 +47,9 @@ public class ReservationService {
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
 		LocalDate reservationDate = reservationDto.getReservationDate();
-
-		// TODO: 일 마감 체크
+		if (dayCloseService.isRestaurantDayClose(restaurantInfo.getId(), reservationDate)) {
+			throw new ReservationException("해당 예약일은 이미 마감되었습니다.");
+		}
 
 		LocalTime reservationTime = reservationDto.getReservationTime();
 		if (reservationTime.isBefore(restaurantInfo.getOpenTime())) {
