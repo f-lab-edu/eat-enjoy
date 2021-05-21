@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.restaurant.eatenjoy.dao.ReservationDao">
+    <select id="findMenusByOrderMenus" parameterType="ReservationDto" resultType="MenuInfo">
+        SELECT A.id
+             , A.name
+             , A.price
+          FROM menu A
+         INNER JOIN menu_group B
+            ON A.menu_group_id = B.id
+         WHERE A.id IN <foreach collection="orderMenus" item="item" open="(" separator="," close=")">#{item.menuId}</foreach>
+           AND B.restaurant_id = #{restaurantId}
+           AND A.used = 1
+    </select>
+
+    <insert id="reserve" parameterType="ReservationDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation(rsrv_date, rsrv_time, rsrv_count, status, users_id, restaurant_id)
+        VALUES (#{reservationDate}, #{reservationTime}, #{peopleCount}, #{status}, #{userId}, #{restaurantId})
+    </insert>
+
+    <insert id="insertOrderMenus" parameterType="list">
+        INSERT INTO order_menu(reservation_id, menu_id, menu_name, price, count)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.reservationId}, #{item.menuId}, #{item.menuName}, #{item.price}, #{item.count})
+        </foreach>
+    </insert>
+</mapper>
