@@ -113,8 +113,8 @@ public class RestaurantService {
 		}
 	}
 
-	private void paymentTypeAndBizrNoValidCheck(String paymentType, int minOrderPrice, String bizrNo) {
-		if ((PaymentType.PREPAYMENT.getPaymentType()).equals(paymentType)
+	private void paymentTypeAndBizrNoValidCheck(PaymentType paymentType, int minOrderPrice, String bizrNo) {
+		if ((PaymentType.PREPAYMENT).equals(paymentType)
 			&& minOrderPrice == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}

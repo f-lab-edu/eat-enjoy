@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,8 +41,8 @@ public class RestaurantDto {
 
 	private int minOrderPrice;
 
-	@NotBlank(message = "결재 방식을 선택 해주세요")
-	private String paymentType;
+	@NotNull(message = "결제 방식을 선택 해주세요")
+	private PaymentType paymentType;
 
 	@NotNull
 	private Long ownerId;

@@ -2,6 +2,8 @@ package com.restaurant.eatenjoy.dto;
 
 import java.time.LocalTime;
 
+import com.restaurant.eatenjoy.util.restaurant.PaymentType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +29,7 @@ public class RestaurantInfo {
 
 	private int minOrderPrice;
 
-	private String paymentType;
+	private PaymentType paymentType;
 
 	private LocalTime openTime;
 
