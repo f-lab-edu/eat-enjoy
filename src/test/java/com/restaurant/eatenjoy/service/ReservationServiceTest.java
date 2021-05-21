@@ -25,6 +25,7 @@ import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
+import com.restaurant.eatenjoy.util.type.PaymentMethod;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +44,9 @@ class ReservationServiceTest {
 
 	@Mock
 	private DayCloseService dayCloseService;
+
+	@Mock
+	private PaymentService paymentService;
 
 	@Mock
 	private ReservationDao reservationDao;
@@ -79,6 +83,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -100,6 +105,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -121,6 +127,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -140,6 +147,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -157,6 +165,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -174,6 +183,31 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
+	}
+
+	@Test
+	@DisplayName("선불일 경우 결제 수단이 존재하지 않으면 예약할 수 없다.")
+	void failToReservationIfPaymentTypeIsPrePaidAndAndMethodIsNull() {
+		given(restaurantService.findById(RESTAURANT_ID)).willReturn(getRestaurantInfo(PaymentType.PREPAYMENT));
+		given(dayCloseService.isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE)).willReturn(false);
+
+		assertThatThrownBy(() -> reservationService.reserve(USER_ID, ReservationDto.builder()
+			.restaurantId(RESTAURANT_ID)
+			.reservationDate(RESERVATION_DATE)
+			.reservationTime(LocalTime.of(12, 0))
+			.paymentType(PaymentType.PREPAYMENT)
+			.paymentMethod(null)
+			.build()))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("결제 수단을 선택해야 합니다.");
+
+		then(restaurantService).should(times(1)).findById(RESTAURANT_ID);
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(RESTAURANT_ID, RESERVATION_DATE);
+		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
+		then(reservationDao).should(times(0)).reserve(any());
+		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -191,6 +225,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -208,6 +243,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(any());
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -228,6 +264,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -248,6 +285,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -268,6 +306,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(0)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -285,6 +324,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(0)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(1)).reserve(any());
 		then(reservationDao).should(times(0)).insertOrderMenus(any());
+		then(paymentService).should(times(0)).insertPayment(any());
 	}
 
 	@Test
@@ -303,6 +343,7 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).findMenusByOrderMenus(reservationDto);
 		then(reservationDao).should(times(1)).reserve(any());
 		then(reservationDao).should(times(1)).insertOrderMenus(reservationDto.getOrderMenus());
+		then(paymentService).should(times(1)).insertPayment(any());
 	}
 
 	private ReservationDto getReservationDto(PaymentType paymentType) {
@@ -312,6 +353,7 @@ class ReservationServiceTest {
 			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(12, 0))
 			.paymentType(paymentType)
+			.paymentMethod(PaymentMethod.CARD)
 			.peopleCount(1)
 			.totalPrice(15000)
 			.status(ReservationStatus.REQUEST)
@@ -325,6 +367,7 @@ class ReservationServiceTest {
 			.reservationDate(RESERVATION_DATE)
 			.reservationTime(LocalTime.of(12, 0))
 			.paymentType(paymentType)
+			.paymentMethod(PaymentMethod.CARD)
 			.peopleCount(1)
 			.totalPrice(15000)
 			.orderMenus(getOrderMenus())
