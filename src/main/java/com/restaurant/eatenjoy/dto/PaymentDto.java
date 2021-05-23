@@ -1,6 +1,6 @@
 package com.restaurant.eatenjoy.dto;
 
-import com.restaurant.eatenjoy.util.type.PaymentMethod;
+import javax.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,20 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PaymentDto {
 
-	private Long id;
+	@NotBlank(message = "아임포트 거래 번호는 필수 값 입니다.")
+	private String imp_uid;
 
-	private PaymentMethod type;
-
-	private int price;
-
-	private Long reservationId;
-
-	public static PaymentDto create(ReservationDto reservationDto) {
-		return PaymentDto.builder()
-			.type(reservationDto.getPaymentMethod())
-			.price(reservationDto.getTotalPrice())
-			.reservationId(reservationDto.getId())
-			.build();
-	}
+	@NotBlank(message = "예약 번호는 필수 값 입니다.")
+	private String merchant_uid;
 
 }

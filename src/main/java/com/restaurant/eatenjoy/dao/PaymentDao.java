@@ -1,9 +1,9 @@
 package com.restaurant.eatenjoy.dao;
 
-import com.restaurant.eatenjoy.dto.PaymentDto;
+import com.siot.IamportRestClient.response.Payment;
 
 public interface PaymentDao {
 
-	void insertPayment(PaymentDto paymentDto);
+	void insertPayment(Payment payment);
 
 }
