@@ -1,5 +1,6 @@
 package com.restaurant.eatenjoy.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -10,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.restaurant.eatenjoy.dao.ReservationDao;
 import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.dto.OrderMenuDto;
-import com.restaurant.eatenjoy.dto.PaymentDto;
 import com.restaurant.eatenjoy.dto.ReservationDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.ReservationException;
@@ -27,16 +27,18 @@ public class ReservationService {
 
 	private final DayCloseService dayCloseService;
 
-	private final PaymentService paymentService;
-
 	private final ReservationDao reservationDao;
 
+	public BigDecimal getTotalPrice(Long reservationId) {
+		return reservationDao.getTotalPriceById(reservationId);
+	}
+
 	@Transactional
-	public void reserve(Long userId, ReservationDto reservationDto) {
+	public Long reserve(Long userId, ReservationDto reservationDto) {
 		RestaurantInfo restaurantInfo = restaurantService.findById(reservationDto.getRestaurantId());
 
 		validateReservationDateTime(reservationDto, restaurantInfo);
-		validatePayment(reservationDto, restaurantInfo.getPaymentType());
+		validatePaymentType(reservationDto.getPaymentType(), restaurantInfo.getPaymentType());
 		List<MenuInfo> menuInfos = validateOrderMenus(reservationDto, restaurantInfo);
 
 		reservationDto = ReservationDto.createReservation(reservationDto, userId);
@@ -45,8 +47,9 @@ public class ReservationService {
 		if (reservationDto.getPaymentType() == PaymentType.PREPAYMENT) {
 			setOrderMenusInfo(reservationDto, menuInfos);
 			reservationDao.insertOrderMenus(reservationDto.getOrderMenus());
-			paymentService.insertPayment(PaymentDto.create(reservationDto));
 		}
+
+		return reservationDto.getId();
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
@@ -70,18 +73,13 @@ public class ReservationService {
 		}
 	}
 
-	private void validatePayment(ReservationDto reservationDto, PaymentType restaurantPaymentType) {
-		PaymentType reservationPaymentType = reservationDto.getPaymentType();
+	private void validatePaymentType(PaymentType reservationPaymentType, PaymentType restaurantPaymentType) {
 		if (reservationPaymentType == PaymentType.FREE) {
 			throw new ReservationException("결제 방식을 선택해야 합니다.");
 		}
 
 		if (restaurantPaymentType != PaymentType.FREE && reservationPaymentType != restaurantPaymentType) {
 			throw new ReservationException("레스토랑 결제 방식과 일치하지 않습니다.");
-		}
-
-		if (reservationPaymentType == PaymentType.PREPAYMENT && reservationDto.getPaymentMethod() == null) {
-			throw new ReservationException("결제 수단을 선택해야 합니다.");
 		}
 	}
 

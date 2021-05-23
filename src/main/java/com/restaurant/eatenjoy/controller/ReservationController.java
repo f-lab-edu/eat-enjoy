@@ -27,8 +27,8 @@ public class ReservationController {
 	@Authority(Role.USER)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void reservation(@LoginAuthId Long userId, @RequestBody @Valid ReservationDto reservationDto) {
-		reservationService.reserve(userId, reservationDto);
+	public Long reservation(@LoginAuthId Long userId, @RequestBody @Valid ReservationDto reservationDto) {
+		return reservationService.reserve(userId, reservationDto);
 	}
 
 }
