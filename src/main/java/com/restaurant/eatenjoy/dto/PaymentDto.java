@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 public class PaymentDto {
 
 	@NotBlank(message = "아임포트 거래 번호는 필수 값 입니다.")
-	private String imp_uid;
+	private String impUid;
 
 	@NotBlank(message = "예약 번호는 필수 값 입니다.")
-	private String merchant_uid;
+	private String merchantUid;
 
 }
