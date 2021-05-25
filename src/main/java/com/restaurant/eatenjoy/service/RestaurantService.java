@@ -44,24 +44,7 @@ public class RestaurantService {
 	}
 
 	private void saveRestaurant(RestaurantDto restaurantDto, Long ownerId) {
-		restaurantDto = RestaurantDto.builder()
-			.name(restaurantDto.getName())
-			.bizrNo(restaurantDto.getBizrNo())
-			.telNo(restaurantDto.getTelNo())
-			.intrDc(restaurantDto.getIntrDc())
-			.minOrderPrice(restaurantDto.getMinOrderPrice())
-			.paymentType(restaurantDto.getPaymentType())
-			.ownerId(ownerId)
-			.categoryId(restaurantDto.getCategoryId())
-			.openTime(restaurantDto.getOpenTime())
-			.closeTime(restaurantDto.getCloseTime())
-			.postCd(restaurantDto.getPostCd())
-			.baseAddress(restaurantDto.getBaseAddress())
-			.detailAddress(restaurantDto.getDetailAddress())
-			.sigunguCd(restaurantDto.getSigunguCd())
-			.uploadFile(restaurantDto.getUploadFile())
-			.bname(restaurantDto.getBname())
-			.build();
+		restaurantDto = RestaurantDto.createRestaurant(restaurantDto, ownerId);
 
 		try {
 			restaurantDao.register(restaurantDto);
