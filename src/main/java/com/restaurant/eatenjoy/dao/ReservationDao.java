@@ -17,4 +17,6 @@ public interface ReservationDao {
 
 	void insertOrderMenus(List<OrderMenuDto> orderMenus);
 
+	void deleteById(Long reservationId);
+
 }

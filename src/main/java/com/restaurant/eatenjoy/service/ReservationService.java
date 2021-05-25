@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
@@ -50,6 +51,11 @@ public class ReservationService {
 		}
 
 		return reservationDto.getId();
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void delete(Long reservationId) {
+		reservationDao.deleteById(reservationId);
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {

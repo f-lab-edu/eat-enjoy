@@ -38,7 +38,7 @@ public class PaymentService {
 
 		BigDecimal totalPrice = reservationService.getTotalPrice(Long.parseLong(payment.getMerchantUid()));
 		if (!payment.getAmount().equals(totalPrice)) {
-			cancelPaymentOnRollback(payment.getImpUid());
+			cancelPaymentOnRollback(payment);
 			throw new NoMatchedPaymentAmountException("결제금액이 일치하지 않습니다.");
 		}
 
@@ -53,13 +53,15 @@ public class PaymentService {
 		}
 	}
 
-	private void cancelPaymentOnRollback(String impUid) {
+	private void cancelPaymentOnRollback(Payment payment) {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCompletion(int status) {
 				if (status == STATUS_ROLLED_BACK) {
+					reservationService.delete(Long.parseLong(payment.getMerchantUid()));
+
 					try {
-						iamportClient.cancelPaymentByImpUid(new CancelData(impUid, true));
+						iamportClient.cancelPaymentByImpUid(new CancelData(payment.getImpUid(), true));
 					} catch (IamportResponseException | IOException e) {
 						throw new IamportFailedException("Iamport 결제취소 작업에 실패했습니다.", e);
 					}

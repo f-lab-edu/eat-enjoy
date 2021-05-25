@@ -34,4 +34,12 @@
             (#{item.reservationId}, #{item.menuId}, #{item.menuName}, #{item.price}, #{item.count})
         </foreach>
     </insert>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE A, B
+          FROM reservation A
+          LEFT OUTER JOIN order_menu B
+            ON A.id = B.reservation_id
+         WHERE A.id = #{id}
+    </delete>
 </mapper>
