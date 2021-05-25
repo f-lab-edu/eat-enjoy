@@ -305,6 +305,14 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).insertOrderMenus(reservationDto.getOrderMenus());
 	}
 
+	@Test
+	@DisplayName("예약 정보를 정상적으로 삭제할 수 있다.")
+	void successToDeleteReservation() {
+		reservationService.delete(1L);
+
+		then(reservationDao).should(times(1)).deleteById(1L);
+	}
+
 	private ReservationDto getReservationDto(PaymentType paymentType) {
 		return ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
