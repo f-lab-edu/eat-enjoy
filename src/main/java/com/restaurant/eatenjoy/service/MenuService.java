@@ -41,21 +41,21 @@ public class MenuService {
 		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
 
 		MenuInfo menuInfo = getMenuInfo(updateMenuDto.getId());
+		menuDao.updateById(updateMenuDto);
+
 		if (canDeleteSavedFile(updateMenuDto, menuInfo.getFile())) {
 			deleteFile(menuInfo.getFile());
 		}
-
-		menuDao.updateById(updateMenuDto);
 	}
 
 	@Transactional
 	public void delete(Long menuId) {
 		MenuInfo menuInfo = getMenuInfo(menuId);
+		menuDao.deleteById(menuId);
+
 		if (menuInfo.getFile() != null) {
 			deleteFile(menuInfo.getFile());
 		}
-
-		menuDao.deleteById(menuId);
 	}
 
 	public FileDto uploadImage(MultipartFile photo) {

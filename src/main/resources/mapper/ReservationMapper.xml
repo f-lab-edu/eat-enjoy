@@ -11,7 +11,6 @@
             ON A.menu_group_id = B.id
          WHERE A.id IN <foreach collection="orderMenus" item="item" open="(" separator="," close=")">#{item.menuId}</foreach>
            AND B.restaurant_id = #{restaurantId}
-           AND A.used = 1
     </select>
 
     <insert id="reserve" parameterType="ReservationDto" useGeneratedKeys="true" keyProperty="id">

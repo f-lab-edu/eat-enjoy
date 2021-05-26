@@ -34,7 +34,6 @@
           LEFT OUTER JOIN files B
             ON A.file_id = B.id
          WHERE A.id = #{id}
-           AND A.used = 1
     </select>
 
     <select id="existsByRestaurantIdAndName" resultType="boolean">
@@ -71,15 +70,11 @@
              , menu_group_id = #{menuGroupId}
              , update_at = now()
          WHERE id = #{id}
-           AND used = 1
     </update>
 
-    <update id="deleteById" parameterType="long">
-        UPDATE menu
-           SET file_id = null
-             , used = 0
-             , update_at = now()
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM menu
          WHERE id = #{id}
-           AND used = 1
-    </update>
+    </delete>
 </mapper>
