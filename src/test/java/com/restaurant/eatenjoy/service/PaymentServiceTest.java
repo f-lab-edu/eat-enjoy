@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +20,7 @@ import com.restaurant.eatenjoy.dao.PaymentDao;
 import com.restaurant.eatenjoy.dto.PaymentDto;
 import com.restaurant.eatenjoy.exception.IamportFailedException;
 import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
+import com.restaurant.eatenjoy.util.ReflectionUtils;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
@@ -125,28 +125,18 @@ class PaymentServiceTest {
 
 	private IamportResponse<Payment> getIamportResponse(String impUid, String merchantUid, BigDecimal amount) {
 		IamportResponse<Payment> iamportResponse = new IamportResponse<>();
-		setFieldValue(iamportResponse, "response", getPayment(impUid, merchantUid, amount));
+		ReflectionUtils.setFieldValue(iamportResponse, "response", getPayment(impUid, merchantUid, amount));
 
 		return iamportResponse;
 	}
 
 	private Payment getPayment(String impUid, String merchantUid, BigDecimal amount) {
 		Payment payment = new Payment();
-		setFieldValue(payment, "imp_uid", impUid);
-		setFieldValue(payment, "merchant_uid", merchantUid);
-		setFieldValue(payment, "amount", amount);
+		ReflectionUtils.setFieldValue(payment, "imp_uid", impUid);
+		ReflectionUtils.setFieldValue(payment, "merchant_uid", merchantUid);
+		ReflectionUtils.setFieldValue(payment, "amount", amount);
 
 		return payment;
-	}
-
-	private void setFieldValue(Object obj, String fieldName, Object value) {
-		try {
-			Field field = obj.getClass().getDeclaredField(fieldName);
-			field.setAccessible(true);
-			field.set(obj, value);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 }
