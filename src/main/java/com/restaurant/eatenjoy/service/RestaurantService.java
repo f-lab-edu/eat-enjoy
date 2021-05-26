@@ -3,6 +3,8 @@ package com.restaurant.eatenjoy.service;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.BizrNoValidCheck;
+import com.restaurant.eatenjoy.util.cache.CacheNames;
 import com.restaurant.eatenjoy.util.file.FileExtension;
 import com.restaurant.eatenjoy.util.file.FileService;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
@@ -67,6 +70,7 @@ public class RestaurantService {
 		return restaurantDao.findAllRestaurantList(lastRestaurantId, ownerId);
 	}
 
+	@Cacheable(value = CacheNames.RESTAURANT, key = "#id")
 	public RestaurantInfo findById(Long id) {
 		RestaurantInfo restaurantInfo = restaurantDao.findById(id);
 
@@ -78,6 +82,7 @@ public class RestaurantService {
 	}
 
 	@Transactional
+	@CacheEvict(value = CacheNames.RESTAURANT, key = "#updateRestaurant.id")
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
 		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
 			updateRestaurant.getBizrNo());
