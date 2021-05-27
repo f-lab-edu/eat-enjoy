@@ -20,6 +20,10 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.restaurant.eatenjoy.util.cache.CacheNames.TimeToLive;
 
@@ -39,11 +43,6 @@ public class CacheConfig {
 	}
 
 	@Bean
-	public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
-		return new GenericJackson2JsonRedisSerializer();
-	}
-
-	@Bean
 	@Primary
 	public CacheManager redisCacheManager() {
 		return RedisCacheManager.RedisCacheManagerBuilder
@@ -59,6 +58,20 @@ public class CacheConfig {
 		simpleCacheManager.setCaches(caffeineCaches());
 
 		return simpleCacheManager;
+	}
+
+	@Bean
+	public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.activateDefaultTyping(
+			BasicPolymorphicTypeValidator.builder()
+				.allowIfSubType(Object.class)
+				.build(),
+			ObjectMapper.DefaultTyping.NON_FINAL);
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		return new GenericJackson2JsonRedisSerializer(objectMapper);
 	}
 
 	private RedisCacheConfiguration redisCacheConfiguration() {
