@@ -18,7 +18,9 @@ import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
+import com.restaurant.eatenjoy.exception.IamportFailedException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
+import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
@@ -67,6 +69,11 @@ public class ExceptionAdvisor {
 	@ExceptionHandler(FileNotSupportException.class)
 	public ResponseEntity<String> processFileNotSupportError(FileNotSupportException exception) {
 		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(exception.getMessage());
+	}
+
+	@ExceptionHandler({ NoMatchedPaymentAmountException.class, IamportFailedException.class })
+	public ResponseEntity<String> processPaymentError(RuntimeException exception) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
 	}
 
 	private List<InvalidField> createInvalidFields(List<FieldError> fieldErrors) {

@@ -10,25 +10,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.annotation.LoginAuthId;
-import com.restaurant.eatenjoy.dto.ReservationDto;
-import com.restaurant.eatenjoy.service.ReservationService;
+import com.restaurant.eatenjoy.dto.PaymentDto;
+import com.restaurant.eatenjoy.service.PaymentService;
 import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
-public class ReservationController {
+public class PaymentController {
 
-	private final ReservationService reservationService;
+	private final PaymentService paymentService;
 
 	@Authority(Role.USER)
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Long reservation(@LoginAuthId Long userId, @RequestBody @Valid ReservationDto reservationDto) {
-		return reservationService.reserve(userId, reservationDto);
+	public void payment(@RequestBody @Valid PaymentDto paymentDto) {
+		paymentService.insertPayment(paymentDto);
 	}
 
 }

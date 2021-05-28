@@ -1,10 +1,12 @@
 package com.restaurant.eatenjoy.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
@@ -28,8 +30,12 @@ public class ReservationService {
 
 	private final ReservationDao reservationDao;
 
+	public BigDecimal getTotalPrice(Long reservationId) {
+		return reservationDao.getTotalPriceById(reservationId);
+	}
+
 	@Transactional
-	public void reserve(Long userId, ReservationDto reservationDto) {
+	public Long reserve(Long userId, ReservationDto reservationDto) {
 		RestaurantInfo restaurantInfo = restaurantService.findById(reservationDto.getRestaurantId());
 
 		validateReservationDateTime(reservationDto, restaurantInfo);
@@ -43,6 +49,13 @@ public class ReservationService {
 			setOrderMenusInfo(reservationDto, menuInfos);
 			reservationDao.insertOrderMenus(reservationDto.getOrderMenus());
 		}
+
+		return reservationDto.getId();
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void delete(Long reservationId) {
+		reservationDao.deleteById(reservationId);
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {

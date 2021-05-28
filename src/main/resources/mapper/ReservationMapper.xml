@@ -14,6 +14,14 @@
            AND A.used = 1
     </select>
 
+    <select id="getTotalPriceById" parameterType="long" resultType="decimal">
+        SELECT SUM(B.price * B.count) AS totalPrice
+          FROM reservation A
+         INNER JOIN order_menu B
+            ON A.id = B.reservation_id
+         WHERE A.id = #{id}
+    </select>
+
     <insert id="reserve" parameterType="ReservationDto" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO reservation(rsrv_date, rsrv_time, rsrv_count, status, users_id, restaurant_id)
         VALUES (#{reservationDate}, #{reservationTime}, #{peopleCount}, #{status}, #{userId}, #{restaurantId})
@@ -26,4 +34,12 @@
             (#{item.reservationId}, #{item.menuId}, #{item.menuName}, #{item.price}, #{item.count})
         </foreach>
     </insert>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE A, B
+          FROM reservation A
+          LEFT OUTER JOIN order_menu B
+            ON A.id = B.reservation_id
+         WHERE A.id = #{id}
+    </delete>
 </mapper>
