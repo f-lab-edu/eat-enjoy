@@ -1,10 +1,12 @@
 package com.restaurant.eatenjoy.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
@@ -24,10 +26,16 @@ public class ReservationService {
 
 	private final RestaurantService restaurantService;
 
+	private final DayCloseService dayCloseService;
+
 	private final ReservationDao reservationDao;
 
+	public BigDecimal getTotalPrice(Long reservationId) {
+		return reservationDao.getTotalPriceById(reservationId);
+	}
+
 	@Transactional
-	public void reserve(Long userId, ReservationDto reservationDto) {
+	public Long reserve(Long userId, ReservationDto reservationDto) {
 		RestaurantInfo restaurantInfo = restaurantService.findById(reservationDto.getRestaurantId());
 
 		validateReservationDateTime(reservationDto, restaurantInfo);
@@ -41,12 +49,20 @@ public class ReservationService {
 			setOrderMenusInfo(reservationDto, menuInfos);
 			reservationDao.insertOrderMenus(reservationDto.getOrderMenus());
 		}
+
+		return reservationDto.getId();
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void delete(Long reservationId) {
+		reservationDao.deleteById(reservationId);
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
 		LocalDate reservationDate = reservationDto.getReservationDate();
-
-		// TODO: 일 마감 체크
+		if (dayCloseService.isRestaurantDayClose(restaurantInfo.getId(), reservationDate)) {
+			throw new ReservationException("해당 예약일은 이미 마감되었습니다.");
+		}
 
 		LocalTime reservationTime = reservationDto.getReservationTime();
 		if (reservationTime.isBefore(restaurantInfo.getOpenTime())) {

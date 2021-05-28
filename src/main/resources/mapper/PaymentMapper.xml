@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.restaurant.eatenjoy.dao.PaymentDao">
+    <insert id="insertPayment" parameterType="com.siot.IamportRestClient.response.Payment">
+        INSERT INTO payment(imp_uid, pay_method, amount, status, paid_at, reservation_id)
+        VALUES(#{imp_uid}, #{pay_method}, #{amount}, #{status}, #{paid_at}, #{merchant_uid})
+    </insert>
+</mapper>
