@@ -12,10 +12,12 @@ public interface MenuGroupDao {
 
 	void register(MenuGroupDto menuGroupDto);
 
-	int updateById(UpdateMenuGroupDto menuGroupDto);
+	void updateById(UpdateMenuGroupDto menuGroupDto);
 
 	void deleteById(Long menuGroupId);
 
 	List<SimpleMenuGroupInfo> findAllAndMenusByRestaurantId(Long restaurantId);
+
+	boolean existsMenusById(Long menuGroupId);
 
 }

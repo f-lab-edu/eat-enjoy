@@ -27,7 +27,6 @@
              , restaurant_id AS restaurantId
           FROM menu_group
          WHERE restaurant_id = #{restaurantId}
-           AND used = 1
          ORDER BY sort
     </select>
 
@@ -46,12 +45,16 @@
           FROM menu_group A
           LEFT OUTER JOIN menu B
             ON A.id = B.menu_group_id
-           AND B.used = 1
           LEFT OUTER JOIN files C
             ON B.file_id = C.id
          WHERE A.restaurant_id = #{restaurantId}
-           AND A.used = 1
          ORDER BY A.sort, B.sort
+    </select>
+
+    <select id="existsMenusById" parameterType="long" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                        FROM menu
+                       WHERE menu_group_id = #{id})
     </select>
 
     <insert id="register" parameterType="MenuGroupDto">
@@ -61,17 +64,15 @@
 
     <update id="updateById" parameterType="UpdateMenuGroupDto">
         UPDATE menu_group
-           SET name = #{id}
+           SET name = #{name}
              , sort = #{sort}
              , update_at = now()
          WHERE id = #{id}
-           AND used = 1
     </update>
 
-    <update id="deleteById" parameterType="long">
-        UPDATE menu_group
-           SET used = 0
-             , update_at = now()
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM menu_group
          WHERE id = #{id}
-    </update>
+    </delete>
 </mapper>
