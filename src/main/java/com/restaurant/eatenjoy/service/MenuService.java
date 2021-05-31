@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -10,6 +12,7 @@ import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.dto.MenuInfo;
+import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateMenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.util.file.FileExtension;
@@ -56,6 +59,10 @@ public class MenuService {
 		if (menuInfo.getFile() != null) {
 			deleteFile(menuInfo.getFile());
 		}
+	}
+
+	public void deleteByIdIn(List<SimpleMenuGroupInfo.MenuInfo> menus) {
+		menuDao.deleteByIdIn(menus);
 	}
 
 	public FileDto uploadImage(MultipartFile photo) {

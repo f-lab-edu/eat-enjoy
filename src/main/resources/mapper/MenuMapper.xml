@@ -77,4 +77,10 @@
           FROM menu
          WHERE id = #{id}
     </delete>
+
+    <delete id="deleteByIdIn" parameterType="list">
+        DELETE
+          FROM menu
+         WHERE id IN <foreach collection="menus" item="item" open="(" separator="," close=")">#{item.menuId}</foreach>
+    </delete>
 </mapper>
