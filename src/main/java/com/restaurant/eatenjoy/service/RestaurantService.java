@@ -1,8 +1,13 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.apache.ibatis.javassist.Loader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DuplicateKeyException;
@@ -10,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
@@ -17,6 +23,7 @@ import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
+import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -28,6 +35,7 @@ import com.restaurant.eatenjoy.util.file.FileExtension;
 import com.restaurant.eatenjoy.util.file.FileService;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
+import io.netty.util.internal.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,6 +45,10 @@ public class RestaurantService {
 	private final RestaurantDao restaurantDao;
 
 	private final FileService fileService;
+
+	private final MenuGroupService menuGroupService;
+
+	private final MenuService menuService;
 
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
@@ -101,6 +113,50 @@ public class RestaurantService {
 		}
 	}
 
+	@Transactional
+	@CacheEvict(value = CacheNames.RESTAURANT, key = "#id")
+	public void deleteRestaurant(Long id) {
+
+		/*
+		* ToDo 예약 대기건이 존재하는지
+		* ToDo 일 마감이 존재하는지
+		* */
+
+		List<SimpleMenuGroupInfo> menuGroupInfos = menuGroupService.getSimpleMenuGroupInfos(id);
+
+		restaurantMenuAndMenuImageDelete(menuGroupInfos);
+		restaurantMenuGroupDelete(menuGroupInfos);
+
+		FileDto uploadFile = findById(id).getUploadFile();
+		restaurantDao.deleteById(id);
+		deleteUploadFile(uploadFile);
+	}
+
+	private void restaurantMenuAndMenuImageDelete(List<SimpleMenuGroupInfo> menuGroupInfos) {
+		List<FileDto> fileDtos = new ArrayList<>();
+		List<SimpleMenuGroupInfo.MenuInfo> menus = new ArrayList<>();
+
+		menuGroupInfos.stream()
+			.flatMap(simpleMenuGroupInfo -> simpleMenuGroupInfo.getMenus().stream())
+			.forEach(menuInfo -> {
+				if (!Objects.isNull(menuInfo.getFile())) {
+					fileDtos.add(menuInfo.getFile());
+				}
+				menus.add(menuInfo);
+			});
+
+		menuService.deleteByIdIn(menus);
+		deleteUploadFiles(fileDtos);
+	}
+
+	private void restaurantMenuGroupDelete(List<SimpleMenuGroupInfo> menuGroupInfos) {
+		List<Long> menuGroupIds = menuGroupInfos.stream()
+			.map(simpleMenuGroupInfo -> simpleMenuGroupInfo.getMenuGroupId())
+			.collect(Collectors.toList());
+
+		menuGroupService.deleteByIdIn(menuGroupIds);
+	}
+
 	private void paymentTypeAndBizrNoValidCheck(PaymentType paymentType, int minOrderPrice, String bizrNo) {
 		if ((PaymentType.PREPAYMENT).equals(paymentType)
 			&& minOrderPrice == 0) {
@@ -126,6 +182,11 @@ public class RestaurantService {
 	private void deleteUploadFile(FileDto fileDto) {
 		fileService.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
+	}
+
+	public void deleteUploadFiles(List<FileDto> fileDtos) {
+		fileService.deleteFiles(fileDtos);
+		fileService.deleteFileInfos(fileDtos);
 	}
 
 	private boolean isDeleteServerFile(FileDto restaurantImage, FileDto serverFile) {

@@ -141,4 +141,10 @@
              </choose>
          WHERE id = #{id}
     </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM restaurant
+         WHERE id = #{id}
+    </delete>
 </mapper>
