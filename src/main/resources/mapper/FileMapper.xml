@@ -12,4 +12,10 @@
           FROM files
          WHERE id = #{id}
     </delete>
+
+    <delete id="deleteByIdIn" parameterType="list">
+        DELETE
+          FROM files
+         WHERE id IN <foreach collection="fileDtos" item="item" open="(" separator="," close=")">#{item.id}</foreach>
+    </delete>
 </mapper>

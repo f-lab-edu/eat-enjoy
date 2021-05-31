@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,23 @@ public class LocalFileService implements FileService {
 	@Override
 	public void deleteFileInfo(Long fileId) {
 		fileDao.deleteById(fileId);
+	}
+
+	@Override
+	public void deleteFiles(List<FileDto> fileDtos) {
+		File file;
+
+		for (FileDto fileDto : fileDtos) {
+			file = new File(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
+			if (file.exists()) {
+				file.delete();
+			}
+		}
+	}
+
+	@Override
+	public void deleteFileInfos(List<FileDto> fileDtos) {
+		fileDao.deleteByIdIn(fileDtos);
 	}
 
 	private String initializeUploadDirectoryPath(String subPath) {
