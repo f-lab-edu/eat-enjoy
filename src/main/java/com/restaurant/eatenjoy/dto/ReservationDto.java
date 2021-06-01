@@ -61,7 +61,7 @@ public class ReservationDto {
 			.paymentType(reservationDto.getPaymentType())
 			.totalPrice(reservationDto.getTotalPrice())
 			.orderMenus(reservationDto.getOrderMenus())
-			.status(ReservationStatus.REQUEST)
+			.status(reservationDto.getPaymentType() == PaymentType.PREPAYMENT ? ReservationStatus.REQUEST : ReservationStatus.APPROVAL)
 			.build();
 	}
 
