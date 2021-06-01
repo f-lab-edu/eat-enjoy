@@ -67,9 +67,7 @@ public class LocalFileService implements FileService {
 
 	@Override
 	public void deleteFiles(List<FileDto> fileDtos) {
-		for (FileDto fileDto : fileDtos) {
-			deleteFile(fileDto);
-		}
+		fileDtos.stream().forEach(this::deleteFile);
 	}
 
 	@Override
