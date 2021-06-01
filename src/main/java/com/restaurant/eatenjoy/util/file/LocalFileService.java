@@ -67,13 +67,8 @@ public class LocalFileService implements FileService {
 
 	@Override
 	public void deleteFiles(List<FileDto> fileDtos) {
-		File file;
-
 		for (FileDto fileDto : fileDtos) {
-			file = new File(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
-			if (file.exists()) {
-				file.delete();
-			}
+			deleteFile(fileDto);
 		}
 	}
 
