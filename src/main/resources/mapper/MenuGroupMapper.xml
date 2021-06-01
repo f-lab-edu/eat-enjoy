@@ -76,9 +76,9 @@
          WHERE id = #{id}
     </delete>
 
-    <delete id="deleteByIdIn" parameterType="list">
+    <delete id="deleteByRestaurantId" parameterType="long">
         DELETE
           FROM menu_group
-         WHERE id IN <foreach collection="menuGroupIds" item="item" open="(" separator="," close=")">#{item}</foreach>
-     </delete>
+         WHERE restaurant_id = #{restaurantId}
+    </delete>
 </mapper>

@@ -16,10 +16,9 @@ public interface MenuGroupDao {
 
 	void deleteById(Long menuGroupId);
 
-	void deleteByIdIn(List<Long> menuGroupIds);
+	void deleteByRestaurantId(Long restaurantId);
 
 	List<SimpleMenuGroupInfo> findAllAndMenusByRestaurantId(Long restaurantId);
 
 	boolean existsMenusById(Long menuGroupId);
-
 }

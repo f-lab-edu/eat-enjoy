@@ -57,8 +57,8 @@ public class MenuGroupService {
 		menuGroupDao.deleteById(menuGroupId);
 	}
 
-	public void deleteByIdIn(List<Long> menuGroupIds) {
-		menuGroupDao.deleteByIdIn(menuGroupIds);
+	public void deleteByRestaurantId(Long restaurantId) {
+		menuGroupDao.deleteByRestaurantId(restaurantId);
 	}
 
 	private void validateMenusOfMenuGroup(Long menuGroupId) {
