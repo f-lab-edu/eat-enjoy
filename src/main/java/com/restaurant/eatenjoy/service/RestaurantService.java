@@ -1,9 +1,9 @@
 package com.restaurant.eatenjoy.service;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.*;
+
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,10 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
 import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
 import com.restaurant.eatenjoy.dto.RestaurantListDto;
-import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateRestaurant;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
@@ -113,43 +113,29 @@ public class RestaurantService {
 	public void deleteRestaurant(Long id) {
 
 		/*
-		* ToDo 예약 대기건이 존재하는지
-		* ToDo 일 마감이 존재하는지
-		* */
+		 * ToDo 예약 대기건이 존재하는지
+		 * ToDo 일 마감이 존재하는지
+		 * */
 
-		List<SimpleMenuGroupInfo> menuGroupInfos = menuGroupService.getSimpleMenuGroupInfos(id);
+		List<MenuInfo> menuInfos = menuService.getMenuInfos(id);
+		deleteMenuAndMenuImage(menuInfos);
 
-		deleteMenuAndMenuImage(menuGroupInfos);
-		deleteMenuGroup(menuGroupInfos);
+		menuGroupService.deleteByRestaurantId(id);
 
 		FileDto uploadFile = findById(id).getUploadFile();
 		restaurantDao.deleteById(id);
 		deleteUploadFile(uploadFile);
 	}
 
-	private void deleteMenuAndMenuImage(List<SimpleMenuGroupInfo> menuGroupInfos) {
-		List<FileDto> fileDtos = new ArrayList<>();
-		List<SimpleMenuGroupInfo.MenuInfo> menus = new ArrayList<>();
+	private void deleteMenuAndMenuImage(List<MenuInfo> menuInfos) {
+		menuService.deleteByIdIn(menuInfos);
 
-		menuGroupInfos.stream()
-			.flatMap(simpleMenuGroupInfo -> simpleMenuGroupInfo.getMenus().stream())
-			.forEach(menuInfo -> {
-				if (!Objects.isNull(menuInfo.getFile())) {
-					fileDtos.add(menuInfo.getFile());
-				}
-				menus.add(menuInfo);
-			});
+		List<FileDto> fileDtos = menuInfos.stream()
+			.filter(menuInfo -> !Objects.isNull(menuInfo.getFile()))
+			.map(MenuInfo::getFile)
+			.collect(toList());
 
-		menuService.deleteByIdIn(menus);
 		deleteUploadFiles(fileDtos);
-	}
-
-	private void deleteMenuGroup(List<SimpleMenuGroupInfo> menuGroupInfos) {
-		List<Long> menuGroupIds = menuGroupInfos.stream()
-			.map(simpleMenuGroupInfo -> simpleMenuGroupInfo.getMenuGroupId())
-			.collect(Collectors.toList());
-
-		menuGroupService.deleteByIdIn(menuGroupIds);
 	}
 
 	private void validatePaymentTypeAndBizrNo(PaymentType paymentType, int minOrderPrice, String bizrNo) {
