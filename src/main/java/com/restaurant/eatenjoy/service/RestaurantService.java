@@ -135,7 +135,9 @@ public class RestaurantService {
 			.map(MenuInfo::getFile)
 			.collect(toList());
 
-		deleteUploadFiles(fileDtos);
+		if (!fileDtos.isEmpty()) {
+			deleteUploadFiles(fileDtos);
+		}
 	}
 
 	private void validatePaymentTypeAndBizrNo(PaymentType paymentType, int minOrderPrice, String bizrNo) {
