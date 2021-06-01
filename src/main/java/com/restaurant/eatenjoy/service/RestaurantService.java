@@ -1,13 +1,10 @@
 package com.restaurant.eatenjoy.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.javassist.Loader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
@@ -35,7 +31,6 @@ import com.restaurant.eatenjoy.util.file.FileExtension;
 import com.restaurant.eatenjoy.util.file.FileService;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
-import io.netty.util.internal.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -52,7 +47,7 @@ public class RestaurantService {
 
 	@Transactional
 	public void register(RestaurantDto restaurantDto, Long ownerId) {
-		paymentTypeAndBizrNoValidCheck(restaurantDto.getPaymentType(), restaurantDto.getMinOrderPrice(),
+		validatePaymentTypeAndBizrNo(restaurantDto.getPaymentType(), restaurantDto.getMinOrderPrice(),
 			restaurantDto.getBizrNo());
 
 		saveRestaurant(restaurantDto, ownerId);
@@ -64,7 +59,7 @@ public class RestaurantService {
 		try {
 			restaurantDao.register(restaurantDto);
 		} catch (DuplicateKeyException ex) {
-			restaurantFileDeleteOnRollback(restaurantDto.getUploadFile());
+			deleteRestaurantFileOnRollback(restaurantDto.getUploadFile());
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}
@@ -96,7 +91,7 @@ public class RestaurantService {
 	@Transactional
 	@CacheEvict(value = CacheNames.RESTAURANT, key = "#updateRestaurant.id")
 	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
-		paymentTypeAndBizrNoValidCheck(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
+		validatePaymentTypeAndBizrNo(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
 			updateRestaurant.getBizrNo());
 
 		try {
@@ -108,7 +103,7 @@ public class RestaurantService {
 				deleteUploadFile(restaurantInfo.getUploadFile());
 			}
 		} catch (DuplicateKeyException ex) {
-			restaurantFileDeleteOnRollback(updateRestaurant.getUploadFile());
+			deleteRestaurantFileOnRollback(updateRestaurant.getUploadFile());
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}
@@ -124,15 +119,15 @@ public class RestaurantService {
 
 		List<SimpleMenuGroupInfo> menuGroupInfos = menuGroupService.getSimpleMenuGroupInfos(id);
 
-		restaurantMenuAndMenuImageDelete(menuGroupInfos);
-		restaurantMenuGroupDelete(menuGroupInfos);
+		deleteMenuAndMenuImage(menuGroupInfos);
+		deleteMenuGroup(menuGroupInfos);
 
 		FileDto uploadFile = findById(id).getUploadFile();
 		restaurantDao.deleteById(id);
 		deleteUploadFile(uploadFile);
 	}
 
-	private void restaurantMenuAndMenuImageDelete(List<SimpleMenuGroupInfo> menuGroupInfos) {
+	private void deleteMenuAndMenuImage(List<SimpleMenuGroupInfo> menuGroupInfos) {
 		List<FileDto> fileDtos = new ArrayList<>();
 		List<SimpleMenuGroupInfo.MenuInfo> menus = new ArrayList<>();
 
@@ -149,7 +144,7 @@ public class RestaurantService {
 		deleteUploadFiles(fileDtos);
 	}
 
-	private void restaurantMenuGroupDelete(List<SimpleMenuGroupInfo> menuGroupInfos) {
+	private void deleteMenuGroup(List<SimpleMenuGroupInfo> menuGroupInfos) {
 		List<Long> menuGroupIds = menuGroupInfos.stream()
 			.map(simpleMenuGroupInfo -> simpleMenuGroupInfo.getMenuGroupId())
 			.collect(Collectors.toList());
@@ -157,7 +152,7 @@ public class RestaurantService {
 		menuGroupService.deleteByIdIn(menuGroupIds);
 	}
 
-	private void paymentTypeAndBizrNoValidCheck(PaymentType paymentType, int minOrderPrice, String bizrNo) {
+	private void validatePaymentTypeAndBizrNo(PaymentType paymentType, int minOrderPrice, String bizrNo) {
 		if ((PaymentType.PREPAYMENT).equals(paymentType)
 			&& minOrderPrice == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
@@ -168,7 +163,7 @@ public class RestaurantService {
 		}
 	}
 
-	private void restaurantFileDeleteOnRollback(FileDto fileDto) {
+	private void deleteRestaurantFileOnRollback(FileDto fileDto) {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCompletion(int status) {
