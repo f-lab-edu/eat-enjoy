@@ -36,6 +36,26 @@
          WHERE A.id = #{id}
     </select>
 
+    <select id="findAllByRestaurantId" parameterType="long" resultMap="menuInfo">
+        SELECT B.id
+             , B.name
+             , B.intr_dc
+             , B.price
+             , B.sort
+             , B.menu_group_id
+             , C.id AS file_id
+             , C.origFilename
+             , C.serverFilename
+             , C.filePath
+             , C.size
+        FROM menu_group A
+        INNER JOIN menu B
+          ON A.id = B.menu_group_id
+        LEFT OUTER JOIN files C
+          ON B.file_id = C.id
+        WHERE A.restaurant_id = #{restaurantId}
+    </select>
+
     <select id="existsByRestaurantIdAndName" resultType="boolean">
         SELECT EXISTS(SELECT 1
                         FROM menu A
@@ -81,6 +101,6 @@
     <delete id="deleteByIdIn" parameterType="list">
         DELETE
           FROM menu
-         WHERE id IN <foreach collection="menus" item="item" open="(" separator="," close=")">#{item.menuId}</foreach>
+         WHERE id IN <foreach collection="menus" item="item" open="(" separator="," close=")">#{item.id}</foreach>
     </delete>
 </mapper>

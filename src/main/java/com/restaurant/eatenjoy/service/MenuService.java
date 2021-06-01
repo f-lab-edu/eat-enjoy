@@ -12,7 +12,6 @@ import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.MenuDto;
 import com.restaurant.eatenjoy.dto.MenuInfo;
-import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
 import com.restaurant.eatenjoy.dto.UpdateMenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.util.file.FileExtension;
@@ -39,6 +38,10 @@ public class MenuService {
 		return menuDao.findById(menuId);
 	}
 
+	public List<MenuInfo> getMenuInfos(Long restaurantId) {
+		return menuDao.findAllByRestaurantId(restaurantId);
+	}
+
 	@Transactional
 	public void update(Long restaurantId, UpdateMenuDto updateMenuDto) {
 		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
@@ -61,7 +64,7 @@ public class MenuService {
 		}
 	}
 
-	public void deleteByIdIn(List<SimpleMenuGroupInfo.MenuInfo> menus) {
+	public void deleteByIdIn(List<MenuInfo> menus) {
 		menuDao.deleteByIdIn(menus);
 	}
 
