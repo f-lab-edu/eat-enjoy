@@ -3,6 +3,8 @@ package com.restaurant.eatenjoy.controller;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,11 @@ public class ReservationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void completePayment(@LoginAuthId Long userId, @RequestBody @Valid PaymentDto paymentDto) {
 		reservationService.completePayment(userId, paymentDto);
+	}
+
+	@PatchMapping("/{reservationId}/cancel")
+	public void cancelReservation(@LoginAuthId Long userId, @PathVariable Long reservationId) {
+		reservationService.cancel(userId, reservationId);
 	}
 
 }

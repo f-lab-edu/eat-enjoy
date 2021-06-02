@@ -1,6 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
+import com.restaurant.eatenjoy.util.payment.PaymentService;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 import com.siot.IamportRestClient.response.Payment;
@@ -64,7 +66,7 @@ public class ReservationService {
 
 		validateReservationBeforePaymentComplete(reservationInfo);
 
-		Payment payment = paymentService.getIamportPayment(paymentDto.getImpUid());
+		Payment payment = paymentService.getPayment(paymentDto.getImpUid());
 		if (!paymentDto.getMerchantUid().equals(payment.getMerchantUid())) {
 			throw new IllegalArgumentException("유효하지 않은 예약번호 입니다.");
 		}
@@ -73,6 +75,20 @@ public class ReservationService {
 
 		paymentService.insert(payment);
 		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.APPROVAL);
+	}
+
+	@Transactional
+	public void cancel(Long userId, Long reservationId) {
+		ReservationInfo reservationInfo = getReservationInfo(reservationId, userId);
+
+		validateReservationBeforeCancel(reservationInfo);
+
+		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.CANCEL);
+
+		if (reservationInfo.getPayment() != null) {
+			paymentService.cancel(reservationId.toString(), false, calculateCancelAmount(reservationInfo));
+			paymentService.updateCancelByImpUid(reservationInfo.getPayment().getImpUid());
+		}
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
@@ -191,12 +207,33 @@ public class ReservationService {
 	private void validatePaymentAmount(ReservationInfo reservationInfo, Payment payment) {
 		BigDecimal totalAmount = reservationInfo.getOrderMenus().stream()
 			.map(orderMenu -> new BigDecimal(orderMenu.getPrice() * orderMenu.getCount()))
-			.reduce(BigDecimal.ZERO, BigDecimal::add);
+			.reduce(BigDecimal::add)
+			.orElseThrow();
 
 		if (payment.getAmount().compareTo(totalAmount) != 0) {
 			cancelPaymentOnRollback(payment);
 			throw new NoMatchedPaymentAmountException("결제금액이 일치하지 않습니다.");
 		}
+	}
+
+	private void validateReservationBeforeCancel(ReservationInfo reservationInfo) {
+		if (reservationInfo.getStatus() != ReservationStatus.APPROVAL) {
+			throw new ReservationException("예약 취소가 가능한 상태가 아닙니다.");
+		}
+
+		if (reservationInfo.getReservationDate().isBefore(LocalDateTimeProvider.dateOfNow())) {
+			throw new ReservationException("예약 일이 오늘 일자 이전 예약 건은 취소할 수 없습니다.");
+		}
+	}
+
+	private BigDecimal calculateCancelAmount(ReservationInfo reservationInfo) {
+		BigDecimal paymentAmount = new BigDecimal(reservationInfo.getPayment().getAmount());
+		if (reservationInfo.getReservationDate().isEqual(LocalDateTimeProvider.dateOfNow())
+			&& reservationInfo.getReservationTime().isBefore(LocalDateTimeProvider.timeOfNow().plusHours(1))) {
+			return paymentAmount.divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
+		}
+
+		return paymentAmount;
 	}
 
 	private void cancelPaymentOnRollback(Payment payment) {
@@ -205,7 +242,7 @@ public class ReservationService {
 			public void afterCompletion(int status) {
 				if (status == STATUS_ROLLED_BACK) {
 					reservationDao.deleteById(Long.parseLong(payment.getMerchantUid()));
-					paymentService.cancel(payment);
+					paymentService.cancel(payment.getImpUid(), true);
 				}
 			}
 		});

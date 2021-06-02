@@ -6,9 +6,16 @@ import java.util.List;
 
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReservationInfo {
 
 	private Long id;
@@ -28,12 +35,15 @@ public class ReservationInfo {
 	private Payment payment;
 
 	@Getter
+	@Setter
 	public static class Payment {
 		private String impUid;
 		private String payMethod;
 		private int amount;
+		private int cancelAmount;
 		private String status;
 		private long paidAt;
+		private long cancelledAt;
 	}
 
 }

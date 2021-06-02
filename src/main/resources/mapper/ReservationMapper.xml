@@ -13,8 +13,10 @@
             <id property="impUid" column="imp_uid"/>
             <result property="payMethod" column="pay_method"/>
             <result property="amount" column="amount"/>
+            <result property="cancelAmount" column="cancel_amount"/>
             <result property="status" column="pay_status"/>
             <result property="paidAt" column="paid_at"/>
+            <result property="cancelledAt" column="cancelled_at"/>
         </association>
         <collection property="orderMenus" ofType="OrderMenuDto">
             <id property="reservationId" column="reservation_id"/>
@@ -51,8 +53,10 @@
              , C.imp_uid
              , C.pay_method
              , C.amount
+             , C.cancel_amount
              , C.status AS pay_status
              , C.paid_at
+             , C.cancelled_at
           FROM reservation A
           LEFT OUTER JOIN order_menu B
             ON A.id = B.reservation_id
