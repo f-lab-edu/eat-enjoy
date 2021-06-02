@@ -48,12 +48,12 @@
              , C.serverFilename
              , C.filePath
              , C.size
-        FROM menu_group A
-        INNER JOIN menu B
-          ON A.id = B.menu_group_id
-        LEFT OUTER JOIN files C
-          ON B.file_id = C.id
-        WHERE A.restaurant_id = #{restaurantId}
+          FROM menu_group A
+         INNER JOIN menu B
+            ON A.id = B.menu_group_id
+          LEFT OUTER JOIN files C
+            ON B.file_id = C.id
+         WHERE A.restaurant_id = #{restaurantId}
     </select>
 
     <select id="existsByRestaurantIdAndName" resultType="boolean">
