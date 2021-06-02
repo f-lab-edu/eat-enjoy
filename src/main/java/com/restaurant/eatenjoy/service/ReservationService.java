@@ -67,11 +67,8 @@ public class ReservationService {
 		validateReservationBeforePaymentComplete(reservationInfo);
 
 		Payment payment = paymentService.getPayment(paymentDto.getImpUid());
-		if (!paymentDto.getMerchantUid().equals(payment.getMerchantUid())) {
-			throw new IllegalArgumentException("유효하지 않은 예약번호 입니다.");
-		}
 
-		validatePaymentAmount(reservationInfo, payment);
+		validatePaymentComplete(reservationInfo, payment);
 
 		paymentService.insert(payment);
 		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.APPROVAL);
@@ -204,7 +201,15 @@ public class ReservationService {
 		}
 	}
 
-	private void validatePaymentAmount(ReservationInfo reservationInfo, Payment payment) {
+	private void validatePaymentComplete(ReservationInfo reservationInfo, Payment payment) {
+		if (!reservationInfo.getId().toString().equals(payment.getMerchantUid())) {
+			throw new IllegalArgumentException("유효하지 않은 예약번호 입니다.");
+		}
+
+		if (!"paid".equals(payment.getStatus())) {
+			throw new IllegalStateException("결제완료 상태가 아닙니다.");
+		}
+
 		BigDecimal totalAmount = reservationInfo.getOrderMenus().stream()
 			.map(orderMenu -> new BigDecimal(orderMenu.getPrice() * orderMenu.getCount()))
 			.reduce(BigDecimal::add)
