@@ -3,6 +3,7 @@ package com.restaurant.eatenjoy.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,19 +17,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
 import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.dto.OrderMenuDto;
+import com.restaurant.eatenjoy.dto.PaymentDto;
 import com.restaurant.eatenjoy.dto.ReservationDto;
+import com.restaurant.eatenjoy.dto.ReservationInfo;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
+import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
+import com.restaurant.eatenjoy.util.ReflectionUtils;
+import com.restaurant.eatenjoy.util.payment.PaymentService;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
+import com.siot.IamportRestClient.response.Payment;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
+
+	private static final Long RESERVATION_ID = 1L;
 
 	private static final Long RESTAURANT_ID = 1L;
 
@@ -57,11 +68,13 @@ class ReservationServiceTest {
 	void setUp() {
 		LocalDateTimeProvider.mockLocalDateAt(RESERVATION_DATE);
 		LocalDateTimeProvider.mockLocalTimeAt(LocalTime.of(10, 0));
+		TransactionSynchronizationManager.initSynchronization();
 	}
 
 	@AfterEach
 	void cleanUp() {
 		LocalDateTimeProvider.resetClock();
+		TransactionSynchronizationManager.clear();
 	}
 
 	@Test
@@ -308,6 +321,221 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).insertOrderMenus(reservationDto.getOrderMenus());
 	}
 
+	@Test
+	@DisplayName("예약 정보가 존재하지 않으면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfReservationInfoIsNull() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(null);
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, getPaymentDto()))
+			.isInstanceOf(NotFoundException.class);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(0)).getPayment(any());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("예약 상태가 요청이 아니면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfReservationStatusIsNotRequest() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.APPROVAL, null, null));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, getPaymentDto()))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("예약 요청 상태가 아닙니다.");
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(0)).getPayment(any());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("주문 메뉴가 존재하지 않으면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfOrderMenusNotExists() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, new ArrayList<>(), null));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, getPaymentDto()))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("주문 메뉴가 존재하지 않습니다.");
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(0)).getPayment(any());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("결제 정보가 존재하면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfPaymentInfoExists() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, getOrderMenus(), new ReservationInfo.Payment()));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, getPaymentDto()))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("결제 정보가 이미 존재합니다.");
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(0)).getPayment(any());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("예약번호가 유효하지 않으면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfMerchantUidIsNotValid() {
+		PaymentDto paymentDto = getPaymentDto();
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, getOrderMenus(), null));
+		given(paymentService.getPayment(paymentDto.getImpUid())).willReturn(getPayment(paymentDto.getImpUid(), "2", BigDecimal.ONE));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, paymentDto))
+			.isInstanceOf(IllegalArgumentException.class);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(1)).getPayment(paymentDto.getImpUid());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("결제금액이 일치하지 않으면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfPaymentAmountNotMatch() {
+		PaymentDto paymentDto = getPaymentDto();
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, getOrderMenus(), null));
+		given(paymentService.getPayment(paymentDto.getImpUid())).willReturn(getPayment(paymentDto.getImpUid(), RESERVATION_ID.toString(), BigDecimal.ONE));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, paymentDto))
+			.isInstanceOf(NoMatchedPaymentAmountException.class);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(1)).getPayment(paymentDto.getImpUid());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isOne();
+	}
+
+	@Test
+	@DisplayName("결제 정보를 정상적으로 등록하고 예약 승인상태로 변경할 수 있다.")
+	void successToCompletePayment() {
+		PaymentDto paymentDto = getPaymentDto();
+		Payment payment = getPayment(paymentDto.getImpUid(), RESERVATION_ID.toString(), new BigDecimal(15000));
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, getOrderMenus(), null));
+		given(paymentService.getPayment(paymentDto.getImpUid())).willReturn(payment);
+
+		reservationService.completePayment(USER_ID, paymentDto);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(1)).getPayment(paymentDto.getImpUid());
+		then(paymentService).should(times(1)).insert(payment);
+		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.APPROVAL);
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
+	@DisplayName("예약 정보가 존재하지 않으면 예약 취소를 할 수 없다.")
+	void failToCancelReservationIfReservationInfoIsNull() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(null);
+
+		assertThatThrownBy(() -> reservationService.cancel(USER_ID, RESERVATION_ID))
+			.isInstanceOf(NotFoundException.class);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+		then(paymentService).should(times(0)).cancel(any(), eq(false), any());
+		then(paymentService).should(times(0)).updateCancelByImpUid(any());
+	}
+
+	@Test
+	@DisplayName("예약 상태가 승인이 아니면 예약 취소를 할 수 없다.")
+	void failToCancelReservationIfReservationStatusIsNotApproval() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, null, null));
+
+		assertThatThrownBy(() -> reservationService.cancel(USER_ID, RESERVATION_ID))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("예약 취소가 가능한 상태가 아닙니다.");
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+		then(paymentService).should(times(0)).cancel(any(), eq(false), any());
+		then(paymentService).should(times(0)).updateCancelByImpUid(any());
+	}
+
+	@Test
+	@DisplayName("예약 일이 오늘 일자보다 이전이면 예약 취소를 할 수 없다.")
+	void failToCancelReservationIfReservationDateIsEarlierThanToday() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(LocalDate.of(2021, 5, 18), null, ReservationStatus.APPROVAL, null, null));
+
+		assertThatThrownBy(() -> reservationService.cancel(USER_ID, RESERVATION_ID))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("예약 일이 오늘 일자 이전 예약 건은 취소할 수 없습니다.");
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+		then(paymentService).should(times(0)).cancel(any(), eq(false), any());
+		then(paymentService).should(times(0)).updateCancelByImpUid(any());
+	}
+
+	@Test
+	@DisplayName("결제 정보가 존재하지 않으면 예약 상태를 취소로 변경한다.")
+	void successToCancelReservationIfPaymentInfoNotExists() {
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.APPROVAL, getOrderMenus(), null));
+
+		reservationService.cancel(USER_ID, RESERVATION_ID);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
+		then(paymentService).should(times(0)).cancel(any(), eq(false), any());
+		then(paymentService).should(times(0)).updateCancelByImpUid(any());
+	}
+
+	@Test
+	@DisplayName("결제 정보가 존재하면 예약 상태를 취소로 변경하고 결제 취소를 할 수 있다.")
+	void successToCancelReservationIfPaymentInfoExists() {
+		ReservationInfo.Payment payment = new ReservationInfo.Payment();
+		payment.setImpUid("1");
+		payment.setAmount(15000);
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.APPROVAL, getOrderMenus(), payment));
+
+		reservationService.cancel(USER_ID, RESERVATION_ID);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
+		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, new BigDecimal(15000));
+		then(paymentService).should(times(1)).updateCancelByImpUid(payment.getImpUid());
+	}
+
+	@Test
+	@DisplayName("당일 예약 한시간 전에 예약을 취소하면 결제 금액의 50% 위약금이 발생한다.")
+	void successToChargePaymentAmountPenaltyIfReservationDateIsTodayAndCancelIsReservationTimeOneHourBefore() {
+		ReservationInfo.Payment payment = new ReservationInfo.Payment();
+		payment.setImpUid("1");
+		payment.setAmount(15000);
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(RESERVATION_DATE, LocalTime.of(10, 30), ReservationStatus.APPROVAL, getOrderMenus(), payment));
+
+		reservationService.cancel(USER_ID, RESERVATION_ID);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
+		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, new BigDecimal(7500));
+		then(paymentService).should(times(1)).updateCancelByImpUid(payment.getImpUid());
+	}
+
 	private ReservationDto getReservationDto(PaymentType paymentType) {
 		return ReservationDto.builder()
 			.restaurantId(RESTAURANT_ID)
@@ -340,6 +568,7 @@ class ReservationServiceTest {
 		for (long i = 1; i <= ORDER_MENU_COUNT; i++) {
 			OrderMenuDto orderMenu = new OrderMenuDto();
 			orderMenu.setMenuId(i);
+			orderMenu.setPrice(5000);
 			orderMenu.setCount(1);
 
 			orderMenus.add(orderMenu);
@@ -373,6 +602,37 @@ class ReservationServiceTest {
 		}
 
 		return menuInfos;
+	}
+
+	private PaymentDto getPaymentDto() {
+		return PaymentDto.builder()
+			.impUid("1")
+			.merchantUid("1")
+			.build();
+	}
+
+	private Payment getPayment(String impUid, String merchantUid, BigDecimal amount) {
+		Payment payment = new Payment();
+		ReflectionUtils.setFieldValue(payment, "imp_uid", impUid);
+		ReflectionUtils.setFieldValue(payment, "merchant_uid", merchantUid);
+		ReflectionUtils.setFieldValue(payment, "amount", amount);
+
+		return payment;
+	}
+
+	private ReservationInfo getReservationInfo(ReservationStatus status, List<OrderMenuDto> orderMenus, ReservationInfo.Payment payment) {
+		return getReservationInfo(RESERVATION_DATE, LocalTime.of(12, 0), status, orderMenus, payment);
+	}
+
+	private ReservationInfo getReservationInfo(LocalDate reservationDate, LocalTime reservationTime, ReservationStatus status, List<OrderMenuDto> orderMenus, ReservationInfo.Payment payment) {
+		return ReservationInfo.builder()
+			.id(RESERVATION_ID)
+			.reservationDate(reservationDate)
+			.reservationTime(reservationTime)
+			.status(status)
+			.orderMenus(orderMenus)
+			.payment(payment)
+			.build();
 	}
 
 }

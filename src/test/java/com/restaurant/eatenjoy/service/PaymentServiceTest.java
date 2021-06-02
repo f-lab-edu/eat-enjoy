@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.restaurant.eatenjoy.dao.PaymentDao;
 import com.restaurant.eatenjoy.util.ReflectionUtils;
+import com.restaurant.eatenjoy.util.payment.PaymentService;
 import com.siot.IamportRestClient.response.Payment;
 
 @ExtendWith(MockitoExtension.class)
