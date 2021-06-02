@@ -408,6 +408,25 @@ class ReservationServiceTest {
 	}
 
 	@Test
+	@DisplayName("결제완료 상태가 아니면 결제를 완료할 수 없다.")
+	void failToCompletePaymentIfPaymentStatusIsNotPaid() {
+		PaymentDto paymentDto = getPaymentDto();
+
+		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.REQUEST, getOrderMenus(), null));
+		given(paymentService.getPayment(paymentDto.getImpUid())).willReturn(getPayment(paymentDto.getImpUid(), RESERVATION_ID.toString(), BigDecimal.ONE, "ready"));
+
+		assertThatThrownBy(() -> reservationService.completePayment(USER_ID, paymentDto))
+			.isInstanceOf(IllegalStateException.class);
+
+		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
+		then(paymentService).should(times(1)).getPayment(paymentDto.getImpUid());
+		then(paymentService).should(times(0)).insert(any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+
+		assertThat(TransactionSynchronizationManager.getSynchronizations().size()).isZero();
+	}
+
+	@Test
 	@DisplayName("결제금액이 일치하지 않으면 결제를 완료할 수 없다.")
 	void failToCompletePaymentIfPaymentAmountNotMatch() {
 		PaymentDto paymentDto = getPaymentDto();
@@ -612,10 +631,15 @@ class ReservationServiceTest {
 	}
 
 	private Payment getPayment(String impUid, String merchantUid, BigDecimal amount) {
+		return getPayment(impUid, merchantUid, amount, "paid");
+	}
+
+	private Payment getPayment(String impUid, String merchantUid, BigDecimal amount, String status) {
 		Payment payment = new Payment();
 		ReflectionUtils.setFieldValue(payment, "imp_uid", impUid);
 		ReflectionUtils.setFieldValue(payment, "merchant_uid", merchantUid);
 		ReflectionUtils.setFieldValue(payment, "amount", amount);
+		ReflectionUtils.setFieldValue(payment, "status", status);
 
 		return payment;
 	}
