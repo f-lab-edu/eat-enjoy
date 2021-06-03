@@ -23,6 +23,7 @@ import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
 import com.restaurant.eatenjoy.util.payment.PaymentService;
+import com.restaurant.eatenjoy.util.payment.PaymentStatus;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 import com.siot.IamportRestClient.response.Payment;
@@ -83,8 +84,8 @@ public class ReservationService {
 		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.CANCEL);
 
 		if (reservationInfo.getPayment() != null) {
-			paymentService.cancel(reservationId.toString(), false, calculateCancelAmount(reservationInfo));
-			paymentService.updateCancelByImpUid(reservationInfo.getPayment().getImpUid());
+			Payment cancelPayment = paymentService.cancel(reservationId.toString(), false, calculateCancelAmount(reservationInfo));
+			paymentService.updateCancelByImpUid(cancelPayment);
 		}
 	}
 
@@ -206,7 +207,7 @@ public class ReservationService {
 			throw new IllegalArgumentException("유효하지 않은 예약번호 입니다.");
 		}
 
-		if (!"paid".equals(payment.getStatus())) {
+		if (!PaymentStatus.PAID.isMatch(payment)) {
 			throw new IllegalStateException("결제완료 상태가 아닙니다.");
 		}
 

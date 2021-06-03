@@ -37,21 +37,25 @@ public class PaymentService {
 	}
 
 	@Transactional
-	public void updateCancelByImpUid(String impUid) {
-		paymentDao.updateCancelByImpUid(getPayment(impUid));
+	public void updateCancelByImpUid(Payment payment) {
+		if (!PaymentStatus.CANCELLED.isMatch(payment)) {
+			throw new IllegalStateException("결제취소 상태가 아닙니다.");
+		}
+
+		paymentDao.updateCancelByImpUid(payment);
 	}
 
-	public void cancel(String uid, boolean isImpUid) {
-		cancel(new CancelData(uid, isImpUid));
+	public Payment cancel(String uid, boolean isImpUid) {
+		return cancel(new CancelData(uid, isImpUid));
 	}
 
-	public void cancel(String uid, boolean isImpUid, BigDecimal amount) {
-		cancel(new CancelData(uid, isImpUid, amount));
+	public Payment cancel(String uid, boolean isImpUid, BigDecimal amount) {
+		return cancel(new CancelData(uid, isImpUid, amount));
 	}
 
-	private void cancel(CancelData cancelData) {
+	private Payment cancel(CancelData cancelData) {
 		try {
-			iamportClient.cancelPaymentByImpUid(cancelData);
+			return iamportClient.cancelPaymentByImpUid(cancelData).getResponse();
 		} catch (IamportResponseException | IOException e) {
 			throw new IamportFailedException("Iamport 결제취소 작업에 실패했습니다.", e);
 		}
