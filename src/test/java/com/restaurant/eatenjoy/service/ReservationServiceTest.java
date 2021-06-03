@@ -528,14 +528,18 @@ class ReservationServiceTest {
 		payment.setImpUid("1");
 		payment.setAmount(15000);
 
+		BigDecimal cancelAmount = new BigDecimal(15000);
+		Payment cancelPayment = getPayment("1", "1", cancelAmount, "cancelled");
+
 		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(ReservationStatus.APPROVAL, getOrderMenus(), payment));
+		given(paymentService.cancel(RESERVATION_ID.toString(), false, cancelAmount)).willReturn(cancelPayment);
 
 		reservationService.cancel(USER_ID, RESERVATION_ID);
 
 		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
 		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
-		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, new BigDecimal(15000));
-		then(paymentService).should(times(1)).updateCancelByImpUid(payment.getImpUid());
+		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, cancelAmount);
+		then(paymentService).should(times(1)).updateCancelByImpUid(cancelPayment);
 	}
 
 	@Test
@@ -545,14 +549,18 @@ class ReservationServiceTest {
 		payment.setImpUid("1");
 		payment.setAmount(15000);
 
+		BigDecimal cancelAmount = new BigDecimal(7500);
+		Payment cancelPayment = getPayment("1", "1", cancelAmount, "cancelled");
+
 		given(reservationDao.findByIdAndUserId(RESERVATION_ID, USER_ID)).willReturn(getReservationInfo(RESERVATION_DATE, LocalTime.of(10, 30), ReservationStatus.APPROVAL, getOrderMenus(), payment));
+		given(paymentService.cancel(RESERVATION_ID.toString(), false, cancelAmount)).willReturn(cancelPayment);
 
 		reservationService.cancel(USER_ID, RESERVATION_ID);
 
 		then(reservationDao).should(times(1)).findByIdAndUserId(RESERVATION_ID, USER_ID);
 		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
-		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, new BigDecimal(7500));
-		then(paymentService).should(times(1)).updateCancelByImpUid(payment.getImpUid());
+		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, cancelAmount);
+		then(paymentService).should(times(1)).updateCancelByImpUid(cancelPayment);
 	}
 
 	private ReservationDto getReservationDto(PaymentType paymentType) {
