@@ -2,6 +2,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.restaurant.eatenjoy.dao.ReservationDao">
+    <resultMap type="ReservationInfo" id="reservationInfo">
+        <id property="id" column="id"/>
+        <result property="reservationDate" column="rsrv_date"/>
+        <result property="reservationTime" column="rsrv_time"/>
+        <result property="peopleCount" column="rsrv_count"/>
+        <result property="status" column="status"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <association property="payment" javaType="com.restaurant.eatenjoy.dto.ReservationInfo$Payment">
+            <id property="impUid" column="imp_uid"/>
+            <result property="payMethod" column="pay_method"/>
+            <result property="amount" column="amount"/>
+            <result property="cancelAmount" column="cancel_amount"/>
+            <result property="status" column="pay_status"/>
+            <result property="paidAt" column="paid_at"/>
+            <result property="cancelledAt" column="cancelled_at"/>
+        </association>
+        <collection property="orderMenus" ofType="OrderMenuDto">
+            <id property="reservationId" column="reservation_id"/>
+            <id property="menuId" column="menu_id"/>
+            <result property="menuName" column="menu_name"/>
+            <result property="price" column="price"/>
+            <result property="count" column="count"/>
+        </collection>
+    </resultMap>
+
     <select id="findMenusByOrderMenus" parameterType="ReservationDto" resultType="MenuInfo">
         SELECT A.id
              , A.name
@@ -13,16 +38,36 @@
            AND B.restaurant_id = #{restaurantId}
     </select>
 
-    <select id="getTotalPriceById" parameterType="long" resultType="decimal">
-        SELECT SUM(B.price * B.count) AS totalPrice
+    <select id="findByIdAndUserId" resultMap="reservationInfo">
+        SELECT A.id
+             , A.rsrv_date
+             , A.rsrv_time
+             , A.people_count
+             , A.status
+             , A.restaurant_id
+             , B.reservation_id
+             , B.menu_id
+             , B.menu_name
+             , B.price
+             , B.count
+             , C.imp_uid
+             , C.pay_method
+             , C.amount
+             , C.cancel_amount
+             , C.status AS pay_status
+             , C.paid_at
+             , C.cancelled_at
           FROM reservation A
-         INNER JOIN order_menu B
+          LEFT OUTER JOIN order_menu B
             ON A.id = B.reservation_id
+          LEFT OUTER JOIN payment C
+            ON A.id = C.reservation_id
          WHERE A.id = #{id}
+           AND A.user_id = #{userId}
     </select>
 
     <insert id="reserve" parameterType="ReservationDto" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reservation(rsrv_date, rsrv_time, rsrv_count, status, users_id, restaurant_id)
+        INSERT INTO reservation(rsrv_date, rsrv_time, people_count, status, user_id, restaurant_id)
         VALUES (#{reservationDate}, #{reservationTime}, #{peopleCount}, #{status}, #{userId}, #{restaurantId})
     </insert>
 
@@ -33,6 +78,13 @@
             (#{item.reservationId}, #{item.menuId}, #{item.menuName}, #{item.price}, #{item.count})
         </foreach>
     </insert>
+
+    <update id="updateStatusById">
+        UPDATE reservation
+           SET status = #{status}
+             , update_at = now()
+         WHERE id = #{id}
+    </update>
 
     <delete id="deleteById" parameterType="long">
         DELETE A, B

@@ -3,7 +3,16 @@
 
 <mapper namespace="com.restaurant.eatenjoy.dao.PaymentDao">
     <insert id="insertPayment" parameterType="com.siot.IamportRestClient.response.Payment">
-        INSERT INTO payment(imp_uid, pay_method, amount, status, paid_at, reservation_id)
-        VALUES(#{imp_uid}, #{pay_method}, #{amount}, #{status}, #{paid_at}, #{merchant_uid})
+        INSERT INTO payment(reservation_id, imp_uid, pay_method, amount, status, paid_at)
+        VALUES(#{merchant_uid}, #{imp_uid}, #{pay_method}, #{amount}, #{status}, #{paid_at})
     </insert>
+
+    <update id="updateCancelByImpUid" parameterType="com.siot.IamportRestClient.response.Payment">
+        UPDATE payment
+           SET cancel_amount = #{amount}
+             , status = #{status}
+             , cancelled_at = #{cancelled_at}
+             , update_at = now()
+         WHERE imp_uid = #{imp_uid}
+    </update>
 </mapper>
