@@ -6,4 +6,6 @@ public interface PaymentDao {
 
 	void insertPayment(Payment payment);
 
+	void updateCancelByImpUid(Payment payment);
+
 }

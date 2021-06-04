@@ -1,22 +1,32 @@
 package com.restaurant.eatenjoy.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
 import com.restaurant.eatenjoy.dto.MenuInfo;
 import com.restaurant.eatenjoy.dto.OrderMenuDto;
+import com.restaurant.eatenjoy.dto.PaymentDto;
 import com.restaurant.eatenjoy.dto.ReservationDto;
+import com.restaurant.eatenjoy.dto.ReservationInfo;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
+import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;
 import com.restaurant.eatenjoy.util.LocalDateTimeProvider;
+import com.restaurant.eatenjoy.util.payment.PaymentService;
+import com.restaurant.eatenjoy.util.payment.PaymentStatus;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
+import com.restaurant.eatenjoy.util.type.ReservationStatus;
+import com.siot.IamportRestClient.response.Payment;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,11 +38,9 @@ public class ReservationService {
 
 	private final DayCloseService dayCloseService;
 
-	private final ReservationDao reservationDao;
+	private final PaymentService paymentService;
 
-	public BigDecimal getTotalPrice(Long reservationId) {
-		return reservationDao.getTotalPriceById(reservationId);
-	}
+	private final ReservationDao reservationDao;
 
 	@Transactional
 	public Long reserve(Long userId, ReservationDto reservationDto) {
@@ -53,9 +61,32 @@ public class ReservationService {
 		return reservationDto.getId();
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void delete(Long reservationId) {
-		reservationDao.deleteById(reservationId);
+	@Transactional
+	public void completePayment(Long userId, PaymentDto paymentDto) {
+		ReservationInfo reservationInfo = getReservationInfo(Long.parseLong(paymentDto.getMerchantUid()), userId);
+
+		validateReservationBeforePaymentComplete(reservationInfo);
+
+		Payment payment = paymentService.getPayment(paymentDto.getImpUid());
+
+		validatePaymentComplete(reservationInfo, payment);
+
+		paymentService.insert(payment);
+		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.APPROVAL);
+	}
+
+	@Transactional
+	public void cancel(Long userId, Long reservationId) {
+		ReservationInfo reservationInfo = getReservationInfo(reservationId, userId);
+
+		validateReservationBeforeCancel(reservationInfo);
+
+		reservationDao.updateStatusById(reservationInfo.getId(), ReservationStatus.CANCEL);
+
+		if (reservationInfo.getPayment() != null) {
+			Payment cancelPayment = paymentService.cancel(reservationId.toString(), false, calculateCancelAmount(reservationInfo));
+			paymentService.updateCancelByImpUid(cancelPayment);
+		}
 	}
 
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
@@ -146,6 +177,81 @@ public class ReservationService {
 			orderMenu.setMenuName(menu.getName());
 			orderMenu.setPrice(menu.getPrice());
 		}
+	}
+
+	private ReservationInfo getReservationInfo(Long reservationId, Long userId) {
+		ReservationInfo reservationInfo = reservationDao.findByIdAndUserId(reservationId, userId);
+		if (reservationInfo == null) {
+			throw new NotFoundException("예약 정보를 찾을 수 없습니다.");
+		}
+
+		return reservationInfo;
+	}
+
+	private void validateReservationBeforePaymentComplete(ReservationInfo reservationInfo) {
+		if (reservationInfo.getStatus() != ReservationStatus.REQUEST) {
+			throw new ReservationException("예약 요청 상태가 아닙니다.");
+		}
+
+		if (reservationInfo.getOrderMenus().size() == 0) {
+			throw new ReservationException("주문 메뉴가 존재하지 않습니다.");
+		}
+
+		if (reservationInfo.getPayment() != null) {
+			throw new ReservationException("결제 정보가 이미 존재합니다.");
+		}
+	}
+
+	private void validatePaymentComplete(ReservationInfo reservationInfo, Payment payment) {
+		if (!reservationInfo.getId().toString().equals(payment.getMerchantUid())) {
+			throw new IllegalArgumentException("유효하지 않은 예약번호 입니다.");
+		}
+
+		if (!PaymentStatus.PAID.isMatch(payment)) {
+			throw new IllegalStateException("결제완료 상태가 아닙니다.");
+		}
+
+		BigDecimal totalAmount = reservationInfo.getOrderMenus().stream()
+			.map(orderMenu -> new BigDecimal(orderMenu.getPrice() * orderMenu.getCount()))
+			.reduce(BigDecimal::add)
+			.orElseThrow();
+
+		if (payment.getAmount().compareTo(totalAmount) != 0) {
+			cancelPaymentOnRollback(payment);
+			throw new NoMatchedPaymentAmountException("결제금액이 일치하지 않습니다.");
+		}
+	}
+
+	private void validateReservationBeforeCancel(ReservationInfo reservationInfo) {
+		if (reservationInfo.getStatus() != ReservationStatus.APPROVAL) {
+			throw new ReservationException("예약 취소가 가능한 상태가 아닙니다.");
+		}
+
+		if (reservationInfo.getReservationDate().isBefore(LocalDateTimeProvider.dateOfNow())) {
+			throw new ReservationException("예약 일이 오늘 일자 이전 예약 건은 취소할 수 없습니다.");
+		}
+	}
+
+	private BigDecimal calculateCancelAmount(ReservationInfo reservationInfo) {
+		BigDecimal paymentAmount = new BigDecimal(reservationInfo.getPayment().getAmount());
+		if (reservationInfo.getReservationDate().isEqual(LocalDateTimeProvider.dateOfNow())
+			&& reservationInfo.getReservationTime().isBefore(LocalDateTimeProvider.timeOfNow().plusHours(1))) {
+			return paymentAmount.divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
+		}
+
+		return paymentAmount;
+	}
+
+	private void cancelPaymentOnRollback(Payment payment) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCompletion(int status) {
+				if (status == STATUS_ROLLED_BACK) {
+					reservationDao.deleteById(Long.parseLong(payment.getMerchantUid()));
+					paymentService.cancel(payment.getImpUid(), true);
+				}
+			}
+		});
 	}
 
 }
