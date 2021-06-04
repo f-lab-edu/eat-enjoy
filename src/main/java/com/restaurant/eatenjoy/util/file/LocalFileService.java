@@ -2,7 +2,10 @@ package com.restaurant.eatenjoy.util.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.restaurant.eatenjoy.dao.FileDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
+import com.restaurant.eatenjoy.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,9 +58,11 @@ public class LocalFileService implements FileService {
 
 	@Override
 	public void deleteFile(FileDto fileDto) {
-		File file = new File(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
-		if (file.exists()) {
-			file.delete();
+		Path file = Path.of(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
+
+		try(AsynchronousFileChannel open = AsynchronousFileChannel.open(file, StandardOpenOption.DELETE_ON_CLOSE)) {
+		} catch (IOException ex) {
+			throw new NotFoundException("파일을 찾을 수 없습니다");
 		}
 	}
 
