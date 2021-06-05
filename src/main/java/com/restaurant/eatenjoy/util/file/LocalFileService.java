@@ -17,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.FileDao;
 import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.exception.FileNotFoundException;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
-import com.restaurant.eatenjoy.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,7 +62,7 @@ public class LocalFileService implements FileService {
 
 		try(AsynchronousFileChannel open = AsynchronousFileChannel.open(file, StandardOpenOption.DELETE_ON_CLOSE)) {
 		} catch (IOException ex) {
-			throw new NotFoundException("파일을 찾을 수 없습니다");
+			throw new FileNotFoundException("파일을 찾을 수 없습니다");
 		}
 	}
 
