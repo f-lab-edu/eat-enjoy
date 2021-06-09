@@ -22,6 +22,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.restaurant.eatenjoy.dao.FileDao;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
+import com.restaurant.eatenjoy.exception.UnknownURLException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -113,7 +114,7 @@ public class AwsS3FileService implements FileService {
 
 			return url.getPath().substring(1);
 		} catch (MalformedURLException e) {
-			throw new FileUploadFailedException("파일 업로드에 실패하였습니다.", e);
+			throw new UnknownURLException("파일 URL이 올바르지 않습니다.", e);
 		}
 	}
 
