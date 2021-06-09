@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.restaurant.eatenjoy.dto.MenuDto;
@@ -15,8 +17,11 @@ public interface MenuDao {
 
 	MenuInfo findById(Long menuId);
 
+	List<MenuInfo> findAllByRestaurantId(Long restaurantId);
+
 	void updateById(UpdateMenuDto menuDto);
 
 	void deleteById(Long menuId);
 
+	void deleteByIdIn(List<MenuInfo> menus);
 }

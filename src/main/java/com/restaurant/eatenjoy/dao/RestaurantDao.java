@@ -16,4 +16,7 @@ public interface RestaurantDao {
 	RestaurantInfo findById(Long id);
 
 	void modifyRestaurantInfo(UpdateRestaurant updateRestaurant);
+
+	void deleteById(Long id);
+
 }

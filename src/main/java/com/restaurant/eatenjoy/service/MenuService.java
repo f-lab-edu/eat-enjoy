@@ -1,5 +1,7 @@
 package com.restaurant.eatenjoy.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -36,6 +38,10 @@ public class MenuService {
 		return menuDao.findById(menuId);
 	}
 
+	public List<MenuInfo> getMenuInfos(Long restaurantId) {
+		return menuDao.findAllByRestaurantId(restaurantId);
+	}
+
 	@Transactional
 	public void update(Long restaurantId, UpdateMenuDto updateMenuDto) {
 		validateMenuName(restaurantId, updateMenuDto.getId(), updateMenuDto.getName(), updateMenuDto.getUploadFile());
@@ -56,6 +62,10 @@ public class MenuService {
 		if (menuInfo.getFile() != null) {
 			deleteFile(menuInfo.getFile());
 		}
+	}
+
+	public void deleteByIdIn(List<MenuInfo> menus) {
+		menuDao.deleteByIdIn(menus);
 	}
 
 	public FileDto uploadImage(MultipartFile photo) {

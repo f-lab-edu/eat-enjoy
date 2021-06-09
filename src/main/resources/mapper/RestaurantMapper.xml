@@ -106,12 +106,12 @@
              , intr_dc
              , bname
           FROM restaurant
-            WHERE owner_id = #{ownerId}
+         WHERE owner_id = #{ownerId}
         <if test=" lastRestaurantId != 0 ">
-              AND id <![CDATA[ > ]]> #{lastRestaurantId}
+           AND id <![CDATA[ > ]]> #{lastRestaurantId}
         </if>
-            ORDER BY id
-          LIMIT 10
+         ORDER BY id
+         LIMIT 10
     </select>
 
     <update id="modifyRestaurantInfo" parameterType="UpdateRestaurant">
@@ -141,4 +141,10 @@
              </choose>
          WHERE id = #{id}
     </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM restaurant
+         WHERE id = #{id}
+    </delete>
 </mapper>
