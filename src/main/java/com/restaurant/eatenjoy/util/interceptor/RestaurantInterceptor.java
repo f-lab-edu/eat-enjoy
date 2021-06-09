@@ -12,7 +12,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
-import com.restaurant.eatenjoy.exception.UnauthorizedException;
+import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.LoginService;
 
@@ -58,7 +58,7 @@ public class RestaurantInterceptor implements HandlerInterceptor {
 
 		RestaurantInfo restaurantInfo = restaurantService.findById(restaurantId);
 		if (!ownerId.equals(restaurantInfo.getOwnerId())) {
-			throw new UnauthorizedException();
+			throw new AuthorizationException();
 		}
 
 		return true;
