@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
-import com.restaurant.eatenjoy.annotation.OwnersRestaurantCheck;
 import com.restaurant.eatenjoy.dto.FileDto;
 import com.restaurant.eatenjoy.dto.RestaurantDto;
 import com.restaurant.eatenjoy.dto.RestaurantInfo;
@@ -71,7 +70,6 @@ public class RestaurantController {
 	 * @return RestaurantInfo
 	 * */
 	@GetMapping("{restaurantId}")
-	@OwnersRestaurantCheck
 	public RestaurantInfo getRestaurant(@PathVariable Long restaurantId) {
 		return restaurantService.findById(restaurantId);
 	}
@@ -81,7 +79,6 @@ public class RestaurantController {
 	 * @param restaurantId 수정할 레스토랑의 id
 	 * */
 	@PutMapping("{restaurantId}")
-	@OwnersRestaurantCheck
 	public void updateRestaurant(@RequestBody @Valid UpdateRestaurant restaurant) {
 		restaurantService.updateRestaurant(restaurant);
 	}
