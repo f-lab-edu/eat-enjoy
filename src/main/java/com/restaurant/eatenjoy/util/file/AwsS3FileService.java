@@ -26,7 +26,7 @@ import com.restaurant.eatenjoy.exception.UnknownURLException;
 
 import lombok.RequiredArgsConstructor;
 
-@Profile("dev")
+@Profile("!default")
 @Component
 @RequiredArgsConstructor
 public class AwsS3FileService implements FileService {
