@@ -57,6 +57,10 @@ public class MenuGroupService {
 		menuGroupDao.deleteById(menuGroupId);
 	}
 
+	public void deleteByRestaurantId(Long restaurantId) {
+		menuGroupDao.deleteByRestaurantId(restaurantId);
+	}
+
 	private void validateMenusOfMenuGroup(Long menuGroupId) {
 		if (menuGroupDao.existsMenusById(menuGroupId)) {
 			throw new IllegalArgumentException("해당 메뉴그룹에 속한 메뉴가 존재합니다.");

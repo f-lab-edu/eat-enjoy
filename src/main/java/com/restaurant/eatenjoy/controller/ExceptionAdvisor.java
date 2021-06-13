@@ -17,6 +17,7 @@ import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
+import com.restaurant.eatenjoy.exception.FileNotFoundException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.IamportFailedException;
 import com.restaurant.eatenjoy.exception.NoMatchedPasswordException;
@@ -71,7 +72,7 @@ public class ExceptionAdvisor {
 		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(exception.getMessage());
 	}
 
-	@ExceptionHandler({ NoMatchedPaymentAmountException.class, IamportFailedException.class })
+	@ExceptionHandler({ NoMatchedPaymentAmountException.class, IamportFailedException.class, FileNotFoundException.class })
 	public ResponseEntity<String> processPaymentError(RuntimeException exception) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
 	}

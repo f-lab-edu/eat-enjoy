@@ -2,21 +2,28 @@ package com.restaurant.eatenjoy.util.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.FileDao;
 import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.exception.FileNotFoundException;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 
 import lombok.RequiredArgsConstructor;
 
+@Profile("default")
 @Component
 @RequiredArgsConstructor
 public class LocalFileService implements FileService {
@@ -53,15 +60,27 @@ public class LocalFileService implements FileService {
 
 	@Override
 	public void deleteFile(FileDto fileDto) {
-		File file = new File(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
-		if (file.exists()) {
-			file.delete();
+		Path file = Path.of(getRealServerFilePath(fileDto.getFilePath(), fileDto.getServerFilename()));
+
+		try(AsynchronousFileChannel open = AsynchronousFileChannel.open(file, StandardOpenOption.DELETE_ON_CLOSE)) {
+		} catch (IOException ex) {
+			throw new FileNotFoundException("파일을 찾을 수 없습니다");
 		}
 	}
 
 	@Override
 	public void deleteFileInfo(Long fileId) {
 		fileDao.deleteById(fileId);
+	}
+
+	@Override
+	public void deleteFiles(List<FileDto> fileDtos) {
+		fileDtos.forEach(this::deleteFile);
+	}
+
+	@Override
+	public void deleteFileInfos(List<FileDto> fileDtos) {
+		fileDao.deleteByIdIn(fileDtos);
 	}
 
 	private String initializeUploadDirectoryPath(String subPath) {

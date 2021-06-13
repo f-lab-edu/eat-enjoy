@@ -75,4 +75,10 @@
           FROM menu_group
          WHERE id = #{id}
     </delete>
+
+    <delete id="deleteByRestaurantId" parameterType="long">
+        DELETE
+          FROM menu_group
+         WHERE restaurant_id = #{restaurantId}
+    </delete>
 </mapper>
