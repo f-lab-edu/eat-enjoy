@@ -20,12 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.restaurant.eatenjoy.dao.ReservationDao;
-import com.restaurant.eatenjoy.dto.MenuInfo;
-import com.restaurant.eatenjoy.dto.OrderMenuDto;
-import com.restaurant.eatenjoy.dto.PaymentDto;
-import com.restaurant.eatenjoy.dto.ReservationDto;
-import com.restaurant.eatenjoy.dto.ReservationInfo;
-import com.restaurant.eatenjoy.dto.RestaurantInfo;
+import com.restaurant.eatenjoy.dto.menu.MenuInfo;
+import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
+import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
+import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
+import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.ReservationException;

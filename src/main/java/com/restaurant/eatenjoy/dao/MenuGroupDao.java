@@ -2,9 +2,9 @@ package com.restaurant.eatenjoy.dao;
 
 import java.util.List;
 
-import com.restaurant.eatenjoy.dto.MenuGroupDto;
-import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
-import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.SimpleMenuGroupInfo;
+import com.restaurant.eatenjoy.dto.menuGroup.UpdateMenuGroupDto;
 
 public interface MenuGroupDao {
 

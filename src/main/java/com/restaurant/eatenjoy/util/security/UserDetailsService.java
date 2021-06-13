@@ -1,6 +1,6 @@
 package com.restaurant.eatenjoy.util.security;
 
-import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.security.LoginDto;
 
 public interface UserDetailsService {
 

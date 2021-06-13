@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.dto.FileDto;
-import com.restaurant.eatenjoy.dto.MenuDto;
-import com.restaurant.eatenjoy.dto.MenuInfo;
-import com.restaurant.eatenjoy.dto.UpdateMenuDto;
+import com.restaurant.eatenjoy.dto.file.FileDto;
+import com.restaurant.eatenjoy.dto.menu.MenuDto;
+import com.restaurant.eatenjoy.dto.menu.MenuInfo;
+import com.restaurant.eatenjoy.dto.menu.UpdateMenuDto;
 import com.restaurant.eatenjoy.service.MenuService;
 import com.restaurant.eatenjoy.util.security.Role;
 

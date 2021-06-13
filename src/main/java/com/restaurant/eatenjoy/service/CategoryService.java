@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dao.CategoryDao;
-import com.restaurant.eatenjoy.dto.CategoryDto;
-import com.restaurant.eatenjoy.dto.SimpleRestaurantDto;
+import com.restaurant.eatenjoy.dto.category.CategoryDto;
+import com.restaurant.eatenjoy.dto.restaurant.SimpleRestaurantDto;
 
 import lombok.RequiredArgsConstructor;
 

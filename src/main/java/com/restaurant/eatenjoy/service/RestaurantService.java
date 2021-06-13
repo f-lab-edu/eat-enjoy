@@ -15,12 +15,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
-import com.restaurant.eatenjoy.dto.FileDto;
-import com.restaurant.eatenjoy.dto.MenuInfo;
-import com.restaurant.eatenjoy.dto.RestaurantDto;
-import com.restaurant.eatenjoy.dto.RestaurantInfo;
-import com.restaurant.eatenjoy.dto.RestaurantListDto;
-import com.restaurant.eatenjoy.dto.UpdateRestaurant;
+import com.restaurant.eatenjoy.dto.file.FileDto;
+import com.restaurant.eatenjoy.dto.menu.MenuInfo;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantDto;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantListDto;
+import com.restaurant.eatenjoy.dto.restaurant.UpdateRestaurantDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
@@ -89,21 +89,21 @@ public class RestaurantService {
 	}
 
 	@Transactional
-	@CacheEvict(value = CacheNames.RESTAURANT, key = "#updateRestaurant.id")
-	public void updateRestaurant(UpdateRestaurant updateRestaurant) {
-		validatePaymentTypeAndBizrNo(updateRestaurant.getPaymentType(), updateRestaurant.getMinOrderPrice(),
-			updateRestaurant.getBizrNo());
+	@CacheEvict(value = CacheNames.RESTAURANT, key = "#updateRestaurantDto.id")
+	public void updateRestaurant(UpdateRestaurantDto updateRestaurantDto) {
+		validatePaymentTypeAndBizrNo(updateRestaurantDto.getPaymentType(), updateRestaurantDto.getMinOrderPrice(),
+			updateRestaurantDto.getBizrNo());
 
 		try {
-			RestaurantInfo restaurantInfo = findById(updateRestaurant.getId());
+			RestaurantInfo restaurantInfo = findById(updateRestaurantDto.getId());
 
-			restaurantDao.modifyRestaurantInfo(updateRestaurant);
+			restaurantDao.modifyRestaurantInfo(updateRestaurantDto);
 
-			if (isDeleteServerFile(updateRestaurant.getUploadFile(), restaurantInfo.getUploadFile())) {
+			if (isDeleteServerFile(updateRestaurantDto.getUploadFile(), restaurantInfo.getUploadFile())) {
 				deleteUploadFile(restaurantInfo.getUploadFile());
 			}
 		} catch (DuplicateKeyException ex) {
-			deleteRestaurantFileOnRollback(updateRestaurant.getUploadFile());
+			deleteRestaurantFileOnRollback(updateRestaurantDto.getUploadFile());
 			throw new DuplicateValueException("이미 존재하는 사업자 번호입니다", ex);
 		}
 	}

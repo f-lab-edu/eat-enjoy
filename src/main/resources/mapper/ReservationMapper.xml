@@ -9,7 +9,7 @@
         <result property="peopleCount" column="rsrv_count"/>
         <result property="status" column="status"/>
         <result property="restaurantId" column="restaurant_id"/>
-        <association property="payment" javaType="com.restaurant.eatenjoy.dto.ReservationInfo$Payment">
+        <association property="payment" javaType="com.restaurant.eatenjoy.dto.reservation.ReservationInfo$Payment">
             <id property="impUid" column="imp_uid"/>
             <result property="payMethod" column="pay_method"/>
             <result property="amount" column="amount"/>

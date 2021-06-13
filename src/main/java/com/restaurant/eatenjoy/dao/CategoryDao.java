@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.restaurant.eatenjoy.dto.CategoryDto;
-import com.restaurant.eatenjoy.dto.SimpleRestaurantDto;
+import com.restaurant.eatenjoy.dto.category.CategoryDto;
+import com.restaurant.eatenjoy.dto.restaurant.SimpleRestaurantDto;
 
 public interface CategoryDao {
 

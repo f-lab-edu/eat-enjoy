@@ -16,8 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.restaurant.eatenjoy.dao.MenuGroupDao;
-import com.restaurant.eatenjoy.dto.MenuGroupDto;
-import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 
 @ExtendWith(MockitoExtension.class)
