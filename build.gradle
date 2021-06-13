@@ -32,6 +32,7 @@ dependencies {
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
     implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.15'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.11.1034'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     annotationProcessor 'org.projectlombok:lombok'
