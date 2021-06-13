@@ -18,7 +18,7 @@ import com.restaurant.eatenjoy.exception.MailSendFailedException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.util.security.Role;
 
-@Profile("dev")
+@Profile("!default")
 @Component
 public class HtmlMailService implements MailService {
 
