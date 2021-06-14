@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
-import com.restaurant.eatenjoy.dto.LoginDto;
-import com.restaurant.eatenjoy.dto.MailDto;
-import com.restaurant.eatenjoy.dto.OwnerDto;
-import com.restaurant.eatenjoy.dto.OwnerInfoDto;
-import com.restaurant.eatenjoy.dto.PasswordDto;
-import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
+import com.restaurant.eatenjoy.dto.security.LoginDto;
+import com.restaurant.eatenjoy.dto.security.MailDto;
+import com.restaurant.eatenjoy.dto.owner.OwnerDto;
+import com.restaurant.eatenjoy.dto.owner.OwnerInfoDto;
+import com.restaurant.eatenjoy.dto.security.PasswordDto;
+import com.restaurant.eatenjoy.dto.security.UpdatePasswordDto;
 import com.restaurant.eatenjoy.util.security.LoginService;
 import com.restaurant.eatenjoy.service.OwnerService;
 import com.restaurant.eatenjoy.util.security.Role;

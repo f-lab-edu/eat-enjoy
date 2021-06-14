@@ -6,7 +6,7 @@
         <id property="menuGroupId" column="menu_group_id"/>
         <result property="menuGroupName" column="menu_group_name"/>
         <result property="restaurantId" column="restaurant_id"/>
-        <collection property="menus" ofType="com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo$MenuInfo">
+        <collection property="menus" ofType="com.restaurant.eatenjoy.dto.menuGroup.SimpleMenuGroupInfo$MenuInfo">
             <id property="menuId" column="menu_id"/>
             <result property="menuName" column="menu_name"/>
             <result property="intrDc" column="intr_dc"/>

@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.restaurant.eatenjoy.dto.MenuInfo;
-import com.restaurant.eatenjoy.dto.OrderMenuDto;
-import com.restaurant.eatenjoy.dto.ReservationDto;
-import com.restaurant.eatenjoy.dto.ReservationInfo;
+import com.restaurant.eatenjoy.dto.menu.MenuInfo;
+import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
+import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
+import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
 public interface ReservationDao {

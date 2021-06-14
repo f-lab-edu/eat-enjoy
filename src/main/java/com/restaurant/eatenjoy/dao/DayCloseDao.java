@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.restaurant.eatenjoy.dto.DayCloseDto;
+import com.restaurant.eatenjoy.dto.restaurant.DayCloseDto;
 
 public interface DayCloseDao {
 

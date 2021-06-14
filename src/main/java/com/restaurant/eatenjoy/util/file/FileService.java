@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.dto.file.FileDto;
 
 public interface FileService {
 

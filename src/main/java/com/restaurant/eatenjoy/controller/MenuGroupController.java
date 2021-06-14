@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.dto.MenuGroupDto;
-import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
-import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.SimpleMenuGroupInfo;
+import com.restaurant.eatenjoy.dto.menuGroup.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.service.MenuGroupService;
 import com.restaurant.eatenjoy.util.security.Role;
 

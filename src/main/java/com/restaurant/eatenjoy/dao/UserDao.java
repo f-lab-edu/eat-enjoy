@@ -2,7 +2,7 @@ package com.restaurant.eatenjoy.dao;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.restaurant.eatenjoy.dto.UserDto;
+import com.restaurant.eatenjoy.dto.user.UserDto;
 
 public interface UserDao {
 

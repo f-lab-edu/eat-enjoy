@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.FileDao;
-import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.dto.file.FileDto;
 import com.restaurant.eatenjoy.exception.FileNotFoundException;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 

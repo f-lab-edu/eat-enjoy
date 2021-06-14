@@ -11,7 +11,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
-import com.restaurant.eatenjoy.dto.RestaurantInfo;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.service.RestaurantService;
 import com.restaurant.eatenjoy.util.security.LoginService;

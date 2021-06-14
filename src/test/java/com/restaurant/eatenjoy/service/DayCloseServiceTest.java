@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.restaurant.eatenjoy.dao.DayCloseDao;
-import com.restaurant.eatenjoy.dto.DayCloseDto;
+import com.restaurant.eatenjoy.dto.restaurant.DayCloseDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 
 @ExtendWith(MockitoExtension.class)

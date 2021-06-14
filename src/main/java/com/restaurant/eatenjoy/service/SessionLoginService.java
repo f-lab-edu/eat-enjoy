@@ -4,7 +4,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 
-import com.restaurant.eatenjoy.dto.LoginDto;
+import com.restaurant.eatenjoy.dto.security.LoginDto;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.UnauthorizedException;

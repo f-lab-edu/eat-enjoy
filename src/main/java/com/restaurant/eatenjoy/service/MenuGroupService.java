@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.MenuGroupDao;
-import com.restaurant.eatenjoy.dto.MenuGroupDto;
-import com.restaurant.eatenjoy.dto.SimpleMenuGroupInfo;
-import com.restaurant.eatenjoy.dto.UpdateMenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.MenuGroupDto;
+import com.restaurant.eatenjoy.dto.menuGroup.SimpleMenuGroupInfo;
+import com.restaurant.eatenjoy.dto.menuGroup.UpdateMenuGroupDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 
 import lombok.RequiredArgsConstructor;

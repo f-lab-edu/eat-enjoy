@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.dto.CategoryDto;
-import com.restaurant.eatenjoy.dto.SimpleRestaurantDto;
+import com.restaurant.eatenjoy.dto.category.CategoryDto;
+import com.restaurant.eatenjoy.dto.restaurant.SimpleRestaurantDto;
 import com.restaurant.eatenjoy.service.CategoryService;
 import com.restaurant.eatenjoy.util.cache.CacheNames;
 import com.restaurant.eatenjoy.util.security.Role;

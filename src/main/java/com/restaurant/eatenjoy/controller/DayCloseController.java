@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.dto.DayCloseDto;
+import com.restaurant.eatenjoy.dto.restaurant.DayCloseDto;
 import com.restaurant.eatenjoy.service.DayCloseService;
 import com.restaurant.eatenjoy.util.security.Role;
 

@@ -20,7 +20,7 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.restaurant.eatenjoy.dao.FileDao;
-import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.dto.file.FileDto;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 import com.restaurant.eatenjoy.exception.UnknownURLException;
 

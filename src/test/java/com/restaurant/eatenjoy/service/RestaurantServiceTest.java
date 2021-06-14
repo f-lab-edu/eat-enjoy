@@ -21,11 +21,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.RestaurantDao;
-import com.restaurant.eatenjoy.dto.FileDto;
-import com.restaurant.eatenjoy.dto.RestaurantDto;
-import com.restaurant.eatenjoy.dto.RestaurantInfo;
-import com.restaurant.eatenjoy.dto.RestaurantListDto;
-import com.restaurant.eatenjoy.dto.UpdateRestaurant;
+import com.restaurant.eatenjoy.dto.file.FileDto;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantDto;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
+import com.restaurant.eatenjoy.dto.restaurant.RestaurantListDto;
+import com.restaurant.eatenjoy.dto.restaurant.UpdateRestaurantDto;
 import com.restaurant.eatenjoy.exception.BizrNoValidException;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
@@ -192,8 +192,8 @@ class RestaurantServiceTest {
 		return restaurantListDto;
 	}
 
-	private UpdateRestaurant createUpdateRestaurantData(FileDto fileDto) {
-		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+	private UpdateRestaurantDto createUpdateRestaurantData(FileDto fileDto) {
+		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -212,11 +212,11 @@ class RestaurantServiceTest {
 			.uploadFile(fileDto)
 			.build();
 
-		return updateRestaurant;
+		return updateRestaurantDto;
 	}
 
-	private UpdateRestaurant createUpdateRestaurantData() {
-		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+	private UpdateRestaurantDto createUpdateRestaurantData() {
+		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -233,11 +233,11 @@ class RestaurantServiceTest {
 			.build();
 		TransactionSynchronizationManager.initSynchronization();
 
-		return updateRestaurant;
+		return updateRestaurantDto;
 	}
 
-	private UpdateRestaurant notExistBizrNoUpdateRestaurantData() {
-		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+	private UpdateRestaurantDto notExistBizrNoUpdateRestaurantData() {
+		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
@@ -249,11 +249,11 @@ class RestaurantServiceTest {
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
-		return updateRestaurant;
+		return updateRestaurantDto;
 	}
 
-	private UpdateRestaurant paymentTypeUpdateRestaurant() {
-		UpdateRestaurant updateRestaurant = UpdateRestaurant.builder()
+	private UpdateRestaurantDto paymentTypeUpdateRestaurant() {
+		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
@@ -265,7 +265,7 @@ class RestaurantServiceTest {
 			.closeTime(LocalTime.of(23, 00))
 			.build();
 
-		return updateRestaurant;
+		return updateRestaurantDto;
 	}
 
 	@AfterEach
@@ -434,7 +434,7 @@ class RestaurantServiceTest {
 		// given
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
 
-		UpdateRestaurant restaurant = createUpdateRestaurantData(null);
+		UpdateRestaurantDto restaurant = createUpdateRestaurantData(null);
 
 		// when
 		restaurantService.updateRestaurant(restaurant);
@@ -458,7 +458,7 @@ class RestaurantServiceTest {
 		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
 
-		UpdateRestaurant restaurant = createUpdateRestaurantData(fileDto);
+		UpdateRestaurantDto restaurant = createUpdateRestaurantData(fileDto);
 
 		// when
 		restaurantService.uploadImage(photo);
@@ -481,7 +481,7 @@ class RestaurantServiceTest {
 
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(fileDto));
 
-		UpdateRestaurant restaurant = createUpdateRestaurantData(null);
+		UpdateRestaurantDto restaurant = createUpdateRestaurantData(null);
 
 		// when
 		restaurantService.updateRestaurant(restaurant);
@@ -511,7 +511,7 @@ class RestaurantServiceTest {
 		given(fileService.saveFileInfo(updateFileDto)).willReturn(updateFileDto.getId());
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(restaurantInfoFileDto));
 
-		UpdateRestaurant restaurant = createUpdateRestaurantData(updateFileDto);
+		UpdateRestaurantDto restaurant = createUpdateRestaurantData(updateFileDto);
 
 		// when
 		restaurantService.uploadImage(photo);

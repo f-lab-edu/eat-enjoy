@@ -114,7 +114,7 @@
          LIMIT 10
     </select>
 
-    <update id="modifyRestaurantInfo" parameterType="UpdateRestaurant">
+    <update id="modifyRestaurantInfo" parameterType="UpdateRestaurantDto">
         UPDATE restaurant
            SET name = #{name}
              , bizr_no = #{bizrNo}

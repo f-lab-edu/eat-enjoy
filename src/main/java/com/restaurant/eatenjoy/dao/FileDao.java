@@ -2,7 +2,7 @@ package com.restaurant.eatenjoy.dao;
 
 import java.util.List;
 
-import com.restaurant.eatenjoy.dto.FileDto;
+import com.restaurant.eatenjoy.dto.file.FileDto;
 
 public interface FileDao {
 

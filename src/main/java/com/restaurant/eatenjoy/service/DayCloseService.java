@@ -6,7 +6,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import com.restaurant.eatenjoy.dao.DayCloseDao;
-import com.restaurant.eatenjoy.dto.DayCloseDto;
+import com.restaurant.eatenjoy.dto.restaurant.DayCloseDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
 
 import lombok.RequiredArgsConstructor;

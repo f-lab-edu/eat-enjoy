@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.restaurant.eatenjoy.dao.MailTokenDao;
 import com.restaurant.eatenjoy.dao.OwnerDao;
-import com.restaurant.eatenjoy.dto.LoginDto;
-import com.restaurant.eatenjoy.dto.MailDto;
-import com.restaurant.eatenjoy.dto.OwnerDto;
-import com.restaurant.eatenjoy.dto.OwnerInfoDto;
-import com.restaurant.eatenjoy.dto.UpdatePasswordDto;
+import com.restaurant.eatenjoy.dto.security.LoginDto;
+import com.restaurant.eatenjoy.dto.security.MailDto;
+import com.restaurant.eatenjoy.dto.owner.OwnerDto;
+import com.restaurant.eatenjoy.dto.owner.OwnerInfoDto;
+import com.restaurant.eatenjoy.dto.security.UpdatePasswordDto;
 import com.restaurant.eatenjoy.exception.AlreadyCertifiedException;
 import com.restaurant.eatenjoy.exception.AuthorizationException;
 import com.restaurant.eatenjoy.exception.ConflictPasswordException;
