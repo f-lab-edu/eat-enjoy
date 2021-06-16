@@ -10,13 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.annotation.Authority;
-import com.restaurant.eatenjoy.dto.file.FileDto;
 import com.restaurant.eatenjoy.dto.menu.MenuDto;
 import com.restaurant.eatenjoy.dto.menu.MenuInfo;
 import com.restaurant.eatenjoy.dto.menu.UpdateMenuDto;
@@ -52,12 +49,6 @@ public class MenuController {
 	@DeleteMapping("/{menuId}")
 	public void delete(@PathVariable Long menuId) {
 		menuService.delete(menuId);
-	}
-
-	@PostMapping("/images")
-	@ResponseStatus(HttpStatus.CREATED)
-	public FileDto imageUpload(@RequestPart MultipartFile photo) {
-		return menuService.uploadImage(photo);
 	}
 
 }

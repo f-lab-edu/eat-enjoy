@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.file.FileDto;
@@ -14,8 +13,7 @@ import com.restaurant.eatenjoy.dto.menu.MenuDto;
 import com.restaurant.eatenjoy.dto.menu.MenuInfo;
 import com.restaurant.eatenjoy.dto.menu.UpdateMenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.util.file.FileExtension;
-import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.file.FileManager;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class MenuService {
 
 	private final MenuDao menuDao;
+
+	private final FileManager fileManager;
 
 	private final FileService fileService;
 
@@ -68,15 +68,6 @@ public class MenuService {
 		menuDao.deleteByIdIn(menus);
 	}
 
-	public FileDto uploadImage(MultipartFile photo) {
-		FileExtension.IMAGE.validate(photo);
-
-		FileDto fileDto = fileService.uploadFile(photo);
-		fileService.saveFileInfo(fileDto);
-
-		return fileDto;
-	}
-
 	private void validateMenuName(Long restaurantId, Long menuId, String menuName, FileDto fileDto) {
 		if (!menuDao.existsByRestaurantIdAndName(restaurantId, menuId, menuName)) {
 			return;
@@ -101,7 +92,7 @@ public class MenuService {
 	}
 
 	private void deleteFile(FileDto fileDto) {
-		fileService.deleteFile(fileDto);
+		fileManager.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 

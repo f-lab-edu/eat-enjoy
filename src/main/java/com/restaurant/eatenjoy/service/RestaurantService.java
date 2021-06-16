@@ -28,7 +28,7 @@ import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.BizrNoValidCheck;
 import com.restaurant.eatenjoy.util.cache.CacheNames;
 import com.restaurant.eatenjoy.util.file.FileExtension;
-import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.file.FileManager;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +38,8 @@ import lombok.RequiredArgsConstructor;
 public class RestaurantService {
 
 	private final RestaurantDao restaurantDao;
+
+	private final FileManager fileManager;
 
 	private final FileService fileService;
 
@@ -64,10 +66,10 @@ public class RestaurantService {
 		}
 	}
 
-	public FileDto uploadImage(MultipartFile photo) {
+	public FileDto uploadImage(Long restaurantId, MultipartFile photo) {
 		FileExtension.IMAGE.validate(photo);
 
-		FileDto fileDto = fileService.uploadFile(photo);
+		FileDto fileDto = fileManager.uploadFile(restaurantId, photo);
 		fileService.saveFileInfo(fileDto);
 
 		return fileDto;
@@ -163,12 +165,12 @@ public class RestaurantService {
 	}
 
 	private void deleteUploadFile(FileDto fileDto) {
-		fileService.deleteFile(fileDto);
+		fileManager.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 
 	public void deleteUploadFiles(List<FileDto> fileDtos) {
-		fileService.deleteFiles(fileDtos);
+		fileManager.deleteFiles(fileDtos);
 		fileService.deleteFileInfos(fileDtos);
 	}
 

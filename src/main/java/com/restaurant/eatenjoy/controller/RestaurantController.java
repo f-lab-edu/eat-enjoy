@@ -31,10 +31,10 @@ import com.restaurant.eatenjoy.util.security.Role;
 
 import lombok.RequiredArgsConstructor;
 
+@Authority(Role.OWNER)
 @RestController
 @RequestMapping("/api/restaurants")
 @RequiredArgsConstructor
-@Authority(Role.OWNER)
 public class RestaurantController {
 
 	private final RestaurantService restaurantService;
@@ -70,7 +70,7 @@ public class RestaurantController {
 	 * @param restaurantId 조회할 레스토랑의 id
 	 * @return RestaurantInfo
 	 * */
-	@GetMapping("{restaurantId}")
+	@GetMapping("/{restaurantId}")
 	public RestaurantInfo getRestaurant(@PathVariable Long restaurantId) {
 		return restaurantService.findById(restaurantId);
 	}
@@ -79,23 +79,24 @@ public class RestaurantController {
 	 * 사장님의 식당 정보를 수정한다
 	 * @param restaurantId 수정할 레스토랑의 id
 	 * */
-	@PutMapping("{restaurantId}")
+	@PutMapping("/{restaurantId}")
 	public void updateRestaurant(@RequestBody @Valid UpdateRestaurantDto restaurant) {
 		restaurantService.updateRestaurant(restaurant);
 	}
 
 	/*
-	 * 식당 이미지를 업로드 한다
+	 * 식당 및 메뉴 이미지 업로드 한다
 	 * @param photo 업로드할 이미지
 	 * */
-	@PostMapping("/images")
+	@PostMapping("/{restaurantId}/images")
 	@ResponseStatus(HttpStatus.CREATED)
-	public FileDto imageUpload(@RequestPart MultipartFile photo) {
-		return restaurantService.uploadImage(photo);
+	public FileDto imageUpload(@PathVariable Long restaurantId, @RequestPart MultipartFile photo) {
+		return restaurantService.uploadImage(restaurantId, photo);
 	}
 
-	@DeleteMapping("{restaurantId}")
+	@DeleteMapping("/{restaurantId}")
 	public void deleteRestaurant(@PathVariable Long restaurantId){
 		restaurantService.deleteRestaurant(restaurantId);
 	}
+
 }
