@@ -3,8 +3,6 @@ package com.restaurant.eatenjoy.util.file;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,7 +17,6 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.restaurant.eatenjoy.dao.FileDao;
 import com.restaurant.eatenjoy.dto.file.FileDto;
 import com.restaurant.eatenjoy.exception.FileUploadFailedException;
 import com.restaurant.eatenjoy.exception.UnknownURLException;
@@ -29,21 +26,17 @@ import lombok.RequiredArgsConstructor;
 @Profile("!default")
 @Component
 @RequiredArgsConstructor
-public class AwsS3FileService implements FileService {
-
-	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+public class AwsS3FileManager implements FileManager {
 
 	private final AmazonS3 amazonS3;
-
-	private final FileDao fileDao;
 
 	@Value("${cloud.s3.bucket.name}")
 	private String bucketName;
 
 	@Override
-	public FileDto uploadFile(MultipartFile multipartFile) {
+	public FileDto uploadFile(Long restaurantId, MultipartFile multipartFile) {
 		String serverFileName = UUID.randomUUID().toString();
-		String objectKey = LocalDate.now().format(dateFormatter) + "/" +  serverFileName;
+		String objectKey = restaurantId + "/" +  serverFileName;
 
 		putFileInBucket(multipartFile, objectKey);
 
@@ -56,30 +49,13 @@ public class AwsS3FileService implements FileService {
 	}
 
 	@Override
-	public Long saveFileInfo(FileDto fileDto) {
-		fileDao.register(fileDto);
-
-		return fileDto.getId();
-	}
-
-	@Override
 	public void deleteFile(FileDto fileDto) {
 		amazonS3.deleteObject(bucketName, getObjectKeyByFilePath(fileDto.getFilePath()));
 	}
 
 	@Override
-	public void deleteFileInfo(Long fileId) {
-		fileDao.deleteById(fileId);
-	}
-
-	@Override
 	public void deleteFiles(List<FileDto> fileDtos) {
 		amazonS3.deleteObjects(createDeleteObjectsRequest(fileDtos));
-	}
-
-	@Override
-	public void deleteFileInfos(List<FileDto> fileDtos) {
-		fileDao.deleteByIdIn(fileDtos);
 	}
 
 	private void putFileInBucket(MultipartFile multipartFile, String objectKey) {
