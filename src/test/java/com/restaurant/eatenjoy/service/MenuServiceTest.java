@@ -11,9 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.restaurant.eatenjoy.dao.MenuDao;
 import com.restaurant.eatenjoy.dto.file.FileDto;
@@ -21,8 +19,7 @@ import com.restaurant.eatenjoy.dto.menu.MenuDto;
 import com.restaurant.eatenjoy.dto.menu.MenuInfo;
 import com.restaurant.eatenjoy.dto.menu.UpdateMenuDto;
 import com.restaurant.eatenjoy.exception.DuplicateValueException;
-import com.restaurant.eatenjoy.exception.FileNotSupportException;
-import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.file.FileManager;
 
 @ExtendWith(MockitoExtension.class)
 public class MenuServiceTest {
@@ -31,6 +28,9 @@ public class MenuServiceTest {
 
 	@Mock
 	private MenuDao menuDao;
+
+	@Mock
+	private FileManager fileManager;
 
 	@Mock
 	private FileService fileService;
@@ -102,36 +102,6 @@ public class MenuServiceTest {
 	}
 
 	@Test
-	@DisplayName("업로드할 파일이 이미지 파일이 아니면 이미지 업로드에 실패한다.")
-	void failToUploadImageIfUploadFileIsNotImage() {
-		MultipartFile multipartFile = getMockMultipartFile("text", "test.txt");
-
-		assertThatThrownBy(() -> menuService.uploadImage(multipartFile))
-			.isInstanceOf(FileNotSupportException.class);
-
-		then(fileService).should(times(0)).uploadFile(multipartFile);
-		then(fileService).should(times(0)).saveFileInfo(any());
-	}
-
-	@Test
-	@DisplayName("업로드할 파일이 이미지 파일이면 이미지 업로드에 성공한다.")
-	void successToRegisterMenuIfUploadFileIsImage() {
-		MultipartFile multipartFile = getMockMultipartFile("image", "image.jpg");
-
-		FileDto fileDto = FileDto.builder()
-			.id(1L)
-			.build();
-
-		given(fileService.uploadFile(multipartFile)).willReturn(fileDto);
-		given(fileService.saveFileInfo(fileDto)).willReturn(1L);
-
-		menuService.uploadImage(multipartFile);
-
-		then(fileService).should(times(1)).uploadFile(multipartFile);
-		then(fileService).should(times(1)).saveFileInfo(any());
-	}
-
-	@Test
 	@DisplayName("특정 레스토랑에 같은 이름의 메뉴가 이미 존재할 경우 메뉴를 수정할 수 없다.")
 	void fileToUpdateMenuIfSameNameAlreadyExists() {
 		UpdateMenuDto updateMenuDto = getUpdateMenuDto();
@@ -192,7 +162,7 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
-		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
+		then(fileManager).should(times(1)).deleteFile(menuInfo.getFile());
 		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
 	}
 
@@ -209,7 +179,7 @@ public class MenuServiceTest {
 
 		then(menuDao).should(times(1)).existsByRestaurantIdAndName(RESTAURANT_ID, updateMenuDto.getId(), updateMenuDto.getName());
 		then(menuDao).should(times(1)).updateById(updateMenuDto);
-		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
+		then(fileManager).should(times(1)).deleteFile(menuInfo.getFile());
 		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
 	}
 
@@ -221,7 +191,7 @@ public class MenuServiceTest {
 		menuService.delete(1L);
 
 		then(menuDao).should(times(1)).deleteById(1L);
-		then(fileService).should(times(0)).deleteFile(any());
+		then(fileManager).should(times(0)).deleteFile(any());
 		then(fileService).should(times(0)).deleteFileInfo(any());
 	}
 
@@ -235,12 +205,8 @@ public class MenuServiceTest {
 		menuService.delete(1L);
 
 		then(menuDao).should(times(1)).deleteById(1L);
-		then(fileService).should(times(1)).deleteFile(menuInfo.getFile());
+		then(fileManager).should(times(1)).deleteFile(menuInfo.getFile());
 		then(fileService).should(times(1)).deleteFileInfo(menuInfo.getFile().getId());
-	}
-
-	private MockMultipartFile getMockMultipartFile(String name, String originalFilename) {
-		return new MockMultipartFile(name, originalFilename, null, name.getBytes());
 	}
 
 	private MenuDto getMenuDto() {

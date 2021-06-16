@@ -31,7 +31,7 @@ import com.restaurant.eatenjoy.exception.DuplicateValueException;
 import com.restaurant.eatenjoy.exception.FileNotSupportException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
 import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
-import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.file.FileManager;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,13 +43,18 @@ class RestaurantServiceTest {
 	private RestaurantDao restaurantDao;
 
 	@Mock
+	private FileManager fileManager;
+
+	@Mock
 	private FileService fileService;
 
 	@InjectMocks
 	private RestaurantService restaurantService;
 
 	private RestaurantDto duplicatedBizrNoRestaurantDto(FileDto fileDto) {
-		RestaurantDto restaurantDto = RestaurantDto.builder()
+		TransactionSynchronizationManager.initSynchronization();
+
+		return RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
@@ -57,8 +62,8 @@ class RestaurantServiceTest {
 			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
@@ -66,13 +71,10 @@ class RestaurantServiceTest {
 			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
-		TransactionSynchronizationManager.initSynchronization();
-
-		return restaurantDto;
 	}
 
 	private RestaurantDto paymentTypeRestaurantDto() {
-		RestaurantDto restaurantDto = RestaurantDto.builder()
+		return RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
@@ -80,20 +82,18 @@ class RestaurantServiceTest {
 			.paymentType(PaymentType.PREPAYMENT)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
 			.bname("삼평동")
 			.build();
-
-		return restaurantDto;
 	}
 
 	private RestaurantDto notExistBizrNoRestaurntDto() {
-		RestaurantDto restaurantDto = RestaurantDto.builder()
+		return RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567892")
 			.telNo("02-123-4567")
@@ -101,20 +101,20 @@ class RestaurantServiceTest {
 			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
 			.sigunguCd("41135")
 			.bname("삼평동")
 			.build();
-
-		return restaurantDto;
 	}
 
 	private RestaurantDto successRestaurantDto() {
-		RestaurantDto restaurantDto = RestaurantDto.builder()
+		TransactionSynchronizationManager.initSynchronization();
+
+		return RestaurantDto.builder()
 			.name("청기와")
 			.bizrNo("1234567891")
 			.telNo("02-123-4567")
@@ -122,8 +122,8 @@ class RestaurantServiceTest {
 			.paymentType(PaymentType.POSTPAID)
 			.ownerId(OWNER_ID)
 			.categoryId(1L)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.detailAddress(null)
@@ -131,13 +131,10 @@ class RestaurantServiceTest {
 			.bname("삼평동")
 			.uploadFile(null)
 			.build();
-		TransactionSynchronizationManager.initSynchronization();
-
-		return restaurantDto;
 	}
 
 	private RestaurantInfo generateRestaurantInfo() {
-		RestaurantInfo restaurantInfo = RestaurantInfo.builder()
+		return RestaurantInfo.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -145,8 +142,8 @@ class RestaurantServiceTest {
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.POSTPAID)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.categoryId(1L)
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
@@ -155,12 +152,10 @@ class RestaurantServiceTest {
 			.bname("삼평동")
 			.uploadFile(null)
 			.build();
-
-		return restaurantInfo;
 	}
 
 	private RestaurantInfo generateRestaurantInfo(FileDto fileDto) {
-		RestaurantInfo restaurantInfo = RestaurantInfo.builder()
+		return RestaurantInfo.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -168,8 +163,8 @@ class RestaurantServiceTest {
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.POSTPAID)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.categoryId(1L)
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
@@ -178,22 +173,18 @@ class RestaurantServiceTest {
 			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
-
-		return restaurantInfo;
 	}
 
 	private RestaurantListDto createRestaurantData(long id, String name, String intrDc) {
-		RestaurantListDto restaurantListDto = RestaurantListDto.builder()
+		return RestaurantListDto.builder()
 			.id(id)
 			.name(name)
 			.intrdc(intrDc)
 			.build();
-
-		return restaurantListDto;
 	}
 
 	private UpdateRestaurantDto createUpdateRestaurantData(FileDto fileDto) {
-		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
+		return UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -201,8 +192,8 @@ class RestaurantServiceTest {
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.POSTPAID)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.categoryId(2L)
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
@@ -211,12 +202,12 @@ class RestaurantServiceTest {
 			.bname("삼평동")
 			.uploadFile(fileDto)
 			.build();
-
-		return updateRestaurantDto;
 	}
 
 	private UpdateRestaurantDto createUpdateRestaurantData() {
-		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
+		TransactionSynchronizationManager.initSynchronization();
+
+		return UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("청기와")
 			.bizrNo("1234567891")
@@ -224,20 +215,17 @@ class RestaurantServiceTest {
 			.intrDc("청기와 소개글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.POSTPAID)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.categoryId(2L)
 			.postCd("13494")
 			.baseAddress("경기 성남시 분당구 판교역로 235")
 			.sigunguCd("41135")
 			.build();
-		TransactionSynchronizationManager.initSynchronization();
-
-		return updateRestaurantDto;
 	}
 
 	private UpdateRestaurantDto notExistBizrNoUpdateRestaurantData() {
-		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
+		return UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
@@ -245,15 +233,13 @@ class RestaurantServiceTest {
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.POSTPAID)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.build();
-
-		return updateRestaurantDto;
 	}
 
 	private UpdateRestaurantDto paymentTypeUpdateRestaurant() {
-		UpdateRestaurantDto updateRestaurantDto = UpdateRestaurantDto.builder()
+		return UpdateRestaurantDto.builder()
 			.id(1L)
 			.name("테스트 식당")
 			.bizrNo("1234567892")
@@ -261,11 +247,9 @@ class RestaurantServiceTest {
 			.intrDc("테스트 식당 수정글")
 			.minOrderPrice(0)
 			.paymentType(PaymentType.PREPAYMENT)
-			.openTime(LocalTime.of(9, 00))
-			.closeTime(LocalTime.of(23, 00))
+			.openTime(LocalTime.of(9, 0))
+			.closeTime(LocalTime.of(23, 0))
 			.build();
-
-		return updateRestaurantDto;
 	}
 
 	@AfterEach
@@ -296,31 +280,27 @@ class RestaurantServiceTest {
 			.id(1L)
 			.build();
 
-		given(fileService.uploadFile(photo)).willReturn(fileDto);
+		given(fileManager.uploadFile(1L, photo)).willReturn(fileDto);
 		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
 
 		// when
-		restaurantService.uploadImage(photo);
+		restaurantService.uploadImage(1L, photo);
 
 		// then
-		then(fileService).should(times(1)).uploadFile(photo);
+		then(fileManager).should(times(1)).uploadFile(1L, photo);
 		then(fileService).should(times(1)).saveFileInfo(fileDto);
 	}
 
 	@Test
 	@DisplayName("식당 등록 실패 - 매장 결제 방식이 선불인 경우 최소 주문 가격이 0원이 된다면 식당 등록을 실패한다")
 	void failToMinOrderPriceByPaymentType() {
-		assertThrows(RestaurantMinOrderPriceValueException.class, () -> {
-			restaurantService.register(paymentTypeRestaurantDto(), OWNER_ID);
-		});
+		assertThrows(RestaurantMinOrderPriceValueException.class, () -> restaurantService.register(paymentTypeRestaurantDto(), OWNER_ID));
 	}
 
 	@Test
 	@DisplayName("식당 등록 실패 - 유효하지 않은 사업자 등록 번호를 입력하면 식당 등록을 실패한다")
 	void failToRegisterRestaurantByNotExistsBizrNo() {
-		assertThrows(BizrNoValidException.class, () -> {
-			restaurantService.register(notExistBizrNoRestaurntDto(), OWNER_ID);
-		});
+		assertThrows(BizrNoValidException.class, () -> restaurantService.register(notExistBizrNoRestaurntDto(), OWNER_ID));
 	}
 
 	@Test
@@ -330,7 +310,7 @@ class RestaurantServiceTest {
 		MultipartFile photo = getMockMultipartFile("test", "test.txt");
 
 		// when
-		assertThatThrownBy(() -> restaurantService.uploadImage(photo)).isInstanceOf(FileNotSupportException.class);
+		assertThatThrownBy(() -> restaurantService.uploadImage(1L, photo)).isInstanceOf(FileNotSupportException.class);
 	}
 
 	@Test
@@ -420,9 +400,7 @@ class RestaurantServiceTest {
 		given(restaurantDao.findById(1L)).willReturn(null);
 
 		// when
-		assertThrows(NotFoundException.class, () -> {
-			restaurantService.findById(1L);
-		});
+		assertThrows(NotFoundException.class, () -> restaurantService.findById(1L));
 
 		// then
 		then(restaurantDao).should(times(1)).findById(1L);
@@ -454,18 +432,18 @@ class RestaurantServiceTest {
 			.id(1L)
 			.build();
 
-		given(fileService.uploadFile(photo)).willReturn(fileDto);
+		given(fileManager.uploadFile(1L, photo)).willReturn(fileDto);
 		given(fileService.saveFileInfo(fileDto)).willReturn(fileDto.getId());
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo());
 
 		UpdateRestaurantDto restaurant = createUpdateRestaurantData(fileDto);
 
 		// when
-		restaurantService.uploadImage(photo);
+		restaurantService.uploadImage(1L, photo);
 		restaurantService.updateRestaurant(restaurant);
 
 		// then
-		then(fileService).should(times(1)).uploadFile(photo);
+		then(fileManager).should(times(1)).uploadFile(1L, photo);
 		then(fileService).should(times(1)).saveFileInfo(fileDto);
 		then(restaurantDao).should(times(1)).findById(restaurant.getId());
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
@@ -487,7 +465,7 @@ class RestaurantServiceTest {
 		restaurantService.updateRestaurant(restaurant);
 
 		// then
-		then(fileService).should(times(1)).deleteFile(fileDto);
+		then(fileManager).should(times(1)).deleteFile(fileDto);
 		then(fileService).should(times(1)).deleteFileInfo(fileDto.getId());
 		then(restaurantDao).should(times(1)).findById(restaurant.getId());
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
@@ -507,18 +485,18 @@ class RestaurantServiceTest {
 			.id(1L)
 			.build();
 
-		given(fileService.uploadFile(photo)).willReturn(updateFileDto);
+		given(fileManager.uploadFile(1L, photo)).willReturn(updateFileDto);
 		given(fileService.saveFileInfo(updateFileDto)).willReturn(updateFileDto.getId());
 		given(restaurantDao.findById(1L)).willReturn(generateRestaurantInfo(restaurantInfoFileDto));
 
 		UpdateRestaurantDto restaurant = createUpdateRestaurantData(updateFileDto);
 
 		// when
-		restaurantService.uploadImage(photo);
+		restaurantService.uploadImage(1L, photo);
 		restaurantService.updateRestaurant(restaurant);
 
 		// then
-		then(fileService).should(times(1)).deleteFile(restaurantInfoFileDto);
+		then(fileManager).should(times(1)).deleteFile(restaurantInfoFileDto);
 		then(fileService).should(times(1)).deleteFileInfo(restaurantInfoFileDto.getId());
 		then(restaurantDao).should(times(1)).findById(restaurant.getId());
 		then(restaurantDao).should(times(1)).modifyRestaurantInfo(restaurant);
@@ -527,17 +505,13 @@ class RestaurantServiceTest {
 	@Test
 	@DisplayName("식당 데이터 수정 실패 - 유효하지 않은 사업자 번호")
 	void failModifyRestaurantByBizrNo() {
-		assertThrows(BizrNoValidException.class, () -> {
-			restaurantService.updateRestaurant(notExistBizrNoUpdateRestaurantData());
-		});
+		assertThrows(BizrNoValidException.class, () -> restaurantService.updateRestaurant(notExistBizrNoUpdateRestaurantData()));
 	}
 
 	@Test
 	@DisplayName("식당 데이터 수정 실패 - RestaurantMinOrderPriceValueException 발생")
 	void failModifyRestaurantByPaymentTypeAndMinOrderPrice() {
-		assertThrows(RestaurantMinOrderPriceValueException.class, () -> {
-			restaurantService.updateRestaurant(paymentTypeUpdateRestaurant());
-		});
+		assertThrows(RestaurantMinOrderPriceValueException.class, () -> restaurantService.updateRestaurant(paymentTypeUpdateRestaurant()));
 	}
 
 	@Test
