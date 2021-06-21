@@ -66,7 +66,7 @@ public class RestaurantService {
 		}
 	}
 
-	public FileDto uploadImage(Long restaurantId, MultipartFile photo) {
+	public FileDto uploadImage(long restaurantId, MultipartFile photo) {
 		FileExtension.IMAGE.validate(photo);
 
 		FileDto fileDto = fileManager.uploadFile(restaurantId, photo);
@@ -143,8 +143,7 @@ public class RestaurantService {
 	}
 
 	private void validatePaymentTypeAndBizrNo(PaymentType paymentType, int minOrderPrice, String bizrNo) {
-		if ((PaymentType.PREPAYMENT).equals(paymentType)
-			&& minOrderPrice == 0) {
+		if (PaymentType.PREPAYMENT.equals(paymentType) && minOrderPrice == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}
 
@@ -169,20 +168,14 @@ public class RestaurantService {
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 
-	public void deleteUploadFiles(List<FileDto> fileDtos) {
+	private void deleteUploadFiles(List<FileDto> fileDtos) {
 		fileManager.deleteFiles(fileDtos);
 		fileService.deleteFileInfos(fileDtos);
 	}
 
 	private boolean isDeleteServerFile(FileDto restaurantImage, FileDto serverFile) {
-		boolean isDelete = isDeleteUploadFile(restaurantImage, serverFile);
-
-		return isDelete;
-	}
-
-	private boolean isDeleteUploadFile(FileDto uploadFileDto, FileDto serverFile) {
-		return serverFile != null && uploadFileDto != null && !serverFile.getId().equals(uploadFileDto.getId())
-			|| serverFile != null && uploadFileDto == null;
+		return serverFile != null && restaurantImage != null && !serverFile.getId().equals(restaurantImage.getId())
+			|| serverFile != null && restaurantImage == null;
 	}
 
 }
