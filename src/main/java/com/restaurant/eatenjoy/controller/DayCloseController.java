@@ -3,6 +3,8 @@ package com.restaurant.eatenjoy.controller;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +30,10 @@ public class DayCloseController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void addDayClose(@RequestBody @Valid DayCloseDto dayCloseDto) {
 		dayCloseService.register(dayCloseDto);
+	}
+
+	@DeleteMapping("/{id}")
+	public void deleteDayClose(@PathVariable Long id) {
+		dayCloseService.delete(id);
 	}
 }

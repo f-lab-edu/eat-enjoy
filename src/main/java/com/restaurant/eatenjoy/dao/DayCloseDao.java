@@ -11,4 +11,6 @@ public interface DayCloseDao {
 	void register(DayCloseDto dayCloseDto);
 
 	boolean existsByRestaurantIdAndCloseDate(@Param("restaurantId") Long restaurantId, @Param("closeDate") LocalDate closeDate);
+
+	void deleteById(Long id);
 }

@@ -28,4 +28,8 @@ public class DayCloseService {
 	public boolean isRestaurantDayClose(Long restaurantId, LocalDate closeDate) {
 		return dayCloseDao.existsByRestaurantIdAndCloseDate(restaurantId, closeDate);
 	}
+
+	public void delete(Long id) {
+		dayCloseDao.deleteById(id);
+	}
 }
