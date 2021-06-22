@@ -83,5 +83,4 @@ class DayCloseServiceTest {
 		// then
 		then(dayCloseDao).should(times(1)).deleteById(anyLong());
 	}
-
 }
