@@ -13,4 +13,10 @@
                        WHERE restaurant_id = #{restaurantId}
                          AND close_date = #{closeDate})
     </select>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE
+          FROM day_close
+         WHERE id = #{id}
+    </delete>
 </mapper>

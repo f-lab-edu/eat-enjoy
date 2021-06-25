@@ -74,4 +74,13 @@ class DayCloseServiceTest {
 		then(dayCloseDao).should(times(1)).existsByRestaurantIdAndCloseDate(dayCloseDto.getRestaurantId(), dayCloseDto.getCloseDate());
 	}
 
+	@Test
+	@DisplayName("일 마감 삭제 성공")
+	void successDeleteDayClose() {
+		// when
+		dayCloseService.delete(anyLong());
+
+		// then
+		then(dayCloseDao).should(times(1)).deleteById(anyLong());
+	}
 }
