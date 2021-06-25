@@ -4,7 +4,7 @@
 - 백엔드 기술에 좀 더 집중하기 위해 클라이언트는 카카오 오븐 프로토타입으로 대체하였습니다.
 
 ## :rice: 사용 기술 및 환경
-[![java](https://img.shields.io/badge/Java-11-orange)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html) [![framework](https://img.shields.io/badge/Spring%20Boot-2.4.2-brightgreen)](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/) [![build tool](https://img.shields.io/badge/Gradle-6.7.1-gray)](https://docs.gradle.org/6.7.1/userguide/userguide.html) [![mybatis](https://img.shields.io/badge/MyBatis-3.5.6-lightgrey)](https://mybatis.org/mybatis-3/ko/index.html) [![mariadb](https://img.shields.io/badge/MariaDB-10.2.12-blue)](https://mariadb.com/kb/en/mariadb-10212-release-notes/) [![redis](https://img.shields.io/badge/Redis-3.0.5-red)](https://github.com/microsoftarchive/redis/blob/win-3.0.504/Redis%20on%20Windows%20Release%20Notes.md) [![checkstyle](https://img.shields.io/badge/codestyle-캠퍼스%20핵데이%20Java%20코딩%20컨벤션-yellow)](https://naver.github.io/hackday-conventions-java/)
+[![java](https://img.shields.io/badge/Java-11-orange)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html) [![framework](https://img.shields.io/badge/Spring%20Boot-2.4.2-brightgreen)](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/) [![build tool](https://img.shields.io/badge/Gradle-6.7.1-gray)](https://docs.gradle.org/6.7.1/userguide/userguide.html) [![mybatis](https://img.shields.io/badge/MyBatis-3.5.6-lightgrey)](https://mybatis.org/mybatis-3/ko/index.html) [![mariadb](https://img.shields.io/badge/MariaDB-10.2.12-blue)](https://mariadb.com/kb/en/mariadb-10212-release-notes/) [![redis](https://img.shields.io/badge/Redis-3.0.5-red)](https://github.com/microsoftarchive/redis/blob/win-3.0.504/Redis%20on%20Windows%20Release%20Notes.md) [![checkstyle](https://img.shields.io/badge/codestyle-캠퍼스%20핵데이%20Java%20코딩%20컨벤션-yellow)](https://naver.github.io/hackday-conventions-java/) [![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-blue)](https://www.jenkins.io/)
 
 ## :rice: Git Flow
 #### :rice_cracker: Branch 전략
@@ -29,3 +29,7 @@
 
 ## :rice: Wiki
 - 해당 프로젝트의 상세 정보는 [Wiki](https://github.com/f-lab-edu/eat-enjoy/wiki)를 통해 확인할 수 있습니다.
+
+## :rice: CI
+- Jenkins를 Multibranch Pipeline을 사용하여 Build 자동화를 적용 하였습니다.
+- [eat-enjoy Jenkins 주소](http://49.50.165.208:18080/)
