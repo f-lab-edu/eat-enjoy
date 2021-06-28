@@ -1,8 +1,13 @@
 package com.restaurant.eatenjoy.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import javax.validation.Valid;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +20,7 @@ import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
+import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.service.ReservationService;
 import com.restaurant.eatenjoy.util.security.Role;
 
@@ -27,6 +33,11 @@ import lombok.RequiredArgsConstructor;
 public class ReservationController {
 
 	private final ReservationService reservationService;
+
+	@GetMapping
+	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
+		return reservationService.getUserReservations(userId, lastReservationDate);
+	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
