@@ -28,7 +28,7 @@ import com.restaurant.eatenjoy.exception.RestaurantMinOrderPriceValueException;
 import com.restaurant.eatenjoy.util.BizrNoValidCheck;
 import com.restaurant.eatenjoy.util.cache.CacheNames;
 import com.restaurant.eatenjoy.util.file.FileExtension;
-import com.restaurant.eatenjoy.util.file.FileService;
+import com.restaurant.eatenjoy.util.file.FileManager;
 import com.restaurant.eatenjoy.util.restaurant.PaymentType;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +38,8 @@ import lombok.RequiredArgsConstructor;
 public class RestaurantService {
 
 	private final RestaurantDao restaurantDao;
+
+	private final FileManager fileManager;
 
 	private final FileService fileService;
 
@@ -64,10 +66,10 @@ public class RestaurantService {
 		}
 	}
 
-	public FileDto uploadImage(MultipartFile photo) {
+	public FileDto uploadImage(long restaurantId, MultipartFile photo) {
 		FileExtension.IMAGE.validate(photo);
 
-		FileDto fileDto = fileService.uploadFile(photo);
+		FileDto fileDto = fileManager.uploadFile(restaurantId, photo);
 		fileService.saveFileInfo(fileDto);
 
 		return fileDto;
@@ -141,8 +143,7 @@ public class RestaurantService {
 	}
 
 	private void validatePaymentTypeAndBizrNo(PaymentType paymentType, int minOrderPrice, String bizrNo) {
-		if ((PaymentType.PREPAYMENT).equals(paymentType)
-			&& minOrderPrice == 0) {
+		if (PaymentType.PREPAYMENT.equals(paymentType) && minOrderPrice == 0) {
 			throw new RestaurantMinOrderPriceValueException("매장 결제 방식이 선불일 경우 최소 주문 가격이 0원이 될 순 없습니다");
 		}
 
@@ -163,24 +164,18 @@ public class RestaurantService {
 	}
 
 	private void deleteUploadFile(FileDto fileDto) {
-		fileService.deleteFile(fileDto);
+		fileManager.deleteFile(fileDto);
 		fileService.deleteFileInfo(fileDto.getId());
 	}
 
-	public void deleteUploadFiles(List<FileDto> fileDtos) {
-		fileService.deleteFiles(fileDtos);
+	private void deleteUploadFiles(List<FileDto> fileDtos) {
+		fileManager.deleteFiles(fileDtos);
 		fileService.deleteFileInfos(fileDtos);
 	}
 
 	private boolean isDeleteServerFile(FileDto restaurantImage, FileDto serverFile) {
-		boolean isDelete = isDeleteUploadFile(restaurantImage, serverFile);
-
-		return isDelete;
-	}
-
-	private boolean isDeleteUploadFile(FileDto uploadFileDto, FileDto serverFile) {
-		return serverFile != null && uploadFileDto != null && !serverFile.getId().equals(uploadFileDto.getId())
-			|| serverFile != null && uploadFileDto == null;
+		return serverFile != null && restaurantImage != null && !serverFile.getId().equals(restaurantImage.getId())
+			|| serverFile != null && restaurantImage == null;
 	}
 
 }
