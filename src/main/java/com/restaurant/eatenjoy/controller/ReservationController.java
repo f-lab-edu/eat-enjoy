@@ -35,7 +35,8 @@ public class ReservationController {
 	private final ReservationService reservationService;
 
 	@GetMapping
-	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
+	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId,
+		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
 		return reservationService.getUserReservations(userId, lastReservationDate);
 	}
 
