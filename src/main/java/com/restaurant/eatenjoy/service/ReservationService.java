@@ -47,6 +47,15 @@ public class ReservationService {
 		return reservationDao.findAllByUserId(userId, lastReservationDate);
 	}
 
+	public ReservationInfo getReservationInfo(Long reservationId, Long userId) {
+		ReservationInfo reservationInfo = reservationDao.findByIdAndUserId(reservationId, userId);
+		if (reservationInfo == null) {
+			throw new NotFoundException("예약 정보를 찾을 수 없습니다.");
+		}
+
+		return reservationInfo;
+	}
+
 	@Transactional
 	public Long reserve(Long userId, ReservationDto reservationDto) {
 		RestaurantInfo restaurantInfo = restaurantService.findById(reservationDto.getRestaurantId());
@@ -182,15 +191,6 @@ public class ReservationService {
 			orderMenu.setMenuName(menu.getName());
 			orderMenu.setPrice(menu.getPrice());
 		}
-	}
-
-	private ReservationInfo getReservationInfo(Long reservationId, Long userId) {
-		ReservationInfo reservationInfo = reservationDao.findByIdAndUserId(reservationId, userId);
-		if (reservationInfo == null) {
-			throw new NotFoundException("예약 정보를 찾을 수 없습니다.");
-		}
-
-		return reservationInfo;
 	}
 
 	private void validateReservationBeforePaymentComplete(ReservationInfo reservationInfo) {
