@@ -20,6 +20,7 @@ import com.restaurant.eatenjoy.annotation.Authority;
 import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
+import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.service.ReservationService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -38,6 +39,11 @@ public class ReservationController {
 	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId,
 		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
 		return reservationService.getUserReservations(userId, lastReservationDate);
+	}
+
+	@GetMapping("/{reservationId}")
+	public ReservationInfo reservation(@LoginAuthId Long userId, @PathVariable Long reservationId) {
+		return reservationService.getReservationInfo(reservationId, userId);
 	}
 
 	@PostMapping
