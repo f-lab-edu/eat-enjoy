@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    environment {
+        PATH = "/usr/lib/gradle/bin:$PATH"
+    }
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'gradle clean build --exclude-task test'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'gradle test'
+                junit '**/build/test-results/test/*.xml'
+            }
+        }
+
+        stage('Deploy') {
+            steps([$class: 'BapSshPromotionPublisherPlugin']) {
+                sshPublisher(
+                    continueOnError: false,
+                    failOnError: true,
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: "eatenjoy",
+                            verbose: true,
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: "build/libs/*.jar",
+                                    removePrefix: "build/libs",
+                                    remoteDirectory: "/",
+                                    execCommand: "sh /usr/local/script/deploy.sh"
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+
+    }
+}
