@@ -1,15 +1,13 @@
 package com.restaurant.eatenjoy.util.mail;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -27,10 +25,9 @@ public class HtmlMailService implements MailService {
 	private final String htmlContent;
 
 	public HtmlMailService(JavaMailSender javaMailSender) {
-		ClassPathResource resource = new ClassPathResource("static/welcome.html");
 		try {
-			Path path = Paths.get(resource.getURI());
-			htmlContent = String.join("\n", Files.readAllLines(path));
+			InputStream stream = this.getClass().getResourceAsStream("/static/welcome.html");
+			htmlContent = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new NotFoundException("메일 양식을 찾을 수 없습니다.");
 		}
