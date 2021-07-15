@@ -63,4 +63,11 @@ public class ReservationController {
 		reservationService.cancel(userId, reservationId);
 	}
 
+	@Authority(Role.OWNER)
+	@GetMapping("/owner")
+	public List<SimpleReservationDto> ownerReservations(@LoginAuthId Long ownerId,
+		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
+		return reservationService.getOwnerReservations(ownerId, lastReservationDate);
+	}
+
 }

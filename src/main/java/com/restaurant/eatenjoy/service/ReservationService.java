@@ -17,6 +17,7 @@ import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
@@ -44,7 +45,17 @@ public class ReservationService {
 	private final ReservationDao reservationDao;
 
 	public List<SimpleReservationDto> getUserReservations(Long userId, LocalDate lastReservationDate) {
-		return reservationDao.findAllByUserId(userId, lastReservationDate);
+		return reservationDao.findAllReservation(ReservationSearchDto.builder()
+			.userId(userId)
+			.lastReservationDate(lastReservationDate)
+			.build());
+	}
+
+	public List<SimpleReservationDto> getOwnerReservations(Long ownerId, LocalDate lastReservationDate) {
+		return reservationDao.findAllReservation(ReservationSearchDto.builder()
+			.ownerId(ownerId)
+			.lastReservationDate(lastReservationDate)
+			.build());
 	}
 
 	public ReservationInfo getReservationInfo(Long reservationId, Long userId) {

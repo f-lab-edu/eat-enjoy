@@ -83,7 +83,7 @@
            AND A.user_id = #{userId}
     </select>
 
-    <select id="findAllByUserId" resultMap="simpleReservationDto">
+    <select id="findAllReservation" parameterType="ReservationSearchDto" resultMap="simpleReservationDto">
         SELECT A.id
              , A.rsrv_date
              , A.rsrv_time
@@ -103,7 +103,18 @@
             ON B.file_id = C.id
           LEFT OUTER JOIN payment D
             ON A.id = D.reservation_id
-         WHERE A.user_id = #{userId}
+         WHERE
+            <choose>
+                <when test="userId != null">
+                    A.user_id = #{userId}
+                </when>
+                <when test="ownerId != null">
+                    B.owner_id = #{ownerId}
+                </when>
+                <otherwise>
+                    1 = 2
+                </otherwise>
+            </choose>
             <if test="lastReservationDate != null">
                 AND A.rsrv_date <![CDATA[<]]> #{lastReservationDate}
             </if>

@@ -1,6 +1,5 @@
 package com.restaurant.eatenjoy.dao;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -9,6 +8,7 @@ import com.restaurant.eatenjoy.dto.menu.MenuInfo;
 import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.util.type.ReservationStatus;
 
@@ -16,7 +16,7 @@ public interface ReservationDao {
 
 	List<MenuInfo> findMenusByOrderMenus(ReservationDto reservationDto);
 
-	List<SimpleReservationDto> findAllByUserId(@Param("userId") Long userId, @Param("lastReservationDate") LocalDate lastReservationDate);
+	List<SimpleReservationDto> findAllReservation(ReservationSearchDto reservationSearchDto);
 
 	ReservationInfo findByIdAndUserId(@Param("id") Long reservationId, @Param("userId") Long userId);
 
