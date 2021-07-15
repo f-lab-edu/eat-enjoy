@@ -44,18 +44,8 @@ public class ReservationService {
 
 	private final ReservationDao reservationDao;
 
-	public List<SimpleReservationDto> getUserReservations(Long userId, LocalDate lastReservationDate) {
-		return reservationDao.findAllReservation(ReservationSearchDto.builder()
-			.userId(userId)
-			.lastReservationDate(lastReservationDate)
-			.build());
-	}
-
-	public List<SimpleReservationDto> getOwnerReservations(Long ownerId, LocalDate lastReservationDate) {
-		return reservationDao.findAllReservation(ReservationSearchDto.builder()
-			.ownerId(ownerId)
-			.lastReservationDate(lastReservationDate)
-			.build());
+	public List<SimpleReservationDto> getReservations(ReservationSearchDto reservationSearchDto) {
+		return reservationDao.findAllReservation(reservationSearchDto);
 	}
 
 	public ReservationInfo getReservationInfo(Long reservationId, Long userId) {

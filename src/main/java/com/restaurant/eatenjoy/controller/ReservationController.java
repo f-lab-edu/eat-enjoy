@@ -21,6 +21,7 @@ import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.service.ReservationService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -38,7 +39,10 @@ public class ReservationController {
 	@GetMapping
 	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId,
 		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
-		return reservationService.getUserReservations(userId, lastReservationDate);
+		return reservationService.getReservations(ReservationSearchDto.builder()
+			.userId(userId)
+			.lastReservationDate(lastReservationDate)
+			.build());
 	}
 
 	@GetMapping("/{reservationId}")
@@ -67,7 +71,10 @@ public class ReservationController {
 	@GetMapping("/owner")
 	public List<SimpleReservationDto> ownerReservations(@LoginAuthId Long ownerId,
 		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
-		return reservationService.getOwnerReservations(ownerId, lastReservationDate);
+		return reservationService.getReservations(ReservationSearchDto.builder()
+			.ownerId(ownerId)
+			.lastReservationDate(lastReservationDate)
+			.build());
 	}
 
 }
