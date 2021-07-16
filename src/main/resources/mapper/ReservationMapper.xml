@@ -112,7 +112,8 @@
                     B.owner_id = #{ownerId}
                 </when>
                 <otherwise>
-                    1 = 2
+                    A.user_id IS NULL
+                AND B.owner_id IS NULL
                 </otherwise>
             </choose>
             <if test="lastReservationDate != null">
