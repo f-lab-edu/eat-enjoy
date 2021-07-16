@@ -18,6 +18,8 @@ public interface ReservationDao {
 
 	List<SimpleReservationDto> findAllReservation(ReservationSearchDto reservationSearchDto);
 
+	ReservationInfo findReservation(ReservationSearchDto reservationSearchDto);
+
 	ReservationInfo findByIdAndUserId(@Param("id") Long reservationId, @Param("userId") Long userId);
 
 	void reserve(ReservationDto reservationDto);

@@ -47,7 +47,10 @@ public class ReservationController {
 
 	@GetMapping("/{reservationId}")
 	public ReservationInfo reservation(@LoginAuthId Long userId, @PathVariable Long reservationId) {
-		return reservationService.getReservationInfo(reservationId, userId);
+		return reservationService.getReservationInfo(ReservationSearchDto.builder()
+			.reservationId(reservationId)
+			.userId(userId)
+			.build());
 	}
 
 	@PostMapping
@@ -74,6 +77,15 @@ public class ReservationController {
 		return reservationService.getReservations(ReservationSearchDto.builder()
 			.ownerId(ownerId)
 			.lastReservationDate(lastReservationDate)
+			.build());
+	}
+
+	@Authority(Role.OWNER)
+	@GetMapping("/owner/{reservationId}")
+	public ReservationInfo ownerReservation(@LoginAuthId Long ownerId, @PathVariable Long reservationId) {
+		return reservationService.getReservationInfo(ReservationSearchDto.builder()
+			.reservationId(reservationId)
+			.ownerId(ownerId)
 			.build());
 	}
 
