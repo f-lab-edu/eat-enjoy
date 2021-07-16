@@ -27,7 +27,6 @@ import com.restaurant.eatenjoy.util.type.DataSourceType;
 
 @Configuration
 @Profile("!default")
-@EnableTransactionManagement
 @MapperScan("com.restaurant.eatenjoy.dao")
 public class DatabaseConfig {
 
