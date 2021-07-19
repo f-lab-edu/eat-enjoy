@@ -17,6 +17,7 @@ import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
@@ -43,12 +44,12 @@ public class ReservationService {
 
 	private final ReservationDao reservationDao;
 
-	public List<SimpleReservationDto> getUserReservations(Long userId, LocalDate lastReservationDate) {
-		return reservationDao.findAllByUserId(userId, lastReservationDate);
+	public List<SimpleReservationDto> getReservations(ReservationSearchDto reservationSearchDto) {
+		return reservationDao.findAllReservation(reservationSearchDto);
 	}
 
-	public ReservationInfo getReservationInfo(Long reservationId, Long userId) {
-		ReservationInfo reservationInfo = reservationDao.findByIdAndUserId(reservationId, userId);
+	public ReservationInfo getReservationInfo(ReservationSearchDto reservationSearchDto) {
+		ReservationInfo reservationInfo = reservationDao.findReservation(reservationSearchDto);
 		if (reservationInfo == null) {
 			throw new NotFoundException("예약 정보를 찾을 수 없습니다.");
 		}
@@ -191,6 +192,15 @@ public class ReservationService {
 			orderMenu.setMenuName(menu.getName());
 			orderMenu.setPrice(menu.getPrice());
 		}
+	}
+
+	private ReservationInfo getReservationInfo(Long reservationId, Long userId) {
+		ReservationInfo reservationInfo = reservationDao.findByIdAndUserId(reservationId, userId);
+		if (reservationInfo == null) {
+			throw new NotFoundException("예약 정보를 찾을 수 없습니다.");
+		}
+
+		return reservationInfo;
 	}
 
 	private void validateReservationBeforePaymentComplete(ReservationInfo reservationInfo) {

@@ -21,6 +21,7 @@ import com.restaurant.eatenjoy.annotation.LoginAuthId;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.reservation.SimpleReservationDto;
 import com.restaurant.eatenjoy.service.ReservationService;
 import com.restaurant.eatenjoy.util.security.Role;
@@ -38,12 +39,18 @@ public class ReservationController {
 	@GetMapping
 	public List<SimpleReservationDto> reservations(@LoginAuthId Long userId,
 		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
-		return reservationService.getUserReservations(userId, lastReservationDate);
+		return reservationService.getReservations(ReservationSearchDto.builder()
+			.userId(userId)
+			.lastReservationDate(lastReservationDate)
+			.build());
 	}
 
 	@GetMapping("/{reservationId}")
 	public ReservationInfo reservation(@LoginAuthId Long userId, @PathVariable Long reservationId) {
-		return reservationService.getReservationInfo(reservationId, userId);
+		return reservationService.getReservationInfo(ReservationSearchDto.builder()
+			.reservationId(reservationId)
+			.userId(userId)
+			.build());
 	}
 
 	@PostMapping
@@ -61,6 +68,25 @@ public class ReservationController {
 	@PatchMapping("/{reservationId}/cancel")
 	public void cancelReservation(@LoginAuthId Long userId, @PathVariable Long reservationId) {
 		reservationService.cancel(userId, reservationId);
+	}
+
+	@Authority(Role.OWNER)
+	@GetMapping("/owner")
+	public List<SimpleReservationDto> ownerReservations(@LoginAuthId Long ownerId,
+		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate lastReservationDate) {
+		return reservationService.getReservations(ReservationSearchDto.builder()
+			.ownerId(ownerId)
+			.lastReservationDate(lastReservationDate)
+			.build());
+	}
+
+	@Authority(Role.OWNER)
+	@GetMapping("/owner/{reservationId}")
+	public ReservationInfo ownerReservation(@LoginAuthId Long ownerId, @PathVariable Long reservationId) {
+		return reservationService.getReservationInfo(ReservationSearchDto.builder()
+			.reservationId(reservationId)
+			.ownerId(ownerId)
+			.build());
 	}
 
 }
