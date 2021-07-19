@@ -7,9 +7,11 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
+@Profile("default")
 @MapperScan("com.restaurant.eatenjoy.dao")
 public class MyBatisConfig {
 
