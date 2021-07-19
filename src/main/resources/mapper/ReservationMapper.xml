@@ -55,7 +55,7 @@
            AND B.restaurant_id = #{restaurantId}
     </select>
 
-    <select id="findByIdAndUserId" resultMap="reservationInfo">
+    <sql id="sqlReservationInfo">
         SELECT A.id
              , A.rsrv_date
              , A.rsrv_time
@@ -79,6 +79,29 @@
             ON A.id = B.reservation_id
           LEFT OUTER JOIN payment C
             ON A.id = C.reservation_id
+    </sql>
+
+    <select id="findReservation" parameterType="ReservationSearchDto" resultMap="reservationInfo">
+        <include refid="sqlReservationInfo"></include>
+         WHERE A.id = #{reservationId}
+        <choose>
+            <when test="userId != null">
+                AND A.user_id = #{userId}
+            </when>
+            <when test="ownerId != null">
+                AND EXISTS(SELECT 1
+                             FROM restaurant D
+                            WHERE D.id = A.restaurant_id
+                              AND D.owner_id = #{ownerId})
+            </when>
+            <otherwise>
+                AND A.user_id IS NULL
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findByIdAndUserId" resultMap="reservationInfo">
+        <include refid="sqlReservationInfo"></include>
          WHERE A.id = #{id}
            AND A.user_id = #{userId}
     </select>

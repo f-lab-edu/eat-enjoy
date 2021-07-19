@@ -9,6 +9,8 @@ import lombok.Getter;
 @Builder
 public class ReservationSearchDto {
 
+	private Long reservationId;
+
 	private Long userId;
 
 	private Long ownerId;
