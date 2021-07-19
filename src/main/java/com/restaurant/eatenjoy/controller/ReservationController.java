@@ -90,7 +90,7 @@ public class ReservationController {
 	}
 
 	@Authority(Role.OWNER)
-	@PatchMapping("/onwer/{reservationId}/approve")
+	@PatchMapping("/owner/{reservationId}/approve")
 	public void reservationApprove(@LoginAuthId Long ownerId, @PathVariable Long reservationId) {
 		reservationService.approve(ownerId, reservationId);
 	}
