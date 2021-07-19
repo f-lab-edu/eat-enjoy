@@ -25,6 +25,7 @@ import com.restaurant.eatenjoy.dto.reservation.OrderMenuDto;
 import com.restaurant.eatenjoy.dto.reservation.PaymentDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationDto;
 import com.restaurant.eatenjoy.dto.reservation.ReservationInfo;
+import com.restaurant.eatenjoy.dto.reservation.ReservationSearchDto;
 import com.restaurant.eatenjoy.dto.restaurant.RestaurantInfo;
 import com.restaurant.eatenjoy.exception.NoMatchedPaymentAmountException;
 import com.restaurant.eatenjoy.exception.NotFoundException;
@@ -42,6 +43,8 @@ class ReservationServiceTest {
 	private static final Long RESERVATION_ID = 1L;
 
 	private static final Long RESTAURANT_ID = 1L;
+
+	private static final Long OWNER_ID = 1L;
 
 	private static final Long USER_ID = 1L;
 
@@ -561,6 +564,65 @@ class ReservationServiceTest {
 		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.CANCEL);
 		then(paymentService).should(times(1)).cancel(RESERVATION_ID.toString(), false, cancelAmount);
 		then(paymentService).should(times(1)).updateCancelByImpUid(cancelPayment);
+	}
+
+	@Test
+	@DisplayName("예약 정보가 존재하지 않으면 승인 처리 할 수 없다.")
+	void failToApproveIfReservationInfoIsNull() {
+		given(reservationDao.findReservation(any(ReservationSearchDto.class))).willReturn(null);
+
+		assertThatThrownBy(() -> reservationService.approve(OWNER_ID, RESERVATION_ID))
+			.isInstanceOf(NotFoundException.class);
+
+		then(reservationDao).should(times(1)).findReservation(any(ReservationSearchDto.class));
+		then(dayCloseService).should(times(0)).isRestaurantDayClose(any(), any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+	}
+
+	@Test
+	@DisplayName("요청 상태가 아니면 승인 처리 할 수 없다.")
+	void failToApproveIfReservationStatusIsNotRequest() {
+		given(reservationDao.findReservation(any(ReservationSearchDto.class))).willReturn(getReservationInfo(ReservationStatus.APPROVAL, null, null));
+
+		assertThatThrownBy(() -> reservationService.approve(OWNER_ID, RESERVATION_ID))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("해당 예약 건은 요청 상태가 아닙니다.");
+
+		then(reservationDao).should(times(1)).findReservation(any(ReservationSearchDto.class));
+		then(dayCloseService).should(times(0)).isRestaurantDayClose(any(), any());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+	}
+
+	@Test
+	@DisplayName("예약일이 마감되었으면 승인 처리 할 수 없다.")
+	void failToApproveIfReservationDateIsClose() {
+		ReservationInfo reservationInfo = getReservationInfo(ReservationStatus.REQUEST, null, null);
+
+		given(reservationDao.findReservation(any(ReservationSearchDto.class))).willReturn(reservationInfo);
+		given(dayCloseService.isRestaurantDayClose(reservationInfo.getRestaurantId(), reservationInfo.getReservationDate())).willReturn(true);
+
+		assertThatThrownBy(() -> reservationService.approve(OWNER_ID, RESERVATION_ID))
+			.isInstanceOf(ReservationException.class)
+			.hasMessage("해당 예약일은 이미 마감되었습니다.");
+
+		then(reservationDao).should(times(1)).findReservation(any(ReservationSearchDto.class));
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(reservationInfo.getRestaurantId(), reservationInfo.getReservationDate());
+		then(reservationDao).should(times(0)).updateStatusById(any(), any());
+	}
+
+	@Test
+	@DisplayName("예약을 승인 처리 할 수 있다.")
+	void successToApproveReservation() {
+		ReservationInfo reservationInfo = getReservationInfo(ReservationStatus.REQUEST, null, null);
+
+		given(reservationDao.findReservation(any(ReservationSearchDto.class))).willReturn(reservationInfo);
+		given(dayCloseService.isRestaurantDayClose(reservationInfo.getRestaurantId(), reservationInfo.getReservationDate())).willReturn(false);
+
+		reservationService.approve(OWNER_ID, RESERVATION_ID);
+
+		then(reservationDao).should(times(1)).findReservation(any(ReservationSearchDto.class));
+		then(dayCloseService).should(times(1)).isRestaurantDayClose(reservationInfo.getRestaurantId(), reservationInfo.getReservationDate());
+		then(reservationDao).should(times(1)).updateStatusById(RESERVATION_ID, ReservationStatus.APPROVAL);
 	}
 
 	private ReservationDto getReservationDto(PaymentType paymentType) {
