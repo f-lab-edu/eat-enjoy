@@ -104,11 +104,25 @@ public class ReservationService {
 		}
 	}
 
+	@Transactional
+	public void approve(Long ownerId, Long reservationId) {
+		ReservationInfo reservationInfo = getReservationInfo(ReservationSearchDto.builder()
+			.reservationId(reservationId)
+			.ownerId(ownerId)
+			.build());
+
+		if (reservationInfo.getStatus() != ReservationStatus.REQUEST) {
+			throw new ReservationException("해당 예약 건은 요청 상태가 아닙니다.");
+		}
+
+		validateRestaurantDayClose(reservationInfo.getRestaurantId(), reservationInfo.getReservationDate());
+
+		reservationDao.updateStatusById(reservationId, ReservationStatus.APPROVAL);
+	}
+
 	private void validateReservationDateTime(ReservationDto reservationDto, RestaurantInfo restaurantInfo) {
 		LocalDate reservationDate = reservationDto.getReservationDate();
-		if (dayCloseService.isRestaurantDayClose(restaurantInfo.getId(), reservationDate)) {
-			throw new ReservationException("해당 예약일은 이미 마감되었습니다.");
-		}
+		validateRestaurantDayClose(restaurantInfo.getId(), reservationDate);
 
 		LocalTime reservationTime = reservationDto.getReservationTime();
 		if (reservationTime.isBefore(restaurantInfo.getOpenTime())) {
@@ -122,6 +136,12 @@ public class ReservationService {
 		if (reservationDate.isEqual(LocalDateTimeProvider.dateOfNow())
 			&& reservationTime.isBefore(LocalDateTimeProvider.timeOfNow().plusHours(1))) {
 			throw new ReservationException("당일 예약일 경우 1시간 전에 예약 해야 합니다.");
+		}
+	}
+
+	private void validateRestaurantDayClose(Long restaurantId, LocalDate reservationDate) {
+		if (dayCloseService.isRestaurantDayClose(restaurantId, reservationDate)) {
+			throw new ReservationException("해당 예약일은 이미 마감되었습니다.");
 		}
 	}
 

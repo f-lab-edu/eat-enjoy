@@ -89,4 +89,10 @@ public class ReservationController {
 			.build());
 	}
 
+	@Authority(Role.OWNER)
+	@PatchMapping("/onwer/{reservationId}/approve")
+	public void reservationApprove(@LoginAuthId Long ownerId, @PathVariable Long reservationId) {
+		reservationService.approve(ownerId, reservationId);
+	}
+
 }
